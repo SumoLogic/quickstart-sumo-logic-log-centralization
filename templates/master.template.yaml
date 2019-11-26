@@ -240,6 +240,7 @@ Parameters:
   InstallGuardDutyApp:
     Type: String
     Default: "yes"
+    Description: Do you need to install guard duty app?
     AllowedValues:
       - "yes"
       - "no"
