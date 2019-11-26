@@ -253,6 +253,7 @@ Parameters:
     Type: String
   SumoAccessID:
     Type: String
+    Description: The Sumo Logic Access ID.
   SumoAccessKey:
     Type: String
   SumoDeployment:
