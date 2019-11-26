@@ -1,0 +1,4 @@
+[submodule "submodules/sumo-aws-apps"]
+	path = submodules/sumo-aws-apps
+	url = https://github.com/madhusarma/sumo-aws-apps.git
+	branch = quickstart-develop
