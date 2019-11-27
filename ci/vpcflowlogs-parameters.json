@@ -5,15 +5,15 @@
   },
   {
     "ParameterKey": "SumoAccessID",
-    "ParameterValue": "suRdztXAKWdlKj"
+    "ParameterValue": "$[ACCESS_ID]"
   },
   {
     "ParameterKey": "S3BucketPrefix",
-    "ParameterValue": "testing-sumo-apps"
+    "ParameterValue": "$[taskcat_genpass_8]"
   },
   {
     "ParameterKey": "SumoAccessKey",
-    "ParameterValue": "Xe1bMKaRIXmRYxAPh7GUxA4fce3s2GCC2YVDYJzeqyFuyM4czEzbEkUyXsVRL6ZE"
+    "ParameterValue": "$[ACCESS_KEY]"
   },
   {
     "ParameterKey": "RemoveSumoResourcesOnDeleteStack",
