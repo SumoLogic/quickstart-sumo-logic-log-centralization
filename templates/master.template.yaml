@@ -557,3 +557,42 @@ Resources:
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
 
+  sumocloudtrail:
+    Condition: InstallCloudTrailCondition
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/cloudtrail/cloudtrail.template.yaml"
+      Parameters:
+        CollectorName: "QuickStart-AWSCloudTrail"
+        RemoveSumoResourcesOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+        SourceCategoryName: !Ref CloudTrailSourceCategoryName
+        SourceName: "AWSCloudTrail"
+        SumoAccessID: !Ref SumoAccessID
+        SumoAccessKey: !Ref SumoAccessKey
+        SumoDeployment: !Ref SumoDeployment
+        ExternalID: !Sub "${SumoDeployment}:${SumoOrganizationId}"
+        PathExpression: !Ref CloudTrailPathExpression
+        CloudTrailTargetS3BucketName: !Ref CloudTrailTargetS3BucketName
+        CreateTargetS3Bucket: !Ref CreateCloudTrailTargetS3Bucket
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+
+  sumoS3Audit:
+    Condition: InstallS3AuditCondition
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/s3-audit/s3audit.template.yaml"
+      Parameters:
+        CollectorName: "QuickStart-AmazonS3Audit"
+        RemoveSumoResourcesOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+        SourceCategoryName: !Ref S3AuditSourceCategoryName
+        SourceName: "AmazonS3Audit"
+        SumoAccessID: !Ref SumoAccessID
+        SumoAccessKey: !Ref SumoAccessKey
+        AccessLogsTargetS3BucketName: !Ref S3AuditLogsTargetS3BucketName
+        CreateTargetS3Bucket: !Ref S3AuditCreateTargetS3Bucket
+        PathExpression: !Ref S3AuditPathExpression
+        SumoDeployment: !Ref SumoDeployment
+        ExternalID: !Sub "${SumoDeployment}:${SumoOrganizationId}"
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
