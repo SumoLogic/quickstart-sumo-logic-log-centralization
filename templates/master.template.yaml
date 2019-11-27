@@ -634,3 +634,41 @@ Resources:
         SumoDeployment: !Ref SumoDeployment
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
+
+  sumoWAF:
+    Condition: InstallWAFCondition
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/WAF/waf.template.yaml"
+      Parameters:
+        CollectorName: "QuickStart-AWSWAF"
+        RemoveSumoResourcesOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+        SourceCategoryName: !Ref WAFSourceCategoryName
+        SourceName: "AWSWAF"
+        SumoAccessID: !Ref SumoAccessID
+        SumoAccessKey: !Ref SumoAccessKey
+        KinesisDestinationS3BucketName: !Ref KinesisDestinationS3BucketName
+        CreateKinesisDestinationS3Bucket: !Ref CreateKinesisDestinationS3Bucket
+        PathExpression: !Ref WAFPathExpression
+        SumoDeployment: !Ref SumoDeployment
+        ExternalID: !Sub "${SumoDeployment}:${SumoOrganizationId}"
+        DeliveryStreamName: !Ref DeliveryStreamName
+
+  sumoVPCFlowLogs:
+    Condition: InstallVPCFlowLogsCondition
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/vpc-flow-logs/vpcflowlogs.template.yaml"
+      Parameters:
+        CollectorName: "QuickStart-AmazonVPCFlowLogs"
+        RemoveSumoResourcesOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+        SourceCategoryName: !Ref VPCFlowLogsSourceCategoryName
+        SourceName: "AmazonVPCFlowLogs"
+        SumoAccessID: !Ref SumoAccessID
+        SumoAccessKey: !Ref SumoAccessKey
+        LogsTargetS3BucketName: !Ref VPCFlowLogsTargetS3BucketName
+        VPCFlowLogAppSourceCategoryName: !Ref VPCFlowLogsSourceCategoryName
+        CreateTargetS3Bucket: !Ref VPCFlowLogsCreateTargetS3Bucket
+        PathExpression: !Ref VPCFlowLogsPathExpression
+        SumoDeployment: !Ref SumoDeployment
+        ExternalID: !Sub "${SumoDeployment}:${SumoOrganizationId}"
