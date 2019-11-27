@@ -9,7 +9,7 @@
   },
   {
     "ParameterKey": "S3BucketPrefix",
-    "ParameterValue": "testing-sumo-apps"
+    "ParameterValue": "$[taskcat_random-string]"
   },
   {
     "ParameterKey": "SumoAccessKey",
