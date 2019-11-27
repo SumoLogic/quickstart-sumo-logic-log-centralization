@@ -281,7 +281,7 @@ Parameters:
     Type: String
   S3BucketPrefix:
     Type: String
-    Description: Provide a unique S3 Bucket prefix to apply for all logs buckets created using the quickstart template.
+    Description: Provide a unique S3 Bucket prefix. This will be applied to all S3 buckets created using this Quickstart template.
 
   InstallGuardDutyBenchmarkApp:
     Type: String
