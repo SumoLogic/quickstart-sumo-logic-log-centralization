@@ -525,3 +525,35 @@ Resources:
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
 
+  sumoguardduty:
+    Condition: InstallGuardDutyCondition
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/guardduty/guardduty.template.yaml"
+      Parameters:
+        CollectorName: "QuickStart-AmazonGuardDuty"
+        RemoveSumoResourcesOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+        SourceCategoryName: !Ref SourceCategoryName
+        SourceName: "AmazonGuardDuty"
+        SumoAccessID: !Ref SumoAccessID
+        SumoAccessKey: !Ref SumoAccessKey
+        SumoDeployment: !Ref SumoDeployment
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+
+  sumoguarddutybenchmark:
+    Condition: InstallGuardDutyBenchmarkCondition
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/guardduty/benchmark/guarddutybenchmark.template.yaml"
+      Parameters:
+        CollectorName: "QuickStart-AmazonGuardDutyBenchmark"
+        RemoveSumoResourcesOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+        SourceCategoryName: !Ref BenchmarkSourceCategoryName
+        SourceName: "AmazonGuardDutyBenchmark"
+        SumoAccessID: !Ref SumoAccessID
+        SumoAccessKey: !Ref SumoAccessKey
+        SumoDeployment: !Ref SumoDeployment
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+
