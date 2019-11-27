@@ -38,9 +38,9 @@ tests:
     parameter_input: cloudtrail-parameters.json
     template_file: master.template.yaml
     regions:
-      - us-west-1
+      - us-east-1
   install-s3audit-app:
     parameter_input: s3audit-parameters.json
     template_file: master.template.yaml
     regions:
-      - us-west-1
+      - us-east-1
