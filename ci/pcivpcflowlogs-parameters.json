@@ -8,6 +8,10 @@
     "ParameterValue": "suRdztXAKWdlKj"
   },
   {
+    "ParameterKey": "S3BucketPrefix",
+    "ParameterValue": "testing-sumo-apps"
+  },
+  {
     "ParameterKey": "SumoAccessKey",
     "ParameterValue": "Xe1bMKaRIXmRYxAPh7GUxA4fce3s2GCC2YVDYJzeqyFuyM4czEzbEkUyXsVRL6ZE"
   },

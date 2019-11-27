@@ -15,6 +15,7 @@ Metadata:
           - SumoAccessKey
           - RemoveSumoResourcesOnDeleteStack
           - SumoOrganizationId
+          - S3BucketPrefix
       -
         Label:
           default: "Select the Sumo Logic Apps that you want to Deploy:"
@@ -143,6 +144,8 @@ Metadata:
         default: "Delete Sumo Logic Resources when stack is deleted"
       SumoOrganizationId:
         default: "Sumo Logic Organization Id"
+      S3BucketPrefix:
+        default: "Prefix For Your S3 Buckets"
       InstallGuardDutyApp:
         default: "Install Amazon GuardDuty App"
       InstallGuardDutyBenchmarkApp:
@@ -276,6 +279,9 @@ Parameters:
     Default: true
     Description: To delete collector, sources and app when stack is deleted, set this parameter to true. Default is true.
     Type: String
+  S3BucketPrefix:
+    Type: String
+    Description: Provide a unique S3 Bucket prefix to apply for all logs buckets created using the quickstart template.
 
   InstallGuardDutyBenchmarkApp:
     Type: String
@@ -520,7 +526,7 @@ Resources:
         SumoDeployment: !Ref SumoDeployment
         ExternalID: !Sub "${SumoDeployment}:${SumoOrganizationId}"
         PathExpression: !Ref CISFoundationsPathExpression
-        CISTargetS3BucketName: !Ref CISFoundationsTargetS3BucketName
+        CISTargetS3BucketName: !Sub "${S3BucketPrefix}-${CISFoundationsTargetS3BucketName}"
         CreateTargetS3Bucket: !Ref CreateCISFoundationsTargetS3Bucket
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
@@ -572,7 +578,7 @@ Resources:
         SumoDeployment: !Ref SumoDeployment
         ExternalID: !Sub "${SumoDeployment}:${SumoOrganizationId}"
         PathExpression: !Ref CloudTrailPathExpression
-        CloudTrailTargetS3BucketName: !Ref CloudTrailTargetS3BucketName
+        CloudTrailTargetS3BucketName: !Sub "${S3BucketPrefix}-${CloudTrailTargetS3BucketName}"
         CreateTargetS3Bucket: !Ref CreateCloudTrailTargetS3Bucket
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
@@ -589,7 +595,7 @@ Resources:
         SourceName: "AmazonS3Audit"
         SumoAccessID: !Ref SumoAccessID
         SumoAccessKey: !Ref SumoAccessKey
-        AccessLogsTargetS3BucketName: !Ref S3AuditLogsTargetS3BucketName
+        AccessLogsTargetS3BucketName: !Sub "${S3BucketPrefix}-${S3AuditLogsTargetS3BucketName}"
         CreateTargetS3Bucket: !Ref S3AuditCreateTargetS3Bucket
         PathExpression: !Ref S3AuditPathExpression
         SumoDeployment: !Ref SumoDeployment
@@ -610,7 +616,7 @@ Resources:
         EnableSecurityHub: !Ref EnableSecurityHub
         CollectorName: "QuickStart-AWSSecurityHub"
         ConnectionName: !Ref SecurityHubConnectionName
-        S3BucketName: !Ref SecurityHubLogsS3BucketName
+        S3BucketName: !Sub "${S3BucketPrefix}-${SecurityHubLogsS3BucketName}"
         CreateTargetS3Bucket: !Ref SecurityHubCreateS3Bucket
         SourceCategoryName: !Ref SecurityHubSourceCategoryName
         SourceName: "AWSSecurityHub"
@@ -647,7 +653,7 @@ Resources:
         SourceName: "AWSWAF"
         SumoAccessID: !Ref SumoAccessID
         SumoAccessKey: !Ref SumoAccessKey
-        KinesisDestinationS3BucketName: !Ref KinesisDestinationS3BucketName
+        KinesisDestinationS3BucketName: !Sub "${S3BucketPrefix}-${KinesisDestinationS3BucketName}"
         CreateKinesisDestinationS3Bucket: !Ref CreateKinesisDestinationS3Bucket
         PathExpression: !Ref WAFPathExpression
         SumoDeployment: !Ref SumoDeployment
@@ -668,7 +674,7 @@ Resources:
         SourceName: "AmazonVPCFlowLogs"
         SumoAccessID: !Ref SumoAccessID
         SumoAccessKey: !Ref SumoAccessKey
-        LogsTargetS3BucketName: !Ref VPCFlowLogsTargetS3BucketName
+        LogsTargetS3BucketName: !Sub "${S3BucketPrefix}-${VPCFlowLogsTargetS3BucketName}"
         VPCFlowLogAppSourceCategoryName: !Ref VPCFlowLogsSourceCategoryName
         CreateTargetS3Bucket: !Ref VPCFlowLogsCreateTargetS3Bucket
         PathExpression: !Ref VPCFlowLogsPathExpression
@@ -689,7 +695,7 @@ Resources:
         SumoAccessKey: !Ref SumoAccessKey
         RemoveSumoResourcesOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
         CollectorName: !If [InstallVPCFlowLogsCondition, "QuickStart-AmazonVPCFlowLogs", "QuickStart-AmazonPCI-VPCFlowLogs"]
-        LogsTargetS3BucketName: !Ref VPCFlowLogsTargetS3BucketName
+        LogsTargetS3BucketName: !Sub "${S3BucketPrefix}-${VPCFlowLogsTargetS3BucketName}"
         CreateTargetS3Bucket: !If [InstallVPCFlowLogsCondition, "no", !Ref VPCFlowLogsCreateTargetS3Bucket]
         PCIVpcFlowAppSourceCategory: !Ref VPCFlowLogsSourceCategoryName
         SourceName: "AmazonVPCFlowLogs"
@@ -712,7 +718,7 @@ Resources:
         RemoveSumoResourcesOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
         CollectorName: !If [InstallCloudTrailCondition, "QuickStart-AWSCloudTrail", "QuickStart-AWSPCI-CloudTrail"]
         SourceCategory: !Ref CloudTrailSourceCategoryName
-        LogsTargetS3BucketName: !Ref CloudTrailTargetS3BucketName
+        LogsTargetS3BucketName: !Sub "${S3BucketPrefix}-${CloudTrailTargetS3BucketName}"
         CreateTargetS3Bucket: !If [InstallCloudTrailCondition, "no", !Ref CreateCloudTrailTargetS3Bucket]
         SourceName: "AWSCloudTrail"
         CreateTrail: !If [InstallCloudTrailCondition, "no", "yes"]
