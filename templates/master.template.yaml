@@ -676,3 +676,25 @@ Resources:
         ExternalID: !Sub "${SumoDeployment}:${SumoOrganizationId}"
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
+
+  sumoPCIVPCFlowLogsStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: InstallPCIVPCFlowLogsCondition
+    Properties:
+      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/pci-compliance-vpc-flow/pci_compliance_vpc_logs.template.yaml"
+      Parameters:
+        S3SourceUtilTempalteS3Url: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/sumo-s3-source-utils/s3utils.template.yaml"
+        SumoDeployment: !Ref SumoDeployment
+        SumoAccessID: !Ref SumoAccessID
+        SumoAccessKey: !Ref SumoAccessKey
+        RemoveSumoResourcesOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+        CollectorName: "QuickStart-AmazonVPCFlowLogs"
+        LogsTargetS3BucketName: !Ref VPCFlowLogsTargetS3BucketName
+        CreateTargetS3Bucket: !If [InstallVPCFlowLogsCondition, "no", !Ref VPCFlowLogsCreateTargetS3Bucket]
+        PCIVpcFlowAppSourceCategory: !Ref VPCFlowLogsSourceCategoryName
+        SourceName: "AmazonVPCFlowLogs"
+        PathExpression: !Ref VPCFlowLogsPathExpression
+        ExternalID: !Sub "${SumoDeployment}:${SumoOrganizationId}"
+        SourceCategory: !Ref VPCFlowLogsSourceCategoryName
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
