@@ -56,6 +56,14 @@
     "ParameterValue": "no"
   },
   {
+    "ParameterKey": "InstallVPCFlowLogsApp",
+    "ParameterValue": "no"
+  },
+  {
+    "ParameterKey": "InstallWAFApp",
+    "ParameterValue": "no"
+  },
+  {
     "ParameterKey": "QSS3BucketName",
     "ParameterValue": "aws-quickstart"
   },

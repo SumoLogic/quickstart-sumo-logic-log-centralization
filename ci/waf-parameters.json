@@ -25,7 +25,7 @@
   },
   {
     "ParameterKey": "InstallGuardDutyBenchmarkApp",
-    "ParameterValue": "yes"
+    "ParameterValue": "no"
   },
   {
     "ParameterKey": "InstallS3AuditApp",
@@ -61,7 +61,7 @@
   },
   {
     "ParameterKey": "InstallWAFApp",
-    "ParameterValue": "no"
+    "ParameterValue": "yes"
   },
   {
     "ParameterKey": "QSS3BucketName",
