@@ -596,3 +596,41 @@ Resources:
         ExternalID: !Sub "${SumoDeployment}:${SumoOrganizationId}"
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
+
+  sumoSecurityHubStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: InstallSecurityHubCondition
+    Properties:
+      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/security-hub/securityhub.template.yaml"
+      Parameters:
+        SumoDeployment: !Ref SumoDeployment
+        SumoAccessID: !Ref SumoAccessID
+        SumoAccessKey: !Ref SumoAccessKey
+        RemoveSumoResourcesOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+        EnableSecurityHub: !Ref EnableSecurityHub
+        CollectorName: "QuickStart-AWSSecurityHub"
+        ConnectionName: !Ref SecurityHubConnectionName
+        S3BucketName: !Ref SecurityHubLogsS3BucketName
+        CreateTargetS3Bucket: !Ref SecurityHubCreateS3Bucket
+        SourceCategoryName: !Ref SecurityHubSourceCategoryName
+        SourceName: "AWSSecurityHub"
+        PathExpression: !Ref SecurityHubPathExpression
+        ExternalID: !Sub "${SumoDeployment}:${SumoOrganizationId}"
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+
+  sumoThreatIntelForAWS:
+    Condition: InstallThreatIntelCondition
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/threat-intel-for-aws/threatintel.template.yaml"
+      Parameters:
+        CloudTrailSourceCategory: !Ref CloudTrailSourceCategoryName
+        RemoveSumoResourcesOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+        VPCSourceCategory: !Ref VPCFlowLogsSourceCategoryName
+        ELBSourceCategory: !Ref ELBSourceCategory
+        SumoAccessID: !Ref SumoAccessID
+        SumoAccessKey: !Ref SumoAccessKey
+        SumoDeployment: !Ref SumoDeployment
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
