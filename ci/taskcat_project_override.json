@@ -1,11 +1,11 @@
 [
   {
     "ParameterKey": "SumoDeployment",
-    "ParameterValue": "us2"
+    "ParameterValue": "us1"
   },
   {
     "ParameterKey": "SumoAccessID",
-    "ParameterValue": "suQydVwoGiEqig"
+    "ParameterValue": "suRdztXAKWdlKj"
   },
   {
     "ParameterKey": "S3BucketPrefix",
@@ -13,7 +13,7 @@
   },
   {
     "ParameterKey": "SumoAccessKey",
-    "ParameterValue": "Om43i01Xzw0dDai67VeffUXA4lQ6YpqHFBW8diMwT53nHWXYujGzrMgEztT1qfeq"
+    "ParameterValue": "Xe1bMKaRIXmRYxAPh7GUxA4fce3s2GCC2YVDYJzeqyFuyM4czEzbEkUyXsVRL6ZE"
   },
   {
     "ParameterKey": "RemoveSumoResourcesOnDeleteStack",
@@ -21,6 +21,6 @@
   },
   {
     "ParameterKey": "SumoOrganizationId",
-    "ParameterValue": "000000000025BD5C"
+    "ParameterValue": "0000000000285A74"
   }
 ]

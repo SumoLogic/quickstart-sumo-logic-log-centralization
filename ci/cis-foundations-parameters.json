@@ -1,27 +1,27 @@
 [
   {
     "ParameterKey": "SumoDeployment",
-    "ParameterValue": "$[SumoDeployment]"
+    "ParameterValue": "overriden"
   },
   {
     "ParameterKey": "SumoAccessID",
-    "ParameterValue": "$[SumoAccessID]"
+    "ParameterValue": "overriden"
   },
   {
     "ParameterKey": "S3BucketPrefix",
-    "ParameterValue": "$[S3BucketPrefix]"
+    "ParameterValue": "overriden"
   },
   {
     "ParameterKey": "SumoAccessKey",
-    "ParameterValue": "$[SumoAccessKey]"
+    "ParameterValue": "overriden"
   },
   {
     "ParameterKey": "RemoveSumoResourcesOnDeleteStack",
-    "ParameterValue": "$[RemoveSumoResourcesOnDeleteStack]"
+    "ParameterValue": "overriden"
   },
   {
     "ParameterKey": "SumoOrganizationId",
-    "ParameterValue": "$[SumoOrganizationId]"
+    "ParameterValue": "overriden"
   },
   {
     "ParameterKey": "InstallGuardDutyApp",
