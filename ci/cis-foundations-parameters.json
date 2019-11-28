@@ -9,7 +9,7 @@
   },
   {
     "ParameterKey": "S3BucketPrefix",
-    "ParameterValue": "$[taskcat_random-string]"
+    "ParameterValue": "overriden"
   },
   {
     "ParameterKey": "SumoAccessKey",
@@ -17,7 +17,7 @@
   },
   {
     "ParameterKey": "RemoveSumoResourcesOnDeleteStack",
-    "ParameterValue": "true"
+    "ParameterValue": "overriden"
   },
   {
     "ParameterKey": "SumoOrganizationId",

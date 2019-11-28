@@ -9,7 +9,7 @@
   },
   {
     "ParameterKey": "S3BucketPrefix",
-    "ParameterValue": "$[taskcat_random-string]"
+    "ParameterValue": "overriden"
   },
   {
     "ParameterKey": "SumoAccessKey",
