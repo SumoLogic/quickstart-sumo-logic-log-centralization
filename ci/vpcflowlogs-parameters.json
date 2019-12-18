@@ -1,0 +1,78 @@
+[
+  {
+    "ParameterKey": "SumoDeployment",
+    "ParameterValue": "overriden"
+  },
+  {
+    "ParameterKey": "SumoAccessID",
+    "ParameterValue": "overriden"
+  },
+  {
+    "ParameterKey": "S3BucketPrefix",
+    "ParameterValue": "overriden"
+  },
+  {
+    "ParameterKey": "SumoAccessKey",
+    "ParameterValue": "overriden"
+  },
+  {
+    "ParameterKey": "RemoveSumoResourcesOnDeleteStack",
+    "ParameterValue": "true"
+  },
+  {
+    "ParameterKey": "SumoOrganizationId",
+    "ParameterValue": "overriden"
+  },
+  {
+    "ParameterKey": "InstallGuardDutyApp",
+    "ParameterValue": "no"
+  },
+  {
+    "ParameterKey": "InstallGuardDutyBenchmarkApp",
+    "ParameterValue": "no"
+  },
+  {
+    "ParameterKey": "InstallS3AuditApp",
+    "ParameterValue": "no"
+  },
+  {
+    "ParameterKey": "InstallSecurityHub",
+    "ParameterValue": "no"
+  },
+  {
+    "ParameterKey": "InstallThreatIntelForAWS",
+    "ParameterValue": "no"
+  },
+  {
+    "ParameterKey": "InstallCloudTrailApp",
+    "ParameterValue": "no"
+  },
+  {
+    "ParameterKey": "InstallCISFoundationsApp",
+    "ParameterValue": "no"
+  },
+  {
+    "ParameterKey": "InstallPCICloudTrailApp",
+    "ParameterValue": "no"
+  },
+  {
+    "ParameterKey": "InstallPCIVPCFlowLogsApp",
+    "ParameterValue": "no"
+  },
+  {
+    "ParameterKey": "InstallVPCFlowLogsApp",
+    "ParameterValue": "yes"
+  },
+  {
+    "ParameterKey": "InstallWAFApp",
+    "ParameterValue": "no"
+  },
+  {
+    "ParameterKey": "QSS3BucketName",
+    "ParameterValue": "aws-quickstart"
+  },
+  {
+    "ParameterKey": "QSS3KeyPrefix",
+    "ParameterValue": "quickstart-sumo-logic-log-centralization/"
+  }
+]
