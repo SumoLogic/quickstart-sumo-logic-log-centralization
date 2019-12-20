@@ -1,0 +1,226 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "A CloudFormation template that creates a role for authenticating with\
+  \ Sumo\u2019s AWS integrations."
+Globals:
+  Function:
+    Timeout: 3000
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: deploy-sumo-aws-apps
+    Description: sumo-guardduty
+    Author: user1
+    SpdxLicenseId: Apache-2.0
+    LicenseUrl: s3://sumologic-sam-app/60dd855ef60687184c3b1f69ed374378
+    ReadmeUrl: s3://sumologic-sam-app/f8285cccc5d34fffb8bf3f1bb6b59413
+    Labels:
+    - tests
+    HomePageUrl: https://github.com/user1/my-app-project
+    SemanticVersion: 0.0.1
+    SourceCodeUrl: https://github.com/user1/my-app-project
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Sumo Logic Deployment Configuration
+      Parameters:
+      - SumoDeployment
+      - SumoAccessID
+      - SumoAccessKey
+      - RemoveSumoResourcesOnDeleteStack
+    - Label:
+        default: Sumo Logic GuardDuty Collector/Source/App Configuration
+      Parameters:
+      - InstallGuardDutyApp
+      - CollectorName
+      - SourceName
+      - SourceCategoryName
+      - CloudFormationStackName
+    - Label:
+        default: Sumo Logic Amazon GuardDuty Benchmark Collector/Source/App Configuration
+      Parameters:
+      - InstallGuardDutyBenchmarkApp
+      - BenchmarkCollectorName
+      - BenchmarkSourceName
+      - BenchmarkSourceCategoryName
+      - BenchmarkCloudFormationStackName
+Parameters:
+  InstallGuardDutyApp:
+    Type: String
+    Default: 'yes'
+    AllowedValues:
+    - 'yes'
+    - 'no'
+  CollectorName:
+    Type: String
+    Default: GuarddutyCollector
+  SourceName:
+    Type: String
+    Default: GuarddutyEvents
+  SourceCategoryName:
+    Type: String
+    Default: Labs/AWS/Guardduty
+  SumoAccessID:
+    Type: String
+  SumoAccessKey:
+    Type: String
+  SumoDeployment:
+    Type: String
+    AllowedValues:
+    - au
+    - ca
+    - de
+    - eu
+    - jp
+    - us2
+    - us1
+    Description: Enter au, ca, de, eu, jp, us2, or us1
+  RemoveSumoResourcesOnDeleteStack:
+    AllowedValues:
+    - true
+    - false
+    Default: false
+    Description: To delete collector, sources and app when stack is deleted, set this
+      parameter to true. Default is false.
+    Type: String
+  CloudFormationStackName:
+    Default: false
+    Description: Name of the AWS cloudformation stack, that deploy the GuardDuty App.
+    Type: String
+  InstallGuardDutyBenchmarkApp:
+    Type: String
+    Default: 'yes'
+    AllowedValues:
+    - 'yes'
+    - 'no'
+  BenchmarkCollectorName:
+    Type: String
+    Default: GuarddutyBenchmarkCollector
+  BenchmarkSourceName:
+    Type: String
+    Default: GuarddutyBenchmarkEvents
+  BenchmarkSourceCategoryName:
+    Type: String
+    Default: Labs/AWS/Guardduty
+  BenchmarkCloudFormationStackName:
+    Default: false
+    Description: Name of the AWS cloudformation stack, that deploy the GuardDuty Benchmark
+      App.
+    Type: String
+Conditions:
+  InstallGuardDutyCondition:
+    Fn::Equals:
+    - Ref: InstallGuardDutyApp
+    - 'yes'
+  InstallGuardDutyBenchmarkCondition:
+    Fn::Equals:
+    - Ref: InstallGuardDutyBenchmarkApp
+    - 'yes'
+Resources:
+  CreateStackRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: SumoPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - serverlessrepo:*
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - cloudformation:*
+            - iam:*
+            - lambda:*
+            - s3:*
+            - events:*
+            Resource: '*'
+  SumoAwsAppsDeployFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: deploy.handler
+      Runtime: python3.7
+      CodeUri: s3://sumologic-sam-app/9f4ae548525395739c5d79f883288278
+      MemorySize: 128
+      Timeout: 300
+      Role:
+        Fn::GetAtt:
+        - CreateStackRole
+        - Arn
+  sumoguardduty:
+    Condition: InstallGuardDutyCondition
+    Type: Custom::App
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+        - SumoAwsAppsDeployFunction
+        - Arn
+      StackName:
+        Ref: CloudFormationStackName
+      ApplicationId: arn:aws:serverlessrepo:us-west-2:296516481872:applications/sumo-guardduty
+      SemanticVersion: 0.0.1
+      Parameters:
+      - ParameterKey: SumoAccessID
+        ParameterValue:
+          Ref: SumoAccessID
+      - ParameterKey: SumoAccessKey
+        ParameterValue:
+          Ref: SumoAccessKey
+      - ParameterKey: SumoDeployment
+        ParameterValue:
+          Ref: SumoDeployment
+      - ParameterKey: CollectorName
+        ParameterValue:
+          Ref: CollectorName
+      - ParameterKey: RemoveSumoResourcesOnDeleteStack
+        ParameterValue:
+          Ref: RemoveSumoResourcesOnDeleteStack
+      - ParameterKey: SourceName
+        ParameterValue:
+          Ref: SourceName
+      - ParameterKey: SourceCategoryName
+        ParameterValue:
+          Ref: SourceCategoryName
+  sumoguarddutybenchmark:
+    Condition: InstallGuardDutyBenchmarkCondition
+    Type: Custom::App
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+        - SumoAwsAppsDeployFunction
+        - Arn
+      StackName:
+        Ref: BenchmarkCloudFormationStackName
+      ApplicationId: arn:aws:serverlessrepo:us-west-2:296516481872:applications/sumo-guardduty-bench-mark
+      SemanticVersion: 0.0.1
+      Parameters:
+      - ParameterKey: SumoAccessID
+        ParameterValue:
+          Ref: SumoAccessID
+      - ParameterKey: SumoAccessKey
+        ParameterValue:
+          Ref: SumoAccessKey
+      - ParameterKey: SumoDeployment
+        ParameterValue:
+          Ref: SumoDeployment
+      - ParameterKey: CollectorName
+        ParameterValue:
+          Ref: BenchmarkCollectorName
+      - ParameterKey: RemoveSumoResourcesOnDeleteStack
+        ParameterValue:
+          Ref: RemoveSumoResourcesOnDeleteStack
+      - ParameterKey: SourceName
+        ParameterValue:
+          Ref: BenchmarkSourceName
+      - ParameterKey: SourceCategoryName
+        ParameterValue:
+          Ref: BenchmarkSourceCategoryName
