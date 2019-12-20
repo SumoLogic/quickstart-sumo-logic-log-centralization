@@ -1,0 +1,299 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: A CloudFormation template that creates a role for authenticating with Sumo’s AWS integrations.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Sumo Logic Deployment Configuration"
+        Parameters:
+          - SumoDeployment
+          - SumoAccessID
+          - SumoAccessKey
+          - RemoveSumoResourcesOnDeleteStack
+      -
+        Label:
+          default: "Sumo Logic Collector/Source/App Configuration"
+        Parameters:
+          - CollectorName
+          - SourceName
+          - LogsTargetS3BucketName
+          - CreateTargetS3Bucket
+          - SourceCategoryName
+          - PathExpression
+          - ExternalID
+          - ExcludeRuleName
+          - ExcludeRule
+          - VPCFlowLogAppSourceCategoryName
+
+      - Label:
+          default: "AWS Quick Start configuration"
+        Parameters:
+          - QSS3BucketName
+          - QSS3KeyPrefix
+      
+    ParameterLabels:
+      SumoDeployment:
+        default: "Deployment Name"
+      SumoAccessID:
+        default: "Access ID"
+      SumoAccessKey:
+        default: "Access Key"
+      CollectorName:
+        default: "Collector Name"
+      SourceName:
+        default: "Source Name"
+      SourceCategoryName:
+        default: "Source Category"
+      PathExpression:
+        default: "Path Expression"
+      
+      RemoveSumoResourcesOnDeleteStack:
+        default: "Remove Sumo Resources On Delete Stack"
+      ExternalID:
+        default: "IAM Role ExternalID"
+      LogsTargetS3BucketName:
+        default: "Target BucketName"
+      CreateTargetS3Bucket:
+        default: "Do you want to create a target S3 bucket?"
+      VPCFlowLogAppSourceCategoryName:
+        default: Amazon VPC Flow Logs App SourceCategoryName
+      QSS3BucketName:
+        default: "Quick Start S3 bucket name"
+      QSS3KeyPrefix:
+        default: "Quick Start S3 key prefix"
+
+Parameters:
+  CollectorName:
+    Type: String
+    Default: VPCFlowLogCollector
+  SourceName:
+    Type: String
+    Default: VPCFlowLogEvents
+  SourceCategoryName:
+    Type: String
+    Description: Category metadata to use later for querying, e.g. prod/web/apache/access . This data is queried using the '_sourceCategory' key name.
+  SumoAccessID:
+    Type: String
+  SumoAccessKey:
+    Type: String
+  SumoDeployment:
+    Type: String
+    AllowedValues:
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+    Description: "Enter au, ca, de, eu, jp, us2, or us1"
+  RemoveSumoResourcesOnDeleteStack:
+    AllowedValues:
+      - true
+      - false
+    Default: false
+    Description: To delete collector, sources and app when stack is deleted, set this parameter to true. Default is false.
+    Type: String
+  ExternalID:
+    Type: String
+    Description: An ID used in the trust policy to designate who can assume the role, formatted as deployment:accountId. Eg. us1:0000000000000131
+  LogsTargetS3BucketName:
+    Type: String
+    Description: S3 access logs target buket name.
+  CreateTargetS3Bucket:
+    Type: String
+    Default: "no"
+    AllowedValues: ["yes", "no"]
+  PathExpression:
+    Type: String
+    Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
+  ExcludeRuleName:
+    Type: String
+    Default: Exclude VPC File Flow headers
+  ExcludeRule:
+    Type: String
+    Description: Exclude rule regexp
+    Default: version account-id interface-id srcaddr dstaddr srcport dstport protocol packets bytes start end action log-status
+  VPCFlowLogAppSourceCategoryName:
+    Type: String
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: "aws-quickstart"
+    Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Type: "String"
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: "quickstart-sumo-logic-log-centralization/"
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: "String"
+
+Conditions:
+  CreateBucket: !Equals [ !Ref CreateTargetS3Bucket, "yes" ]
+
+Resources:
+  SumoRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            AWS: arn:aws:iam::926226587429:root
+          Action: sts:AssumeRole
+          Condition:
+            StringEquals:
+              sts:ExternalId:
+                Ref: ExternalID
+      Path: "/"
+      Policies:
+      - PolicyName: SumoPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:GetObjectVersion
+              - s3:ListBucketVersions
+              - s3:ListBucket
+            Resource:
+              - !Sub 
+                - arn:aws:s3:::${S3bucketName}
+                - { S3bucketName: !Ref LogsTargetS3BucketName }
+              - !Sub
+                - arn:aws:s3:::${S3bucketName}/*
+                - { S3bucketName: !Ref LogsTargetS3BucketName  }
+              
+  
+  TargetS3Bucket:
+    Type: AWS::S3::Bucket
+    Condition: CreateBucket
+    Properties:
+      BucketName: !Ref LogsTargetS3BucketName
+      NotificationConfiguration:
+          TopicConfigurations:
+            -
+              Event: s3:ObjectCreated:Put
+              Topic: !Ref sumoS3SorceTopic
+
+  sumoS3SorceTopic:
+    Type: 'AWS::SNS::Topic'
+    Properties:
+      TopicName: !Sub "SumoSNSTopic-${AWS::StackName}"
+
+  sumoSNSSubscription:
+    Type: 'AWS::SNS::Subscription'
+    Properties:
+      TopicArn: 
+        Ref: sumoS3SorceTopic
+      Endpoint: !GetAtt SumoS3Source.SUMO_ENDPOINT
+      Protocol: https
+      DeliveryPolicy:
+       healthyRetryPolicy:
+         numRetries: 40
+         minDelayTarget: 10
+         maxDelayTarget: 300
+         numMinDelayRetries: 3
+         numMaxDelayRetries: 5
+         numNoDelayRetries: 0
+         backoffFunction: exponential
+
+  sumoSNSpolicy:
+   Properties:
+     PolicyDocument:
+       Id: SumoTopicPolicy
+       Statement:
+         -
+           Action: "sns:Publish"
+           Condition:
+             StringEquals:
+               aws:SourceAccount: !Ref "AWS::AccountId"
+             ArnLike:
+               aws:SourceArn: !Sub "arn:aws:s3:*:*:${LogsTargetS3BucketName}"
+           Effect: Allow
+           Principal:
+             AWS: "*"
+           Resource:
+             Ref: sumoS3SorceTopic
+     Topics:
+       -
+         Ref: sumoS3SorceTopic
+   Type: "AWS::SNS::TopicPolicy"
+
+  SumoAppUtils:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: main.handler
+      Runtime: python3.7
+      CodeUri:
+        Bucket: !Ref QSS3BucketName
+        Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
+      MemorySize: 128
+      Timeout: 300
+
+  SumoHostedCollector:
+    Type: Custom::Collector
+    Properties:
+      ServiceToken: !GetAtt SumoAppUtils.Arn
+      Region: !Ref "AWS::Region"
+      CollectorType: Hosted
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      CollectorName: !Ref CollectorName
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
+
+  SumoS3Source:
+    Type: Custom::S3Source
+    Properties:
+      ServiceToken: !GetAtt SumoAppUtils.Arn
+      Region: !Ref "AWS::Region"
+      SourceName: !Ref SourceName
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      SourceCategory: !Ref SourceCategoryName
+      CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
+      TargetBucketName: !Ref LogsTargetS3BucketName
+      PathExpression: !Ref PathExpression
+      filters:
+         -
+          filterType: "Exclude"
+          name: !Ref ExcludeRuleName
+          regexp: !Ref ExcludeRule   
+      RoleArn: !GetAtt SumoRole.Arn
+      multilineProcessingEnabled: false
+      useAutolineMatching": false
+
+  SumoAmazonVPCFlowLogAApp:
+    Type: Custom::App
+    Properties:
+      ServiceToken: !GetAtt SumoAppUtils.Arn
+      Region: !Ref "AWS::Region"
+      AppName: "Amazon VPC Flow Logs"
+      AppId: "3546d789-3a45-48df-ac85-6838044d988d"
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      AppSources:
+        vpcFlowLogs: !Sub "_sourceCategory=${VPCFlowLogAppSourceCategoryName}"
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
+      
+      
+
+Outputs:
+  SumoRoleArn:
+    Description: ARN of the cretaed Role.
+    Value: !GetAtt SumoRole.Arn
+
+  SumoEndpoint:
+    Description: SNS Subscription Endpoint
+    Value: !GetAtt SumoS3Source.SUMO_ENDPOINT
+
