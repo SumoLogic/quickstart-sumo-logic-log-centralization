@@ -1,0 +1,118 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: A CloudFormation template that creates a role for authenticating with Sumo’s AWS integrations.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Sumo Logic Deployment Configuration"
+        Parameters:
+          - SumoDeployment
+          - SumoAccessID
+          - SumoAccessKey
+          - RemoveSumoResourcesOnDeleteStack
+      -
+        Label:
+          default: "Sumo Logic Threat Intel for AWS App Configuration"
+        Parameters:
+          - CloudTrailSourceCategory
+          - VPCSourceCategory
+          - ELBSourceCategory
+
+      - Label:
+          default: "AWS Quick Start configuration"
+        Parameters:
+          - QSS3BucketName
+          - QSS3KeyPrefix
+      
+    ParameterLabels:
+      SumoDeployment:
+        default: "Deployment Name"
+      SumoAccessID:
+        default: "Access ID"
+      SumoAccessKey:
+        default: "Access Key"
+      QSS3BucketName:
+        default: "Quick Start S3 bucket name"
+      QSS3KeyPrefix:
+        default: "Quick Start S3 key prefix"
+     
+
+Parameters:
+
+  ELBSourceCategory:
+    Type: String
+    Description: Category metadata to use later for querying, e.g. prod/web/apache/access . This data is queried using the '_sourceCategory' key name.
+  VPCSourceCategory:
+    Type: String
+    Description: Category metadata to use later for querying, e.g. prod/web/apache/access . This data is queried using the '_sourceCategory' key name.
+  CloudTrailSourceCategory:
+    Type: String
+    Description: Category metadata to use later for querying, e.g. prod/web/apache/access . This data is queried using the '_sourceCategory' key name.
+  SumoAccessID:
+    Type: String
+  SumoAccessKey:
+    Type: String
+  SumoDeployment:
+    Type: String
+    AllowedValues:
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+    Description: "Enter au, ca, de, eu, jp, us2, or us1"
+  RemoveSumoResourcesOnDeleteStack:
+    AllowedValues:
+      - true
+      - false
+    Default: false
+    Description: To delete collector, sources and app when stack is deleted, set this parameter to true. Default is false.
+    Type: String
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: "aws-quickstart"
+    Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Type: "String"
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: "quickstart-sumo-logic-log-centralization/"
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: "String"
+
+Resources:
+  
+  SumoAppUtils:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: main.handler
+      Runtime: python3.7
+      CodeUri:
+        Bucket: !Ref QSS3BucketName
+        Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
+      MemorySize: 128
+      Timeout: 300
+
+  SumoThreatIntelForAWSApp:
+    Type: Custom::App
+    Properties:
+      ServiceToken: !GetAtt SumoAppUtils.Arn
+      Region: !Ref "AWS::Region"
+      AppName: "Threat Intel for AWS"
+      AppId: "cff3b4a2-b356-4ee3-beda-d7b5a9184fcf"
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      AppSources:
+        awscloudtrail: !Sub "_sourceCategory=${CloudTrailSourceCategory}"
+        awsvpc: !Sub "_sourceCategory=${VPCSourceCategory}"
+        awselb: !Sub "_sourceCategory=${ELBSourceCategory}"
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
+      
+
