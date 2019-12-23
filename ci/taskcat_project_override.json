@@ -1,0 +1,8 @@
+[{
+    "ParameterKey": "SumoDeployment",
+    "ParameterValue": "us1"
+},
+{
+  "ParameterKey": "QSS3BucketName",
+  "ParameterValue": "$[taskcat_autobucket]"
+}]
