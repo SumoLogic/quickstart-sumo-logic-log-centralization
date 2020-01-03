@@ -1,12 +1,26 @@
-[{
+[
+  {
     "ParameterKey": "SumoDeployment",
     "ParameterValue": "us1"
-},
-{
+  },
+  {
     "ParameterKey": "RemoveSumoResourcesOnDeleteStack",
     "ParameterValue": "true"
-},
-{
-  "ParameterKey": "QSS3BucketName",
-  "ParameterValue": "$[taskcat_autobucket]"
-}]
+  },
+  {
+    "ParameterKey": "S3BucketPrefix",
+    "ParameterValue": "$[taskcat_random-string]"
+  },
+  {
+    "ParameterKey": "SumoAccessID",
+    "ParameterValue": "suvp7c42zrgd93"
+  },
+  {
+    "ParameterKey": "SumoAccessKey",
+    "ParameterValue": "r9D4Bu039gxIzC4tek5O18gTY2YB8Ut8Y4lWFTvHjm0KT6MXXUTeO91L5dGdd4Zz"
+  },
+  {
+    "ParameterKey": "SumoOrganizationId",
+    "ParameterValue": "0000000000285A74"
+  }
+]
