@@ -512,6 +512,9 @@ Conditions:
 
 Resources:
 
+  WaitHandle:
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
   sumocisfoundations:
     Condition: InstallCISFoundationsCondition
     Type: AWS::CloudFormation::Stack
@@ -532,8 +535,21 @@ Resources:
         QSS3BucketName: !Sub "${QSS3BucketName}-${AWS::Region}"
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
 
+  sumoguarddutyWaitHandle:
+    Condition: InstallCISFoundationsCondition
+    DependsOn: sumocisfoundations
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  sumoguarddutyWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [InstallCISFoundationsCondition, !Ref sumoguarddutyWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
   sumoguardduty:
     Condition: InstallGuardDutyCondition
+    DependsOn: sumoguarddutyWaitCondition
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "https://${QSS3BucketName}-${AWS::Region}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/guardduty/guardduty.template.yaml"
@@ -548,8 +564,21 @@ Resources:
         QSS3BucketName: !Sub "${QSS3BucketName}-${AWS::Region}"
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
 
+  sumoguarddutybenchmarkWaitHandle:
+    Condition: InstallGuardDutyCondition
+    DependsOn: sumoguardduty
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  sumoguarddutybenchmarkWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [InstallGuardDutyCondition, !Ref sumoguarddutybenchmarkWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
   sumoguarddutybenchmark:
     Condition: InstallGuardDutyBenchmarkCondition
+    DependsOn: sumoguarddutybenchmarkWaitCondition
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "https://${QSS3BucketName}-${AWS::Region}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/guardduty/benchmark/guarddutybenchmark.template.yaml"
@@ -561,26 +590,6 @@ Resources:
         SumoAccessID: !Ref SumoAccessID
         SumoAccessKey: !Ref SumoAccessKey
         SumoDeployment: !Ref SumoDeployment
-        QSS3BucketName: !Sub "${QSS3BucketName}-${AWS::Region}"
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
-
-  sumocloudtrail:
-    Condition: InstallCloudTrailCondition
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "https://${QSS3BucketName}-${AWS::Region}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/cloudtrail/cloudtrail.template.yaml"
-      Parameters:
-        CollectorName: "QuickStart-AWSCloudTrail"
-        RemoveSumoResourcesOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-        SourceCategoryName: !Ref CloudTrailSourceCategoryName
-        SourceName: "AWSCloudTrail"
-        SumoAccessID: !Ref SumoAccessID
-        SumoAccessKey: !Ref SumoAccessKey
-        SumoDeployment: !Ref SumoDeployment
-        ExternalID: !Sub "${SumoDeployment}:${SumoOrganizationId}"
-        PathExpression: !Ref CloudTrailPathExpression
-        CloudTrailTargetS3BucketName: !Sub "${S3BucketPrefix}-${CloudTrailTargetS3BucketName}"
-        CreateTargetS3Bucket: !Ref CreateCloudTrailTargetS3Bucket
         QSS3BucketName: !Sub "${QSS3BucketName}-${AWS::Region}"
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
 
@@ -604,8 +613,21 @@ Resources:
         QSS3BucketName: !Sub "${QSS3BucketName}-${AWS::Region}"
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
 
+  sumoSecurityHubStackWaitHandle:
+    Condition: InstallS3AuditCondition
+    DependsOn: sumoS3Audit
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  sumoSecurityHubStackWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [InstallS3AuditCondition, !Ref sumoSecurityHubStackWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
   sumoSecurityHubStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: sumoSecurityHubStackWaitCondition
     Condition: InstallSecurityHubCondition
     Properties:
       TemplateURL: !Sub "https://${QSS3BucketName}-${AWS::Region}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/security-hub/securityhub.template.yaml"
@@ -626,8 +648,21 @@ Resources:
         QSS3BucketName: !Sub "${QSS3BucketName}-${AWS::Region}"
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
 
+  sumoThreatIntelForAWSWaitHandle:
+    Condition: InstallSecurityHubCondition
+    DependsOn: sumoSecurityHubStack
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  sumoThreatIntelForAWSWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [InstallSecurityHubCondition, !Ref sumoThreatIntelForAWSWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
   sumoThreatIntelForAWS:
     Condition: InstallThreatIntelCondition
+    DependsOn: sumoThreatIntelForAWSWaitCondition
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "https://${QSS3BucketName}-${AWS::Region}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/threat-intel-for-aws/threatintel.template.yaml"
@@ -642,8 +677,21 @@ Resources:
         QSS3BucketName: !Sub "${QSS3BucketName}-${AWS::Region}"
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
 
+  sumoWAFWaitHandle:
+    Condition: InstallThreatIntelCondition
+    DependsOn: sumoThreatIntelForAWS
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  sumoWAFWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [InstallThreatIntelCondition, !Ref sumoWAFWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
   sumoWAF:
     Condition: InstallWAFCondition
+    DependsOn: sumoWAFWaitCondition
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "https://${QSS3BucketName}-${AWS::Region}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/WAF/waf.template.yaml"
@@ -684,8 +732,21 @@ Resources:
         QSS3BucketName: !Sub "${QSS3BucketName}-${AWS::Region}"
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
 
+  sumoPCIVPCFlowLogsStackWaitHandle:
+    Condition: InstallVPCFlowLogsCondition
+    DependsOn: sumoVPCFlowLogs
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  sumoPCIVPCFlowLogsStackWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [InstallVPCFlowLogsCondition, !Ref sumoPCIVPCFlowLogsStackWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
   sumoPCIVPCFlowLogsStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: sumoPCIVPCFlowLogsStackWaitCondition
     Condition: InstallPCIVPCFlowLogsCondition
     Properties:
       TemplateURL: !Sub "https://${QSS3BucketName}-${AWS::Region}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/pci-compliance-vpc-flow/pci_compliance_vpc_logs.template.yaml"
@@ -706,8 +767,54 @@ Resources:
         QSS3BucketName: !Sub "${QSS3BucketName}-${AWS::Region}"
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
 
+  sumocloudtrailWaitHandle:
+    Condition: InstallPCIVPCFlowLogsCondition
+    DependsOn: sumoPCIVPCFlowLogsStack
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  sumocloudtrailWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [InstallPCIVPCFlowLogsCondition, !Ref sumocloudtrailWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
+  sumocloudtrail:
+    Condition: InstallCloudTrailCondition
+    DependsOn: sumocloudtrailWaitCondition
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${QSS3BucketName}-${AWS::Region}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/cloudtrail/cloudtrail.template.yaml"
+      Parameters:
+        CollectorName: "QuickStart-AWSCloudTrail"
+        RemoveSumoResourcesOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+        SourceCategoryName: !Ref CloudTrailSourceCategoryName
+        SourceName: "AWSCloudTrail"
+        SumoAccessID: !Ref SumoAccessID
+        SumoAccessKey: !Ref SumoAccessKey
+        SumoDeployment: !Ref SumoDeployment
+        ExternalID: !Sub "${SumoDeployment}:${SumoOrganizationId}"
+        PathExpression: !Ref CloudTrailPathExpression
+        CloudTrailTargetS3BucketName: !Sub "${S3BucketPrefix}-${CloudTrailTargetS3BucketName}"
+        CreateTargetS3Bucket: !Ref CreateCloudTrailTargetS3Bucket
+        QSS3BucketName: !Sub "${QSS3BucketName}-${AWS::Region}"
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+
+  sumoPCICloudTrailStackWaitHandle:
+    Condition: InstallCloudTrailCondition
+    DependsOn: sumocloudtrail
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  sumoPCICloudTrailStackWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [InstallCloudTrailCondition, !Ref sumoPCICloudTrailStackWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
   sumoPCICloudTrailStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: sumoPCICloudTrailStackWaitCondition
     Condition: InstallPCICloudTrailCondition
     Properties:
       TemplateURL: !Sub "https://${QSS3BucketName}-${AWS::Region}.s3.amazonaws.com/${QSS3KeyPrefix}submodules/sumo-aws-apps/pci-compliance-cloudtrail-app/pci-compliance-cloudtrail-app.template.yaml"
