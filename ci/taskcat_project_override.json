@@ -1,0 +1,12 @@
+[{
+    "ParameterKey": "SumoDeployment",
+    "ParameterValue": "us1"
+},
+{
+    "ParameterKey": "RemoveSumoResourcesOnDeleteStack",
+    "ParameterValue": "true"
+},
+{
+  "ParameterKey": "QSS3BucketName",
+  "ParameterValue": "$[taskcat_autobucket]"
+}]
