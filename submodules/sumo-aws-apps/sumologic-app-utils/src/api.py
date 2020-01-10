@@ -567,7 +567,7 @@ class App(Resource):
         print("waiting for app installation app_id %s job_id %s" % (app_id, job_id))
         waiting = True
         while waiting:
-            response = self.sumologic_cli.check_app_install_status(app_id, job_id)
+            response = self.sumologic_cli.check_app_install_status(job_id)
             waiting = response.json()['status'] == "InProgress"
             time.sleep(5)
         print("job status: %s" % response.text)
