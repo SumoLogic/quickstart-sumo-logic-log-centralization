@@ -541,7 +541,12 @@ Resources:
         SumoDeployment: !Ref SumoDeployment
         ExternalID: !Sub "${SumoDeployment}:${SumoOrganizationId}"
         PathExpression: !Ref CISFoundationsPathExpression
-        CISTargetS3BucketName: !If [!Equals [ !Ref CreateCISFoundationsTargetS3Bucket, "yes" ], !Sub "${S3BucketPrefix}-${CISFoundationsTargetS3BucketName}", !Ref CISFoundationsTargetS3BucketName]
+        CISTargetS3BucketName: !If
+          - !Equals
+            - !Ref CreateCISFoundationsTargetS3Bucket
+            - 'yes'
+          - !Sub '${S3BucketPrefix}-${CISFoundationsTargetS3BucketName}'
+          - !Ref CISFoundationsTargetS3BucketName
         CreateTargetS3Bucket: !Ref CreateCISFoundationsTargetS3Bucket
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
