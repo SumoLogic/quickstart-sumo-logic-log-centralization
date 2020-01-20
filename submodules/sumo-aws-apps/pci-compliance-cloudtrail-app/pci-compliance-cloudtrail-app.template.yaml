@@ -168,7 +168,7 @@ Resources:
         ExcludeRule: "None"
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
-        CreateTrail: !Ref CreateBucket
+        CreateTrail: !Ref CreateTrail
 
   sumoAmazonS3AuditApp:
     Type: Custom::App
