@@ -184,6 +184,7 @@ Resources:
               Topic: !Ref sumoSNSTopic
   
   sumoS3BucketPolicy:
+    Condition: CreateBucket
     Type: AWS::S3::BucketPolicy
     Properties:
       Bucket: !Ref CISTargetS3BucketName

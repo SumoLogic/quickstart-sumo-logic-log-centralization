@@ -183,6 +183,7 @@ Resources:
   
   sumoS3BucketPolicy:
     Type: AWS::S3::BucketPolicy
+    Condition: CreateBucket
     Properties:
       Bucket: !Ref CloudTrailTargetS3BucketName
       PolicyDocument:
