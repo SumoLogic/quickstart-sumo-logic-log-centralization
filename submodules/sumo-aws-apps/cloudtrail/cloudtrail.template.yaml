@@ -206,6 +206,7 @@ Resources:
                 s3:x-amz-acl: bucket-owner-full-control
 
   sumoCloudTrail:
+    Condition: CreateBucket
     DependsOn:
         - sumoS3BucketPolicy
     Properties:
@@ -273,8 +274,6 @@ Resources:
         SumoDeployment: !Ref SumoDeployment
 
   SumoS3Source:
-      DependsOn:
-        - sumoS3BucketPolicy
       Type: Custom::AwsCloudTrail
       Properties:
         ServiceToken: !GetAtt SumoAppUtils.Arn

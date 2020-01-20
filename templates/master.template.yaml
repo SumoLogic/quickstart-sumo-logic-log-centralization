@@ -541,7 +541,7 @@ Resources:
         SumoDeployment: !Ref SumoDeployment
         ExternalID: !Sub "${SumoDeployment}:${SumoOrganizationId}"
         PathExpression: !Ref CISFoundationsPathExpression
-        CISTargetS3BucketName: !Sub "${S3BucketPrefix}-${CISFoundationsTargetS3BucketName}"
+        CISTargetS3BucketName: !If [!Equals [ !Ref CreateCISFoundationsTargetS3Bucket, "yes" ], !Sub "${S3BucketPrefix}-${CISFoundationsTargetS3BucketName}", !Ref CISFoundationsTargetS3BucketName]
         CreateTargetS3Bucket: !Ref CreateCISFoundationsTargetS3Bucket
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
@@ -616,7 +616,7 @@ Resources:
         SourceName: "AmazonS3Audit"
         SumoAccessID: !Ref SumoAccessID
         SumoAccessKey: !Ref SumoAccessKey
-        AccessLogsTargetS3BucketName: !Sub "${S3BucketPrefix}-${S3AuditLogsTargetS3BucketName}"
+        AccessLogsTargetS3BucketName: !If [!Equals [ !Ref S3AuditCreateTargetS3Bucket, "yes" ], !Sub "${S3BucketPrefix}-${S3AuditLogsTargetS3BucketName}", !Ref S3AuditLogsTargetS3BucketName]
         CreateTargetS3Bucket: !Ref S3AuditCreateTargetS3Bucket
         PathExpression: !Ref S3AuditPathExpression
         SumoDeployment: !Ref SumoDeployment
@@ -650,7 +650,7 @@ Resources:
         EnableSecurityHub: !Ref EnableSecurityHub
         CollectorName: "QuickStart-AWSSecurityHub"
         ConnectionName: !Ref SecurityHubConnectionName
-        S3BucketName: !Sub "${S3BucketPrefix}-${SecurityHubLogsS3BucketName}"
+        S3BucketName: !If [!Equals [ !Ref SecurityHubCreateS3Bucket, "yes" ], !Sub "${S3BucketPrefix}-${SecurityHubLogsS3BucketName}", !Ref SecurityHubLogsS3BucketName]
         CreateTargetS3Bucket: !Ref SecurityHubCreateS3Bucket
         SourceCategoryName: !Ref SecurityHubSourceCategoryName
         SourceName: "AWSSecurityHub"
@@ -713,7 +713,7 @@ Resources:
         SourceName: "AWSWAF"
         SumoAccessID: !Ref SumoAccessID
         SumoAccessKey: !Ref SumoAccessKey
-        KinesisDestinationS3BucketName: !Sub "${S3BucketPrefix}-${KinesisDestinationS3BucketName}"
+        KinesisDestinationS3BucketName: !If [!Equals [ !Ref CreateKinesisDestinationS3Bucket, "yes" ], !Sub "${S3BucketPrefix}-${KinesisDestinationS3BucketName}", !Ref KinesisDestinationS3BucketName]
         CreateKinesisDestinationS3Bucket: !Ref CreateKinesisDestinationS3Bucket
         PathExpression: !Ref WAFPathExpression
         SumoDeployment: !Ref SumoDeployment
@@ -734,7 +734,7 @@ Resources:
         SourceName: "AmazonVPCFlowLogs"
         SumoAccessID: !Ref SumoAccessID
         SumoAccessKey: !Ref SumoAccessKey
-        LogsTargetS3BucketName: !Sub "${S3BucketPrefix}-${VPCFlowLogsTargetS3BucketName}"
+        LogsTargetS3BucketName: !If [!Equals [ !Ref VPCFlowLogsCreateTargetS3Bucket, "yes" ], !Sub "${S3BucketPrefix}-${VPCFlowLogsTargetS3BucketName}", !Ref VPCFlowLogsTargetS3BucketName]
         VPCFlowLogAppSourceCategoryName: !Ref VPCFlowLogsSourceCategoryName
         CreateTargetS3Bucket: !Ref VPCFlowLogsCreateTargetS3Bucket
         PathExpression: !Ref VPCFlowLogsPathExpression
@@ -768,7 +768,7 @@ Resources:
         SumoAccessKey: !Ref SumoAccessKey
         RemoveSumoResourcesOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
         CollectorName: !If [InstallVPCFlowLogsCondition, "QuickStart-AmazonVPCFlowLogs", "QuickStart-AmazonPCI-VPCFlowLogs"]
-        LogsTargetS3BucketName: !Sub "${S3BucketPrefix}-${VPCFlowLogsTargetS3BucketName}"
+        LogsTargetS3BucketName: !If [!Equals [ !Ref VPCFlowLogsCreateTargetS3Bucket, "yes" ], !Sub "${S3BucketPrefix}-${VPCFlowLogsTargetS3BucketName}", !Ref VPCFlowLogsTargetS3BucketName]
         CreateTargetS3Bucket: !If [InstallVPCFlowLogsCondition, "no", !Ref VPCFlowLogsCreateTargetS3Bucket]
         PCIVpcFlowAppSourceCategory: !Ref VPCFlowLogsSourceCategoryName
         SourceName: "AmazonVPCFlowLogs"
@@ -806,7 +806,7 @@ Resources:
         SumoDeployment: !Ref SumoDeployment
         ExternalID: !Sub "${SumoDeployment}:${SumoOrganizationId}"
         PathExpression: !Ref CloudTrailPathExpression
-        CloudTrailTargetS3BucketName: !Sub "${S3BucketPrefix}-${CloudTrailTargetS3BucketName}"
+        CloudTrailTargetS3BucketName: !If [!Equals [ !Ref CreateCloudTrailTargetS3Bucket, "yes" ], !Sub "${S3BucketPrefix}-${CloudTrailTargetS3BucketName}", !Ref CloudTrailTargetS3BucketName]
         CreateTargetS3Bucket: !Ref CreateCloudTrailTargetS3Bucket
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
@@ -837,10 +837,10 @@ Resources:
         RemoveSumoResourcesOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
         CollectorName: !If [InstallCloudTrailCondition, "QuickStart-AWSCloudTrail", "QuickStart-AWSPCI-CloudTrail"]
         SourceCategory: !Ref CloudTrailSourceCategoryName
-        LogsTargetS3BucketName: !Sub "${S3BucketPrefix}-${CloudTrailTargetS3BucketName}"
+        LogsTargetS3BucketName: !If [!Equals [ !Ref CreateCloudTrailTargetS3Bucket, "yes" ], !Sub "${S3BucketPrefix}-${CloudTrailTargetS3BucketName}", !Ref CloudTrailTargetS3BucketName]
         CreateTargetS3Bucket: !If [InstallCloudTrailCondition, "no", !Ref CreateCloudTrailTargetS3Bucket]
         SourceName: "AWSCloudTrail"
-        CreateTrail: !If [InstallCloudTrailCondition, "no", "yes"]
+        CreateTrail: !If [InstallCloudTrailCondition, "no", !Ref CreateCloudTrailTargetS3Bucket]
         PathExpression: !Ref CloudTrailPathExpression
         ExternalID: !Sub "${SumoDeployment}:${SumoOrganizationId}"
         PCICloudTrailAppSourceCategory: !Ref CloudTrailSourceCategoryName
