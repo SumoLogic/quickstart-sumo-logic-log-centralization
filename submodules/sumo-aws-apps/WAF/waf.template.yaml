@@ -160,6 +160,7 @@ Resources:
             Topic: !Ref sumoSNSTopic
 
   KinesisFirehoseDeliveryStream:
+    Condition: CreateBucket
     DependsOn:
       - KinesisDestinationS3Bucket
     Type: AWS::KinesisFirehose::DeliveryStream
@@ -180,6 +181,7 @@ Resources:
 
 
   KinesisS3Role:
+    Condition: CreateBucket
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
