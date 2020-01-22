@@ -68,7 +68,13 @@ class Resource(object):
         to_time = int(time.time()) * 1000
         from_time = to_time - 5 * 60 * 1000
         try:
-            response = self.sumologic_cli.search_job("benchmarkcat guardduty", fromTime=from_time, toTime=to_time)
+            search_query = '''guardduty*
+                        | "IAMUser" as targetresource
+                        | "2" as sev
+                        | "UserPermissions" as threatName
+                        | "Recon" as threatPurpose
+                        | benchmark percentage as global_percent from guardduty on threatpurpose=threatPurpose, threatname=threatName, severity=sev, resource=targetresource'''
+            response = self.sumologic_cli.search_job(search_query, fromTime=from_time, toTime=to_time)
             print("schedule job status: %s" % response)
             response = self.sumologic_cli.search_job_status(response)
             print("job status: %s" % response)
@@ -567,7 +573,7 @@ class App(Resource):
         print("waiting for app installation app_id %s job_id %s" % (app_id, job_id))
         waiting = True
         while waiting:
-            response = self.sumologic_cli.check_app_install_status(app_id, job_id)
+            response = self.sumologic_cli.check_app_install_status(job_id)
             waiting = response.json()['status'] == "InProgress"
             time.sleep(5)
         print("job status: %s" % response.text)

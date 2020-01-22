@@ -169,7 +169,7 @@ Resources:
   SecurityHubUser:
     Type: AWS::IAM::User
     Properties:
-      UserName: SecurityHubUser
+      UserName: !Sub "SecurityHubUser-${AWS::StackName}"
       Policies:
         - PolicyName: apigatewayaccess
           PolicyDocument:
