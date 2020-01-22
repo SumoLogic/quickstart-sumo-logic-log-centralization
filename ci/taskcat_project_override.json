@@ -1,7 +1,7 @@
 [
   {
     "ParameterKey": "SumoDeployment",
-    "ParameterValue": "us1"
+    "ParameterValue": "us2"
   },
   {
     "ParameterKey": "RemoveSumoResourcesOnDeleteStack",
