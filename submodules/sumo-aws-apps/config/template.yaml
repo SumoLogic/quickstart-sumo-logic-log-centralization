@@ -1,86 +1,94 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
+Description: >
+  This template is used to install collection mechanism, app and AWS Resources required for Sumo Logic AWS Config app.
 
 Metadata:
-  AWS::ServerlessRepo::Application:
-    Name: sumologic-amazon-config
-    Description: SumoLogic AWS Config Application
-    Author: SumoLogic
-    SpdxLicenseId: Apache-2.0
-    LicenseUrl: "./../licence.txt"
-    ReadmeUrl: "./README.md"
-    Labels:
-    - lambda
-    - sumologic
-    - serverless
-    - config
-    HomePageUrl: https://github.com/SumoLogic/sumologic-aws-lambda
-    SemanticVersion: 0.0.1
-    SourceCodeUrl: https://github.com/SumoLogic/sumologic-aws-lambda
-
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      -
-        Label:
-          default: "Sumo Logic Deployment Configuration"
+      - Label:
+          default: "Sumo Logic Access Configuration (Required)"
         Parameters:
           - SumoDeployment
           - SumoAccessID
           - SumoAccessKey
-      -
-        Label:
-          default: "AWS Resources Configuration"
-        Parameters:
-          - ExternalID
-          - ConfigTargetS3BucketName
-          - CreateTargetS3Bucket
-      -
-        Label:
-          default: "Collection Configuration"
-        Parameters:
-          - CollectorName
-          - SourceName
-          - SourceCategoryName
+          - SumoOrganizationId
           - RemoveSumoResourcesOnDeleteStack
+
+      - Label:
+          default: "App Details - Collector Configuration"
+        Parameters:
+          - InstallApp
+          - CollectorName
+
+      - Label:
+          default: "App Details - AWS Config Details"
+        Parameters:
+          - EnableConfig
+          - BucketName
+          - CreateSNSTopic
+          - TopicName
+
+      - Label:
+          default: "App Details - HTTP Logs Source Configuration"
+        Parameters:
+          - CreateHttpLogsSource
+          - HttpLogsSourceName
+          - HttpLogsSourceCategoryName
+
+      - Label:
+          default: "AWS Quick Start configuration"
+        Parameters:
+          - QSS3BucketName
+          - QSS3KeyPrefix
+
+      - Label:
+          default: "Local Parameters. Do Not Edit the values."
+        Parameters:
+          - ParentStackName
 
     ParameterLabels:
       SumoDeployment:
-        default: "Deployment Name"
+        default: "Sumo Logic Deployment Name"
       SumoAccessID:
-        default: "Access ID"
+        default: "Sumo Logic Access ID"
       SumoAccessKey:
-        default: "Access Key"
+        default: "Sumo Logic Access Key"
+      SumoOrganizationId:
+        default: "Sumo Logic Organization Id"
+      RemoveSumoResourcesOnDeleteStack:
+        default: "Delete Sumo Logic Resources when stack is deleted"
+
+      InstallApp:
+        default: "Install Sumo Logic App"
       CollectorName:
         default: "Collector Name"
-      SourceName:
-        default: "Source Name"
-      SourceCategoryName:
-        default: "Source Category Name"
-      PathExpression:
-        default: "Path Expression"
-      RemoveSumoResourcesOnDeleteStack:
-        default: "Remove Sumo Resources On Delete Stack"
-      ExternalID:
-        default: "IAM Role ExternalID"
-      ConfigTargetS3BucketName:
-        default: "Target BucketName"
-      CreateTargetS3Bucket:
-        default: "Do you want to create a target S3 bucket?"
+
+      EnableConfig:
+        default: "Enable AWS Config for the region"
+      BucketName:
+        default: "Bucket Name"
+      CreateSNSTopic:
+        default: "Create SNS Topic for logs delivery"
+      TopicName:
+        default: "Topic Name"
+
+      CreateHttpLogsSource:
+        default: "Create Sumo Logic HTTP Logs Source"
+      HttpLogsSourceName:
+        default: "Sumo Logic HTTP Logs Source Name"
+      HttpLogsSourceCategoryName:
+        default: "Sumo Logic HTTP Logs Source Category Name"
+
+      QSS3BucketName:
+        default: "Quick Start S3 bucket name"
+      QSS3KeyPrefix:
+        default: "Quick Start S3 key prefix"
+
+      ParentStackName:
+        default: "If Any, Name of parent Stack"
 
 Parameters:
-  CollectorName:
-    Type: String
-    Default: ConfigCollector
-  SourceName:
-    Type: String
-    Default: ConfigSource
-  SourceCategoryName:
-    Type: String
-    Default: AWS/Labs/Config
-  SumoAccessID:
-    Type: String
-  SumoAccessKey:
-    Type: String
   SumoDeployment:
     Type: String
     AllowedValues:
@@ -91,131 +99,255 @@ Parameters:
       - jp
       - us2
       - us1
-    Description: "Enter au, ca, de, eu, jp, us2, or us1"
+      - in
+      - fed
+    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1."
+    AllowedPattern: ".+"
+  SumoAccessID:
+    Type: String
+    Description: "The Sumo Logic Access ID. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+  SumoAccessKey:
+    Type: String
+    Description: "The Sumo Logic Access Key. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    NoEcho: true
+  SumoOrganizationId:
+    Description: "The Account Overview page displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources."
+    Type: String
+    AllowedPattern: ".+"
   RemoveSumoResourcesOnDeleteStack:
     AllowedValues:
       - true
       - false
     Default: false
-    Description: To delete collector, sources and app when stack is deleted, set this parameter to true. Default is false.
+    Description: "To delete collector, sources and app when stack is deleted, set this parameter to true. Default is false.
+                  Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
-  ExternalID:
+
+  InstallApp:
     Type: String
-    Description: An ID used in the trust policy to designate who can assume the role, formatted as deployment:accountId. Eg. us1:0000000000000131
-  ConfigTargetS3BucketName:
+    Description: Install Sumo Logic App. Select Yes for different source category.
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  CollectorName:
     Type: String
-    Description: AWS Config logs target bucket name.
-  CreateTargetS3Bucket:
+    Description: Change the collector name to be created else default name will be used.
+    Default: AWS-Lambda-Collector
+
+  EnableConfig:
     Type: String
-    Default: "no"
-    AllowedValues: ["yes", "no"]
-  PathExpression:
+    Description: "Choose Yes to enable config for the region.
+                  Choose No if config is already enabled."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  BucketName:
     Type: String
-    Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
+    Description: "Enable config flag -> Yes. Provide a new bucket name to receive configuration history and configuration snapshot files.
+                  Enable config flag -> No. Provide the existing bucket name in AWS config settings."
+    Default: ""
+  CreateSNSTopic:
+    Type: String
+    Description: "Choose Yes to create SNS Topic and attach the SNS topic to AWS Config setting to deliver the logs.
+                  Choose No if config logs are already delivered to an existing SNS topic."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  TopicName:
+    Type: String
+    Description: Required when flag -> No. Provide exisitng config SNS topic stream configuration changes and notifications.
+    Default: ""
+
+  CreateHttpLogsSource:
+    Type: String
+    Description: "Choose Yes to create Sumo Logic HTTP logs source. Choose No if HTTP Logs source already exist."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  HttpLogsSourceName:
+    Type: String
+    Description: Change the HTTP Source name to be created else default name will be used.
+    Default: AWS-Config-Source
+  HttpLogsSourceCategoryName:
+    Type: String
+    Description: "Existing - Change to an existing Source Category from Sumo Logic if HTTP Source is not created.\n
+                  New - Change the source category else Default will be used if HTTP Source is Created"
+    Default: AWS/config/logs
+
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: "aws-quickstart"
+    Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Type: "String"
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: "quickstart-sumo-logic-log-centralization/"
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: "String"
+
+  ParentStackName:
+    Type: String
+    Default: "ParentStackName"
+    Description: Parent Stack Name. Do Not Edit the value.
 
 Conditions:
-  CreateBucket: !Equals [ !Ref CreateTargetS3Bucket, "yes" ]
+  do_not_use_parent_stack: !Equals [ !Ref ParentStackName, "ParentStackName"]
+
+  install_app: !Equals [!Ref InstallApp, 'Yes']
+  create_sns_topic: !Equals [!Ref CreateSNSTopic, 'Yes']
+  enable_config: !Equals [!Ref EnableConfig, 'Yes']
+  install_http_logs_source: !Equals [!Ref CreateHttpLogsSource, 'Yes']
 
 Resources:
-  SumoRole:
+
+  SumoLogicHelperRole:
     Type: AWS::IAM::Role
+    Condition: do_not_use_parent_stack
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: SumoPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+  SumoLogicHelperFunction:
+    Type: 'AWS::Serverless::Function'
+    DependsOn: SumoLogicHelperRole
+    Condition: do_not_use_parent_stack
+    Properties:
+      Handler: main.handler
+      Runtime: python3.7
+      CodeUri:
+        Bucket: !Ref QSS3BucketName
+        Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
+      MemorySize: 128
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+          - SumoLogicHelperRole
+          - Arn
+
+  ConfigRecorder:
+    Type: AWS::Config::ConfigurationRecorder
+    Condition: enable_config
+    Properties:
+      Name: default
+      RoleARN: !GetAtt [ConfigRole, Arn]
+
+  ConfigRole:
+    Type: AWS::IAM::Role
+    Condition: enable_config
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
         - Effect: Allow
           Principal:
-            AWS: arn:aws:iam::926226587429:root
-          Action: sts:AssumeRole
-          Condition:
-            StringEquals:
-              sts:ExternalId:
-                Ref: ExternalID
-      Path: /
+            Service: [config.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      ManagedPolicyArns: ['arn:aws:iam::aws:policy/service-role/AWSConfigRole']
       Policies:
-      - PolicyName: SumoPolicy
+      - PolicyName: root
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
           - Effect: Allow
-            Action:
-            - s3:GetObject
-            - s3:GetObjectVersion
-            - s3:ListBucketVersions
-            - s3:ListBucket
-            Resource:
-              - !Sub 
-                - arn:aws:s3:::${ConfigTargetS3BucketName}
-                - { S3bucketName: !Ref ConfigTargetS3BucketName }
-              - !Sub
-                - arn:aws:s3:::${ConfigTargetS3BucketName}/*
-                - { S3bucketName: !Ref ConfigTargetS3BucketName  }
+            Action: s3:GetBucketAcl
+            Resource: !Join ['', ['arn:aws:s3:::', !Ref 'TargetS3Bucket']]
+          - Effect: Allow
+            Action: s3:PutObject
+            Resource: !Join ['', ['arn:aws:s3:::', !Ref 'TargetS3Bucket', /AWSLogs/,
+                !Ref 'AWS::AccountId', /*]]
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+          - Effect: Allow
+            Action: config:Put*
+            Resource: '*'
 
-  SumoAppUtils:
-      Type: AWS::Serverless::Function
-      Properties:
-        Handler: main.handler
-        Runtime: python3.7
-        CodeUri: "../sumologic-app-utils/src/"
-        MemorySize: 128
-        Timeout: 300
+  TargetS3Bucket:
+    Type: AWS::S3::Bucket
+    Condition: enable_config
+    Properties:
+      BucketName: !Ref BucketName
 
-  SumoS3Bucket:
-      DependsOn:
-          - SumoSNSpolicy
-      Properties:
-        BucketName: !Ref ConfigTargetS3BucketName
-        NotificationConfiguration:
-            TopicConfigurations:
-              -
-                Event: s3:ObjectCreated:Put
-                Topic: !Ref SumoSNSTopic
-      Type: AWS::S3::Bucket
-  
   SumoSNSTopic:
-      Properties:
-        TopicName: !Sub "SumoSNSTopic-${AWS::StackName}"
-      Type: "AWS::SNS::Topic"
-  
-  DeliveryChannel:
-    DependsOn:
-      - SumoS3Bucket
-    Type: AWS::Config::DeliveryChannel
-    Properties: 
-      ConfigSnapshotDeliveryProperties: 
-        DeliveryFrequency: "One_Hour"
-      S3BucketName:
-        Ref: ConfigTargetS3BucketName
-      SnsTopicARN: 
+    Type: "AWS::SNS::Topic"
+    Condition: create_sns_topic
+    Properties:
+      TopicName: !Sub "SumoSNSTopic-${AWS::StackName}"
+
+  ConfigTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Condition: create_sns_topic
+    Properties:
+      PolicyDocument:
+        Id: ConfigTopicPolicy
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: config.amazonaws.com
+            Action: SNS:Publish
+            Resource: '*'
+      Topics: [!Ref 'SumoSNSTopic']
+
+  WaitHandle:
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  EnableConfigWaitHandle:
+    Condition: enable_config
+    DependsOn: TargetS3Bucket
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  EnableConfigWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [enable_config, !Ref EnableConfigWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
+  DeliveryChannelWhenConfigIsTurnedOn:
+    Type: "AWS::Config::DeliveryChannel"
+    Condition: create_sns_topic
+    DependsOn: [ConfigTopicPolicy, EnableConfigWaitCondition]
+    Properties:
+      ConfigSnapshotDeliveryProperties:
+        DeliveryFrequency: Six_Hours
+      S3BucketName: !Ref 'TargetS3Bucket'
+      SnsTopicARN:
         Ref: SumoSNSTopic
 
-  ConfigS3BucketPolicy:
-    DependsOn:
-      - SumoS3Bucket
-    Type: AWS::S3::BucketPolicy
-    Properties: 
-      Bucket: 
-        Ref: SumoS3Bucket
-      PolicyDocument:
-        Id: AWSConfigBucketDelivery
-        Statement:
-          Effect: Allow
-          Action: 
-              - s3:GetBucketAcl
-              - s3:ListBucket
-              - s3:PutObject
-          Principal:
-            Service:
-              - config.amazonaws.com
-          Resource: 
-            - !Sub arn:aws:s3:::${ConfigTargetS3BucketName}  
-            - !Sub arn:aws:s3:::${ConfigTargetS3BucketName}/AWSLogs/*
-      
   SumoSNSSubscription:
     Type: "AWS::SNS::Subscription"
+    Condition: install_http_logs_source
     Properties:
-      TopicArn:
-        Ref: SumoSNSTopic
+      TopicArn: !If
+        - create_sns_topic
+        - !Ref SumoSNSTopic
+        - !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${TopicName}"
       Endpoint: !GetAtt SumoHTTPSource.SUMO_ENDPOINT
       Protocol: https
       DeliveryPolicy:
@@ -227,34 +359,18 @@ Resources:
           numMaxDelayRetries: 5
           numNoDelayRetries: 0
           backoffFunction: exponential
-  
-  SumoSNSpolicy:
-      Properties:
-        PolicyDocument:
-          Id: SumoTopicPolicy
-          Statement:
-            -
-              Action:
-                  - sns:Publish
-              Condition:
-                StringEquals:
-                  aws:SourceAccount: !Ref "AWS::AccountId"
-                ArnLike:
-                  aws:SourceArn: !Sub "arn:aws:s3:::${ConfigTargetS3BucketName}"
-              Effect: Allow
-              Principal:
-                AWS: "*"
-              Resource:
-                - !Ref SumoSNSTopic
-        Topics:
-          -
-            Ref: SumoSNSTopic
-      Type: "AWS::SNS::TopicPolicy"
-    
+
   SumoHostedCollector:
     Type: Custom::Collector
+    Condition: install_http_logs_source
     Properties:
-      ServiceToken: !GetAtt SumoAppUtils.Arn
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
       CollectorType: Hosted
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
@@ -264,31 +380,43 @@ Resources:
       SumoDeployment: !Ref SumoDeployment
 
   SumoHTTPSource:
+    Condition: install_http_logs_source
     Type: Custom::HTTPSource
     Properties:
-      ServiceToken: !GetAtt SumoAppUtils.Arn
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
-      SourceName: !Ref SourceName
+      SourceName: !Ref HttpLogsSourceName
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-      SourceCategory: !Ref SourceCategoryName
+      SourceCategory: !Ref HttpLogsSourceCategoryName
       CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
-      DateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-      DateLocatorRegex: '.*"updatedAt":"(.*)".*'
+      MessagePerRequest: true
 
-  SumoConfigApp:
+  sumoApp:
     Type: Custom::App
+    Condition: install_app
     Properties:
-      ServiceToken: !GetAtt SumoAppUtils.Arn
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
       AppName: "AWS Config"
       AppId: "61be4a8f-6702-4035-bc55-e56d149b181d"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       AppSources:
-        logsrc: !Sub "_sourceCategory=${SourceCategoryName}"
+        paramId123: !Sub "_sourceCategory=${HttpLogsSourceCategoryName}"
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
-
