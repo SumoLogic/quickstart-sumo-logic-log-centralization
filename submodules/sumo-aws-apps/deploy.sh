@@ -7,9 +7,9 @@ export AppName=$1
 export InstallType=$2
 
 # Sumo Logic Access Configuration
-export SumoAccessID="suv1UhvjV0PgE0"
-export SumoAccessKey="P0jqVLlNzWwYNAkXwF4SPWVlOMKnll8M9qlAcgrTuDiaqEBxvjyKamp4nzE8wM4L"
-export SumoOrganizationId="0000000000285A74"
+export SumoAccessID=""
+export SumoAccessKey=""
+export SumoOrganizationId=""
 export SumoDeployment="us1"
 export RemoveSumoResourcesOnDeleteStack=true
 
