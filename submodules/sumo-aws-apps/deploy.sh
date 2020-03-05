@@ -28,6 +28,13 @@ then
     export EnableConfig="Yes"
     export CreateSNSTopic="Yes"
     export CreateHttpLogsSource="Yes"
+elif [[ "${InstallType}" == "confignos3" ]]
+then
+    export InstallApp="Yes"
+    export EnableConfig="No"
+    export CreateSNSTopic="Yes"
+    export KeyPrefix="configlogs"
+    export CreateHttpLogsSource="Yes"
 else
     echo "No Valid Choice."
 fi
@@ -40,7 +47,7 @@ aws cloudformation deploy --profile ${AWS_PROFILE} --template-file ./${AppName}/
     --parameter-overrides SumoDeployment="${SumoDeployment}" SumoAccessID="${SumoAccessID}" SumoAccessKey="${SumoAccessKey}" \
     SumoOrganizationId="${SumoOrganizationId}" RemoveSumoResourcesOnDeleteStack="${RemoveSumoResourcesOnDeleteStack}" \
     QSS3BucketName="${QSS3BucketName}" InstallApp="${InstallApp}" CollectorName="${CollectorName}" BucketName="${BucketName}" \
-    EnableConfig="${EnableConfig}" CreateSNSTopic="${CreateSNSTopic}" CreateHttpLogsSource="${CreateHttpLogsSource}"
+    EnableConfig="${EnableConfig}" CreateSNSTopic="${CreateSNSTopic}" CreateHttpLogsSource="${CreateHttpLogsSource}" KeyPrefix="${KeyPrefix}"
  
 
 

@@ -147,8 +147,7 @@ Parameters:
       - 'No'
   BucketName:
     Type: String
-    Description: "Enable config flag -> Yes. Provide a new bucket name to receive configuration history and configuration snapshot files.
-                  Enable config flag -> No. Provide the existing bucket name in AWS config settings."
+    Description: "Enable config flag -> Yes. Provide a new bucket name to receive configuration history and configuration snapshot files."
     Default: ""
   CreateSNSTopic:
     Type: String
@@ -160,7 +159,7 @@ Parameters:
       - 'No'
   TopicName:
     Type: String
-    Description: Required when flag -> No. Provide exisitng config SNS topic stream configuration changes and notifications.
+    Description: Required when flag -> No. Provide exisitng config SNS topic from Config settings to stream configuration changes and notifications.
     Default: ""
 
   CreateHttpLogsSource:
@@ -230,6 +229,9 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
+                  - config:DescribeDeliveryChannels
+                  - config:PutDeliveryChannel
+                  - config:DeleteDeliveryChannel
                 Resource: '*'
 
   SumoLogicHelperFunction:
@@ -263,29 +265,29 @@ Resources:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
-        - Effect: Allow
-          Principal:
-            Service: [config.amazonaws.com]
-          Action: ['sts:AssumeRole']
+          - Effect: Allow
+            Principal:
+              Service: [config.amazonaws.com]
+            Action: ['sts:AssumeRole']
       ManagedPolicyArns: ['arn:aws:iam::aws:policy/service-role/AWSConfigRole']
       Policies:
-      - PolicyName: root
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-          - Effect: Allow
-            Action: s3:GetBucketAcl
-            Resource: !Join ['', ['arn:aws:s3:::', !Ref 'TargetS3Bucket']]
-          - Effect: Allow
-            Action: s3:PutObject
-            Resource: !Join ['', ['arn:aws:s3:::', !Ref 'TargetS3Bucket', /AWSLogs/,
-                !Ref 'AWS::AccountId', /*]]
-            Condition:
-              StringEquals:
-                s3:x-amz-acl: bucket-owner-full-control
-          - Effect: Allow
-            Action: config:Put*
-            Resource: '*'
+        - PolicyName: root
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: s3:GetBucketAcl
+                Resource: !Join ['', ['arn:aws:s3:::', !Ref 'TargetS3Bucket']]
+              - Effect: Allow
+                Action: s3:PutObject
+                Resource: !Join ['', ['arn:aws:s3:::', !Ref 'TargetS3Bucket', /AWSLogs/,
+                                      !Ref 'AWS::AccountId', /*]]
+                Condition:
+                  StringEquals:
+                    s3:x-amz-acl: bucket-owner-full-control
+              - Effect: Allow
+                Action: config:Put*
+                Resource: '*'
 
   TargetS3Bucket:
     Type: AWS::S3::Bucket
@@ -319,7 +321,7 @@ Resources:
 
   EnableConfigWaitHandle:
     Condition: enable_config
-    DependsOn: TargetS3Bucket
+    DependsOn: ConfigRole
     Type: "AWS::CloudFormation::WaitConditionHandle"
 
   EnableConfigWaitCondition:
@@ -330,15 +332,21 @@ Resources:
       Count: 0
 
   DeliveryChannelWhenConfigIsTurnedOn:
-    Type: "AWS::Config::DeliveryChannel"
+    Type: "Custom::ConfigDeliveryChannel"
     Condition: create_sns_topic
     DependsOn: [ConfigTopicPolicy, EnableConfigWaitCondition]
     Properties:
-      ConfigSnapshotDeliveryProperties:
-        DeliveryFrequency: Six_Hours
-      S3BucketName: !Ref 'TargetS3Bucket'
-      SnsTopicARN:
-        Ref: SumoSNSTopic
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      DeliveryFrequency: Six_Hours
+      S3BucketName: !If [enable_config, !Ref TargetS3Bucket, ""]
+      SnsTopicARN: !Ref SumoSNSTopic
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
 
   SumoSNSSubscription:
     Type: "AWS::SNS::Subscription"
