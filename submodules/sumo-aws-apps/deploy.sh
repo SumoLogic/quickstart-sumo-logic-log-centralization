@@ -33,8 +33,21 @@ then
     export InstallApp="Yes"
     export EnableConfig="No"
     export CreateSNSTopic="Yes"
-    export KeyPrefix="configlogs"
     export CreateHttpLogsSource="Yes"
+elif [[ "${InstallType}" == "confignosns" ]]
+then
+    export InstallApp="Yes"
+    export EnableConfig="No"
+    export CreateSNSTopic="No"
+    # Please put an existing topic name.
+    export TopicName="SumoSNSTopic-config-configall"
+    export CreateHttpLogsSource="Yes"
+elif [[ "${InstallType}" == "configapponly" ]]
+then
+    export InstallApp="Yes"
+    export EnableConfig="No"
+    export CreateSNSTopic="No"
+    export CreateHttpLogsSource="No"
 else
     echo "No Valid Choice."
 fi
@@ -42,12 +55,12 @@ fi
 # Stack Name
 export stackName="${AppName}-${InstallType}"
 
-aws cloudformation deploy --profile ${AWS_PROFILE} --template-file ./${AppName}/template.yaml --region ${AWS_REGION}\
+aws cloudformation deploy --profile ${AWS_PROFILE} --template-file ./${AppName}/${AppName}.template.yaml --region ${AWS_REGION}\
     --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --stack-name ${stackName} \
     --parameter-overrides SumoDeployment="${SumoDeployment}" SumoAccessID="${SumoAccessID}" SumoAccessKey="${SumoAccessKey}" \
     SumoOrganizationId="${SumoOrganizationId}" RemoveSumoResourcesOnDeleteStack="${RemoveSumoResourcesOnDeleteStack}" \
     QSS3BucketName="${QSS3BucketName}" InstallApp="${InstallApp}" CollectorName="${CollectorName}" BucketName="${BucketName}" \
-    EnableConfig="${EnableConfig}" CreateSNSTopic="${CreateSNSTopic}" CreateHttpLogsSource="${CreateHttpLogsSource}" KeyPrefix="${KeyPrefix}"
+    EnableConfig="${EnableConfig}" CreateSNSTopic="${CreateSNSTopic}" CreateHttpLogsSource="${CreateHttpLogsSource}" TopicName="${TopicName}"
  
 
 
