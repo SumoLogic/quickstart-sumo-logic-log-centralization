@@ -4,12 +4,11 @@ export AWS_REGION="us-east-1"
 export AWS_PROFILE="personal"
 # App to test
 export AppName=config
-export InstallType=configall
+export InstallType=configapponly
 
 # Sumo Logic Access Configuration
 export SumoAccessID=""
 export SumoAccessKey=""
-export SumoOrganizationId=""
 export SumoDeployment="us1"
 export RemoveSumoResourcesOnDeleteStack=true
 
@@ -58,7 +57,7 @@ export stackName="${AppName}-${InstallType}"
 aws cloudformation deploy --profile ${AWS_PROFILE} --template-file ./config.template.yaml --region ${AWS_REGION}\
     --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --stack-name ${stackName} \
     --parameter-overrides SumoDeployment="${SumoDeployment}" SumoAccessID="${SumoAccessID}" SumoAccessKey="${SumoAccessKey}" \
-    SumoOrganizationId="${SumoOrganizationId}" RemoveSumoResourcesOnDeleteStack="${RemoveSumoResourcesOnDeleteStack}" \
+    RemoveSumoResourcesOnDeleteStack="${RemoveSumoResourcesOnDeleteStack}" \
     QSS3BucketName="${QSS3BucketName}" InstallApp="${InstallApp}" CollectorName="${CollectorName}" BucketName="${BucketName}" \
     EnableConfig="${EnableConfig}" CreateSNSTopic="${CreateSNSTopic}" CreateHttpLogsSource="${CreateHttpLogsSource}" TopicName="${TopicName}"
 

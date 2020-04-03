@@ -1,72 +1,76 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: >
-    This function is invoked by AWS CloudWatch events in response to state change in your AWS resources which matches a event target definition. The event payload received is then forwarded to Sumo Logic HTTP source endpoint.
-
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
-Globals:
-    Function:
-        Timeout: 300
+Description: "Template to setup the Amazon GuardDuty Benchmark app with AWS and Sumo Logic resources for AWS Quick Start Solution."
 
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      -
-        Label:
+      - Label:
           default: "Sumo Logic Deployment Configuration"
         Parameters:
           - SumoDeployment
           - SumoAccessID
           - SumoAccessKey
-      -
-        Label:
-          default: "Collection Configuration"
-        Parameters:
-          - CollectorName
-          - SourceName
-          - SourceCategoryName
           - RemoveSumoResourcesOnDeleteStack
-      -
-        Labels:
+
+      - Label:
+          default: "App Details - Collector Configuration"
+        Parameters:
+          - InstallApp
+          - CollectorName
+
+      - Label:
+          default: "App Details - HTTP Logs Source Configuration"
+        Parameters:
+          - CreateHttpLogsSource
+          - HttpLogsSourceName
+          - HttpLogsSourceCategoryName
+
+      - Label:
           default: "AWS Quick Start configuration"
         Parameters:
-            - QSS3BucketName
-            - QSS3KeyPrefix
+          - QSS3BucketName
+          - QSS3BucketRegion
+          - QSS3KeyPrefix
+
+      - Label:
+          default: "Local Parameters. Do Not Edit the values."
+        Parameters:
+          - ParentStackName
 
     ParameterLabels:
       SumoDeployment:
-        default: "Deployment Name"
+        default: "Sumo Logic Deployment Name"
       SumoAccessID:
-        default: "Access ID"
+        default: "Sumo Logic Access ID"
       SumoAccessKey:
-        default: "Access Key"
+        default: "Sumo Logic Access Key"
+      RemoveSumoResourcesOnDeleteStack:
+        default: "Delete Sumo Logic Resources when stack is deleted"
+
+      InstallApp:
+        default: "Install Sumo Logic App"
       CollectorName:
         default: "Collector Name"
-      SourceName:
-        default: "Source Name"
-      SourceCategoryName:
-        default: "Source Category Name"
-      RemoveSumoResourcesOnDeleteStack:
-        default: "Remove Sumo Resources On Delete Stack"
+
+      CreateHttpLogsSource:
+        default: "Create Sumo Logic HTTP Logs Source"
+      HttpLogsSourceName:
+        default: "Sumo Logic HTTP Logs Source Name"
+      HttpLogsSourceCategoryName:
+        default: "Sumo Logic HTTP Logs Source Category Name"
+
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
+      QSS3BucketRegion:
+        default: "Quick Start S3 bucket region"
       QSS3KeyPrefix:
         default: "Quick Start S3 key prefix"
 
+      ParentStackName:
+        default: "If Any, Name of parent Stack"
+
 Parameters:
-  CollectorName:
-    Type: String
-    Default: GuarddutyCollector
-  SourceName:
-    Type: String
-    Default: GuarddutyEvents
-  SourceCategoryName:
-    Type: String
-    Default: Labs/AWS/Guardduty
-  SumoAccessID:
-    Type: String
-  SumoAccessKey:
-    Type: String
   SumoDeployment:
     Type: String
     AllowedValues:
@@ -77,20 +81,70 @@ Parameters:
       - jp
       - us2
       - us1
-    Description: "Enter au, ca, de, eu, jp, us2, or us1"
+      - in
+      - fed
+    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1."
+    AllowedPattern: ".+"
+  SumoAccessID:
+    Type: String
+    Description: "The Sumo Logic Access ID. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access ID can not be empty."
+  SumoAccessKey:
+    Type: String
+    Description: "The Sumo Logic Access Key. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access Key can not be empty."
+    NoEcho: true
   RemoveSumoResourcesOnDeleteStack:
     AllowedValues:
       - true
       - false
     Default: false
-    Description: To delete collector, sources and app when stack is deleted, set this parameter to true. Default is false.
+    Description: "To delete collector, sources and app when stack is deleted, set this parameter to true. Default is false.
+                  Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
+
+  InstallApp:
+    Type: String
+    Description: "Yes -> To Install App in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  CollectorName:
+    Type: String
+    Description: Change the collector name to be created else default name will be used.
+    Default: AWS-GuardDuty-Benchmark-Collector
+
+  CreateHttpLogsSource:
+    Type: String
+    Description: "Choose Yes to create Sumo Logic HTTP logs source. Choose No if HTTP Logs source already exist."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  HttpLogsSourceName:
+    Type: String
+    Description: Change the HTTP Source name to be created else default name will be used.
+    Default: AWS-GuardDuty-Benchmark-Source
+  HttpLogsSourceCategoryName:
+    Type: String
+    Description: "Existing - Change to an existing Source Category from Sumo Logic if HTTP Source is not created.\n
+                  New - Change the source category else Default will be used if HTTP Source is Created"
+    Default: AWS/GuardDuty/Benchmark/logs
+
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Default: "aws-quickstart"
     Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Type: "String"
+  QSS3BucketRegion:
+    Default: "us-east-1"
+    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
+    Type: String
   QSS3KeyPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
     ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
@@ -98,42 +152,99 @@ Parameters:
     Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Type: "String"
 
+  ParentStackName:
+    Type: String
+    Default: "ParentStackName"
+    Description: Parent Stack Name. Do Not Edit the value.
+
+Conditions:
+  do_not_use_parent_stack: !Equals [ !Ref ParentStackName, "ParentStackName"]
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+
+  install_app: !Equals [!Ref InstallApp, 'Yes']
+  install_http_logs_source: !Equals [!Ref CreateHttpLogsSource, 'Yes']
+
 Resources:
+
+  SumoLogicHelperRole:
+    Type: AWS::IAM::Role
+    Condition: do_not_use_parent_stack
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: SumoPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - config:DescribeDeliveryChannels
+                  - config:PutDeliveryChannel
+                  - config:DeleteDeliveryChannel
+                Resource: '*'
+
+  SumoLogicHelperFunction:
+    Type: 'AWS::Serverless::Function'
+    DependsOn: SumoLogicHelperRole
+    Condition: do_not_use_parent_stack
+    Properties:
+      Handler: main.handler
+      Runtime: python3.7
+      CodeUri:
+        Bucket: !Sub
+          - "${QSS3BucketName}-${S3Region}"
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+        Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
+      MemorySize: 128
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+          - SumoLogicHelperRole
+          - Arn
+
   CloudWatchEventFunction:
+    Type: AWS::Serverless::Function
+    Condition: install_http_logs_source
     Properties:
       CodeUri:
-        Bucket: !Ref QSS3BucketName
+        Bucket: !Sub
+          - "${QSS3BucketName}-${S3Region}"
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
         Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/guardduty/cloudwatchevents.zip"
+      Handler: cloudwatchevents.handler
+      Runtime: nodejs10.x
       Environment:
         Variables:
           SUMO_ENDPOINT: !GetAtt SumoHTTPSource.SUMO_ENDPOINT
       Events:
         CloudWatchEventTrigger:
+          Type: CloudWatchEvent
           Properties:
             Pattern:
               source:
-              - aws.guardduty
-          Type: CloudWatchEvent
-      Handler: cloudwatchevents.handler
-      Runtime: nodejs10.x
-    Type: AWS::Serverless::Function
-
-
-  SumoAppUtils:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      Handler: main.handler
-      Runtime: python3.7
-      CodeUri:
-        Bucket: !Ref QSS3BucketName
-        Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
-      MemorySize: 128
-      Timeout: 300
+                - aws.guardduty
 
   SumoHostedCollector:
     Type: Custom::Collector
+    Condition: install_http_logs_source
     Properties:
-      ServiceToken: !GetAtt SumoAppUtils.Arn
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
       CollectorType: Hosted
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
@@ -143,13 +254,20 @@ Resources:
       SumoDeployment: !Ref SumoDeployment
 
   SumoHTTPSource:
+    Condition: install_http_logs_source
     Type: Custom::HTTPSource
     Properties:
-      ServiceToken: !GetAtt SumoAppUtils.Arn
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
-      SourceName: !Ref SourceName
+      SourceName: !Ref HttpLogsSourceName
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-      SourceCategory: !Ref SourceCategoryName
+      SourceCategory: !Ref HttpLogsSourceCategoryName
       CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
@@ -157,25 +275,34 @@ Resources:
       DateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
       DateLocatorRegex: '.*"updatedAt":"(.*)".*'
 
-  SumoGuardDutyBenchmarkApp:
+  sumoApp:
     Type: Custom::App
+    Condition: install_app
     Properties:
-      ServiceToken: !GetAtt SumoAppUtils.Arn
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
-      AppName: "Amazon GuardDuty Benchmark"
+      AppName: "Amazon QuickStart - Amazon GuardDuty Benchmark"
       AppId: "8e7efcb3-040a-4a92-9f8d-922fafb24afb"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       AppSources:
-        gdbenchmark: !Sub "_sourceCategory=${SourceCategoryName}"
+        gdbenchmark: !Sub "_sourceCategory=${HttpLogsSourceCategoryName}"
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
 
 Outputs:
 
-    CloudWatchEventFunction:
-      Description: "CloudWatchEvent Processor Function ARN"
-      Value: !GetAtt CloudWatchEventFunction.Arn
-    GuarddutyBenchmarkAppFolder:
-      Description: "Folder Name"
-      Value: !GetAtt SumoGuardDutyBenchmarkApp.APP_FOLDER_NAME
+  CloudWatchEventFunction:
+    Description: "CloudWatchEvent Processor Function ARN"
+    Condition: install_http_logs_source
+    Value: !GetAtt CloudWatchEventFunction.Arn
+  GuarddutyBenchmarkAppFolder:
+    Description: "Folder Name"
+    Condition: install_app
+    Value: !GetAtt sumoApp.APP_FOLDER_NAME

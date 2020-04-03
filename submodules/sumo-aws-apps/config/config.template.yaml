@@ -11,7 +11,6 @@ Metadata:
           - SumoDeployment
           - SumoAccessID
           - SumoAccessKey
-          - SumoOrganizationId
           - RemoveSumoResourcesOnDeleteStack
 
       - Label:
@@ -54,8 +53,6 @@ Metadata:
         default: "Sumo Logic Access ID"
       SumoAccessKey:
         default: "Sumo Logic Access Key"
-      SumoOrganizationId:
-        default: "Sumo Logic Organization Id"
       RemoveSumoResourcesOnDeleteStack:
         default: "Delete Sumo Logic Resources when stack is deleted"
 
@@ -116,11 +113,6 @@ Parameters:
     AllowedPattern: ".+"
     ConstraintDescription: "Sumo Logic Access Key can not be empty."
     NoEcho: true
-  SumoOrganizationId:
-    Description: "The Account Overview page displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources."
-    Type: String
-    AllowedPattern: ".+"
-    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
   RemoveSumoResourcesOnDeleteStack:
     AllowedValues:
       - true
@@ -141,7 +133,7 @@ Parameters:
   CollectorName:
     Type: String
     Description: Change the collector name to be created else default name will be used.
-    Default: AWS-Lambda-Collector
+    Default: AWS-Config-Collector
 
   EnableConfig:
     Type: String
