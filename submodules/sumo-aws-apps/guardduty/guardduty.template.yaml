@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: "Template to setup the Amazon GuardDuty app with AWS and Sumo Logic resources for AWS Quick Start Solution."
+Description: "Template to setup the Amazon GuardDuty, Amazon GuardDuty Benchmark app with AWS and Sumo Logic resources for AWS Quick Start Solution."
 
 Metadata:
   AWS::CloudFormation::Interface:

@@ -5,7 +5,7 @@ export AWS_PROFILE="personal"
 # App to test
 export AppTemplateName="cloudtrail"
 export AppName="cloudtrail"
-export InstallTypes=("appexistingS3")
+export InstallTypes=("onlypcicloudtrailapp")
 
 for InstallType in "${InstallTypes[@]}"
 do
@@ -15,23 +15,33 @@ do
 
     if [[ "${InstallType}" == "all" ]]
     then
-        export InstallApp="Yes"
+        export InstallCloudTrailApp="Yes"
+        export InstallPCICloudTrailApp="Yes"
         export CreateCloudTrailBucket="Yes"
         export CreateCloudTrailLogSource="Yes"
-    elif [[ "${InstallType}" == "onlyapp" ]]
+    elif [[ "${InstallType}" == "onlycloudtrailapp" ]]
     then
-        export InstallApp="Yes"
+        export InstallCloudTrailApp="Yes"
+        export InstallPCICloudTrailApp="No"
+        export CreateCloudTrailBucket="No"
+        export CreateCloudTrailLogSource="No"
+    elif [[ "${InstallType}" == "onlypcicloudtrailapp" ]]
+    then
+        export InstallCloudTrailApp="No"
+        export InstallPCICloudTrailApp="Yes"
         export CreateCloudTrailBucket="No"
         export CreateCloudTrailLogSource="No"
     elif [[ "${InstallType}" == "appexistingS3" ]]
     then
-        export InstallApp="Yes"
+        export InstallCloudTrailApp="Yes"
+        export InstallPCICloudTrailApp="Yes"
         export CreateCloudTrailBucket="No"
         export CreateCloudTrailLogSource="Yes"
         export CloudTrailLogsBucketName="lambda-all-randmomstring"
     elif [[ "${InstallType}" == "onlysource" ]]
     then
-        export InstallApp="No"
+        export InstallCloudTrailApp="No"
+        export InstallPCICloudTrailApp="No"
         export CreateCloudTrailBucket="Yes"
         export CreateCloudTrailLogSource="Yes"
     else
@@ -50,8 +60,8 @@ do
 
     # Export CloudTrail Logs Details
     export CloudTrailBucketPathExpression="*"
-    export CloudTrailLogsSourceName="AWS-CloudTrail-${AppName}-${InstallType}-Source"
-    export CloudTrailLogsSourceCategoryName="AWS/CloudTrail/${AppName}/${InstallType}/Logs"
+    export CloudTrailLogsSourceName="AWS-${AppName}-${InstallType}-Source"
+    export CloudTrailLogsSourceCategoryName="AWS/${AppName}/${InstallType}/Logs"
 
     export template_file="${AppTemplateName}.template.yaml"
 
@@ -62,7 +72,8 @@ do
     CollectorName="${CollectorName}" CloudTrailLogsBucketName="${CloudTrailLogsBucketName}" CloudTrailBucketPathExpression="${CloudTrailBucketPathExpression}" \
     CloudTrailLogsSourceName="${CloudTrailLogsSourceName}" CloudTrailLogsSourceCategoryName="${CloudTrailLogsSourceCategoryName}" \
     CreateCloudTrailBucket="${CreateCloudTrailBucket}" CreateCloudTrailLogSource="${CreateCloudTrailLogSource}" \
-    QSS3BucketName="${QSS3BucketName}" QSS3BucketRegion="${QSS3BucketRegion}" InstallApp="${InstallApp}"
+    QSS3BucketName="${QSS3BucketName}" QSS3BucketRegion="${QSS3BucketRegion}" InstallCloudTrailApp="${InstallCloudTrailApp}" \
+    InstallPCICloudTrailApp="${InstallPCICloudTrailApp}"
 
 done
 

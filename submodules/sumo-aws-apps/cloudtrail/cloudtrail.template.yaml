@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: "Template to setup the AWS CloudTrail app with AWS and Sumo Logic resources for AWS Quick Start Solution."
+Description: "Template to setup the AWS CloudTrail, PCI Compliance For AWS CloudTrail app with AWS and Sumo Logic resources for AWS Quick Start Solution."
 
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -17,7 +17,8 @@ Metadata:
       - Label:
           default: "App Details - Collector Configuration"
         Parameters:
-          - InstallApp
+          - InstallCloudTrailApp
+          - InstallPCICloudTrailApp
           - CollectorName
 
       - Label:
@@ -54,8 +55,10 @@ Metadata:
       RemoveSumoResourcesOnDeleteStack:
         default: "Delete Sumo Logic Resources when stack is deleted"
 
-      InstallApp:
-        default: "Install Sumo Logic App"
+      InstallCloudTrailApp:
+        default: "Install Sumo Logic AWS CloudTrail App"
+      InstallPCICloudTrailApp:
+        default: "Install Sumo Logic PCI Compliance For AWS CloudTrail App"
       CollectorName:
         default: "Collector Name"
 
@@ -121,9 +124,17 @@ Parameters:
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
 
-  InstallApp:
+  InstallCloudTrailApp:
     Type: String
-    Description: "Yes -> To Install App in Sumo Logic for AWS Quick Start Solution.
+    Description: "Yes -> To Install Sumo Logic AWS CloudTrail App in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  InstallPCICloudTrailApp:
+    Type: String
+    Description: "Yes -> To Install PCI Compliance For AWS CloudTrail App in Sumo Logic for AWS Quick Start Solution.
                   No -> Skip Installation of the app."
     Default: 'Yes'
     AllowedValues:
@@ -161,7 +172,7 @@ Parameters:
   CloudTrailLogsSourceName:
     Type: String
     Description: Change the CloudTrail Source name to be created else default name will be used.
-    Default: AWS-Cloudtrail-CloudTrail-Log-Source
+    Default: AWS-Cloudtrail-Log-Source
   CloudTrailLogsSourceCategoryName:
     Type: String
     Description: "Existing - Change to an existing Source Category from Sumo Logic if CloudTrail Source is not created.
@@ -194,7 +205,8 @@ Conditions:
   do_not_use_parent_stack: !Equals [ !Ref ParentStackName, "ParentStackName"]
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
-  install_app: !Equals [!Ref InstallApp, 'Yes']
+  install_cloudtrail_app: !Equals [!Ref InstallCloudTrailApp, 'Yes']
+  install_pci_cloudtrail_app: !Equals [!Ref InstallPCICloudTrailApp, 'Yes']
   create_target_s3_bucket: !Equals [!Ref CreateCloudTrailBucket, 'Yes']
   install_cloudtrail_logs_source: !Equals [!Ref CreateCloudTrailLogSource, 'Yes']
 
@@ -294,9 +306,9 @@ Resources:
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
 
-  sumoApp:
+  sumoCloudTrailApp:
     Type: Custom::App
-    Condition: install_app
+    Condition: install_cloudtrail_app
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -311,6 +323,27 @@ Resources:
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       AppSources:
         logsrc: !Sub "_sourceCategory=${CloudTrailLogsSourceCategoryName}"
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
+
+  sumoPCICloudTrailApp:
+    Type: Custom::App
+    Condition: install_pci_cloudtrail_app
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      Region: !Ref "AWS::Region"
+      AppName: "Amazon QuickStart - PCI Compliance For AWS CloudTrail."
+      AppId: "924d7e2a-a14a-4b11-8c91-133241be2a51"
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      AppSources:
+        CloudtrailLogSrc: !Sub "_sourceCategory=${CloudTrailLogsSourceCategoryName}"
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
@@ -471,3 +504,12 @@ Outputs:
     Description: SNS Subscription Endpoint
     Condition: install_cloudtrail_logs_source
     Value: !GetAtt SumoCloudTrailSource.SUMO_ENDPOINT
+
+  CloudTrailAppFolder:
+    Description: "Folder Name"
+    Condition: install_cloudtrail_app
+    Value: !GetAtt sumoCloudTrailApp.APP_FOLDER_NAME
+  PciCloudTrailAppFolder:
+    Description: "Folder Name"
+    Condition: install_pci_cloudtrail_app
+    Value: !GetAtt sumoPCICloudTrailApp.APP_FOLDER_NAME
