@@ -1,80 +1,88 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
+Description: "Template to setup the AWS CloudTrail app with AWS and Sumo Logic resources for AWS Quick Start Solution."
 
 Metadata:
-  AWS::CloudFormation::Interface:
+  'AWS::CloudFormation::Interface':
     ParameterGroups:
-      -
-        Label:
-          default: "Sumo Logic Deployment Configuration"
+      - Label:
+          default: "Sumo Logic Access Configuration (Required)"
         Parameters:
           - SumoDeployment
           - SumoAccessID
           - SumoAccessKey
-      -
-        Label:
-          default: "Sumo Logic Collection Configuration"
-        Parameters:
-          - CollectorName
-          - SourceName
-          - SourceCategoryName
-          - PathExpression
+          - SumoOrganizationId
           - RemoveSumoResourcesOnDeleteStack
-      -
-        Label:
-          default: "AWS Resources Configuration"
+
+      - Label:
+          default: "App Details - Collector Configuration"
         Parameters:
-          - ExternalID
-          - CloudTrailTargetS3BucketName
-          - CreateTargetS3Bucket
+          - InstallApp
+          - CollectorName
+
+      - Label:
+          default: "App Details - CloudTrail Log Source Configuration"
+        Parameters:
+          - CreateCloudTrailBucket
+          - CloudTrailLogsBucketName
+          - CreateCloudTrailLogSource
+          - CloudTrailBucketPathExpression
+          - CloudTrailLogsSourceName
+          - CloudTrailLogsSourceCategoryName
 
       - Label:
           default: "AWS Quick Start configuration"
         Parameters:
           - QSS3BucketName
+          - QSS3BucketRegion
           - QSS3KeyPrefix
+
+      - Label:
+          default: "Local Parameters. Do Not Edit the values."
+        Parameters:
+          - ParentStackName
 
     ParameterLabels:
       SumoDeployment:
-        default: "Deployment Name"
+        default: "Sumo Logic Deployment Name"
       SumoAccessID:
-        default: "Access ID"
+        default: "Sumo Logic Access ID"
       SumoAccessKey:
-        default: "Access Key"
+        default: "Sumo Logic Access Key"
+      SumoOrganizationId:
+        default: "Sumo Logic Organization Id"
+      RemoveSumoResourcesOnDeleteStack:
+        default: "Delete Sumo Logic Resources when stack is deleted"
+
+      InstallApp:
+        default: "Install Sumo Logic App"
       CollectorName:
         default: "Collector Name"
-      SourceName:
-        default: "Source Name"
-      SourceCategoryName:
-        default: "Source Category Name"
-      PathExpression:
-        default: "Path Expression"
-      RemoveSumoResourcesOnDeleteStack:
-        default: "Remove Sumo Resources On Delete Stack"
-      ExternalID:
-        default: "IAM Role ExternalID"
-      CloudTrailTargetS3BucketName:
-        default: "Target BucketName"
-      CreateTargetS3Bucket:
-        default: "Do you want to create a target S3 bucket?"
+
+      CreateCloudTrailBucket:
+        default: "Create AWS S3 Bucket"
+      CloudTrailLogsBucketName:
+        default: "AWS S3 Bucket Name"
+      CreateCloudTrailLogSource:
+        default: "Create Sumo Logic CloudTrail Logs Source"
+      CloudTrailBucketPathExpression:
+        default: "Path Expression for the logs"
+      CloudTrailLogsSourceName:
+        default: "Sumo Logic CloudTrail Logs Source Name"
+      CloudTrailLogsSourceCategoryName:
+        default: "Sumo Logic CloudTrail Logs Source Category Name"
+
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
+      QSS3BucketRegion:
+        default: "Quick Start S3 bucket region"
       QSS3KeyPrefix:
         default: "Quick Start S3 key prefix"
 
+      ParentStackName:
+        default: "If Any, Name of parent Stack"
+
 Parameters:
-  CollectorName:
-    Type: String
-    Default: CloudTrailCollector
-  SourceName:
-    Type: String
-    Default: CloudTrailEvents
-  SourceCategoryName:
-    Type: String
-  SumoAccessID:
-    Type: String
-  SumoAccessKey:
-    Type: String
   SumoDeployment:
     Type: String
     AllowedValues:
@@ -85,33 +93,91 @@ Parameters:
       - jp
       - us2
       - us1
-    Description: "Enter au, ca, de, eu, jp, us2, or us1"
+      - in
+      - fed
+    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1."
+  SumoAccessID:
+    Type: String
+    Description: "The Sumo Logic Access ID. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access ID can not be empty."
+  SumoAccessKey:
+    Type: String
+    Description: "The Sumo Logic Access Key. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access Key can not be empty."
+    NoEcho: true
+  SumoOrganizationId:
+    Description: "The Account Overview page displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources."
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
   RemoveSumoResourcesOnDeleteStack:
     AllowedValues:
       - true
       - false
-    Default: false
-    Description: To delete collector, sources and app when stack is deleted, set this parameter to true. Default is false.
+    Default: true
+    Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to true. Default is true.
+                  Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
-  ExternalID:
+
+  InstallApp:
     Type: String
-    Description: An ID used in the trust policy to designate who can assume the role, formatted as deployment:accountId. Eg. us1:0000000000000131
-  CloudTrailTargetS3BucketName:
+    Description: "Yes -> To Install App in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  CollectorName:
     Type: String
-    Description: CloudTrail logs target bucket name.
-  CreateTargetS3Bucket:
+    Description: Change the collector name to be created else default name will be used.
+    Default: AWS-Cloudtrail-Collector
+
+  CreateCloudTrailBucket:
     Type: String
-    Default: "no"
-    AllowedValues: ["yes", "no"]
-  PathExpression:
+    Description: "Yes - Create a new CloudTrail bucket in AWS S3.
+                  No - Use an existing CloudTrail bucket from AWS S3 which has CloudTrail Logs."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  CloudTrailLogsBucketName:
+    Type: String
+    Description: "Existing Bucket Name - Provide value if the Flag is set to No.
+                  New Bucket Name - Provide a unique Bucket Name if the flag is set to Yes."
+  CreateCloudTrailLogSource:
+    Type: String
+    Description: "Yes - to create Sumo Logic Cloud Trail Log Source with provided bucket Name.
+                  No - to skip creation of the  Sumo Logic Cloud Trail Log Source."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  CloudTrailBucketPathExpression:
     Type: String
     Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
+    Default: "*"
+  CloudTrailLogsSourceName:
+    Type: String
+    Description: Change the CloudTrail Source name to be created else default name will be used.
+    Default: AWS-Cloudtrail-CloudTrail-Log-Source
+  CloudTrailLogsSourceCategoryName:
+    Type: String
+    Description: "Existing - Change to an existing Source Category from Sumo Logic if CloudTrail Source is not created.
+                  New - Default will be used if CloudTrail Source is Created."
+    Default: AWS/Cloudtrail/Logs
+
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Default: "aws-quickstart"
     Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Type: "String"
+  QSS3BucketRegion:
+    Default: "us-east-1"
+    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
+    Type: String
   QSS3KeyPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
     ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
@@ -119,114 +185,149 @@ Parameters:
     Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Type: "String"
 
+  ParentStackName:
+    Type: String
+    Default: "ParentStackName"
+    Description: Parent Stack Name. Do Not Edit the value.
+
 Conditions:
-  CreateBucket: !Equals [ !Ref CreateTargetS3Bucket, "yes" ]
+  do_not_use_parent_stack: !Equals [ !Ref ParentStackName, "ParentStackName"]
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+
+  install_app: !Equals [!Ref InstallApp, 'Yes']
+  create_target_s3_bucket: !Equals [!Ref CreateCloudTrailBucket, 'Yes']
+  install_cloudtrail_logs_source: !Equals [!Ref CreateCloudTrailLogSource, 'Yes']
 
 Resources:
-  SumoRole:
+  SumoLogicHelperRole:
     Type: AWS::IAM::Role
+    Condition: do_not_use_parent_stack
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
-        - Effect: Allow
-          Principal:
-            AWS: arn:aws:iam::926226587429:root
-          Action: sts:AssumeRole
-          Condition:
-            StringEquals:
-              sts:ExternalId:
-                Ref: ExternalID
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
       Path: /
       Policies:
-      - PolicyName: SumoPolicy
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-          - Effect: Allow
-            Action:
-            - s3:GetObject
-            - s3:GetObjectVersion
-            - s3:ListBucketVersions
-            - s3:ListBucket
-            Resource:
-              - !Sub 
-                - arn:aws:s3:::${CloudTrailTargetS3BucketName}
-                - { S3bucketName: !Ref CloudTrailTargetS3BucketName }
-              - !Sub
-                - arn:aws:s3:::${CloudTrailTargetS3BucketName}/*
-                - { S3bucketName: !Ref CloudTrailTargetS3BucketName  }
+        - PolicyName: SumoPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - cloudtrail:CreateTrail
+                  - cloudtrail:DeleteTrail
+                  - cloudtrail:UpdateTrail
+                  - cloudtrail:StartLogging
+                Resource: '*'
 
-  SumoAppUtils:
+  SumoLogicHelperFunction:
     Type: 'AWS::Serverless::Function'
+    DependsOn: SumoLogicHelperRole
+    Condition: do_not_use_parent_stack
     Properties:
       Handler: main.handler
       Runtime: python3.7
       CodeUri:
-        Bucket: !Ref QSS3BucketName
+        Bucket: !Sub
+                - "${QSS3BucketName}-${S3Region}"
+                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
         Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
       MemorySize: 128
-      Timeout: 300
-  
-  TargetS3Bucket:
-    Type: AWS::S3::Bucket
-    Condition: CreateBucket
-    DependsOn:
-        - sumoSNSpolicy
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+          - SumoLogicHelperRole
+          - Arn
+
+  SumoRole:
+    Type: AWS::IAM::Role
+    Condition: do_not_use_parent_stack
     Properties:
-      BucketName: !Ref CloudTrailTargetS3BucketName
-      NotificationConfiguration:
-          TopicConfigurations:
-            -
-              Event: s3:ObjectCreated:Put
-              Topic: !Ref sumoSNSTopic
-  
-  sumoS3BucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Condition: CreateBucket
-    Properties:
-      Bucket: !Ref CloudTrailTargetS3BucketName
-      PolicyDocument:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
         Statement:
-          - Sid: AWSCloudTrailAclCheck
-            Effect: Allow
+          - Effect: Allow
             Principal:
-              Service: cloudtrail.amazonaws.com
-            Action: s3:GetBucketAcl
-            Resource: 
-              - !Sub "arn:aws:s3:::${CloudTrailTargetS3BucketName}"
-          - Sid: AWSCloudTrailWrite
-            Effect: Allow
-            Principal:
-              Service: cloudtrail.amazonaws.com
-            Action: s3:PutObject
-            Resource:
-              - !Sub "arn:aws:s3:::${CloudTrailTargetS3BucketName}/*"
+              AWS: arn:aws:iam::926226587429:root
+            Action: sts:AssumeRole
             Condition:
               StringEquals:
-                s3:x-amz-acl: bucket-owner-full-control
+                sts:ExternalId: !Sub "${SumoDeployment}:${SumoOrganizationId}"
+      Path: "/"
+      Policies:
+        - PolicyName: SumoPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:ListBucketVersions
+                  - s3:ListBucket
+                Resource:
+                  "*"
 
-  sumoCloudTrail:
-    Condition: CreateBucket
-    DependsOn:
-        - sumoS3BucketPolicy
+  SumoHostedCollector:
+    Type: Custom::Collector
+    Condition: install_cloudtrail_logs_source
     Properties:
-      IsLogging: True
-      IsMultiRegionTrail: False
-      S3BucketName: !Ref CloudTrailTargetS3BucketName
-      TrailName: !Sub "SumoCloudTrail-${AWS::StackName}"
-    Type: AWS::CloudTrail::Trail
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      Region: !Ref "AWS::Region"
+      CollectorType: Hosted
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      CollectorName: !Ref CollectorName
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
 
-  sumoSNSTopic:
+  sumoApp:
+    Type: Custom::App
+    Condition: install_app
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      Region: !Ref "AWS::Region"
+      AppName: "Amazon QuickStart - AWS CloudTrail"
+      AppId: "ceb7fac5-1137-4a04-a5b8-2e49190be3d4"
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      AppSources:
+        logsrc: !Sub "_sourceCategory=${CloudTrailLogsSourceCategoryName}"
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
+
+  SumoSNSTopic:
+    Condition: install_cloudtrail_logs_source
+    Type: "AWS::SNS::Topic"
     Properties:
       TopicName: !Sub "SumoSNSTopic-${AWS::StackName}"
-    Type: "AWS::SNS::Topic"
 
-  sumoSNSSubscription:
+  SumoSNSSubscription:
+    Condition: install_cloudtrail_logs_source
+    Type: "AWS::SNS::Subscription"
     Properties:
       TopicArn:
-        Ref: sumoSNSTopic
-      Endpoint: !GetAtt SumoS3Source.SUMO_ENDPOINT
+        Ref: SumoSNSTopic
+      Endpoint: !GetAtt SumoCloudTrailSource.SUMO_ENDPOINT
       Protocol: https
       DeliveryPolicy:
         healthyRetryPolicy:
@@ -237,78 +338,136 @@ Resources:
           numMaxDelayRetries: 5
           numNoDelayRetries: 0
           backoffFunction: exponential
-    Type: "AWS::SNS::Subscription"
 
-  sumoSNSpolicy:
+  SumoSNSpolicy:
+    Condition: install_cloudtrail_logs_source
+    Type: "AWS::SNS::TopicPolicy"
     Properties:
       PolicyDocument:
         Id: SumoTopicPolicy
         Statement:
-          -
-            Action:
-                - sns:Publish
+          - Action:
+              - sns:Publish
             Condition:
               StringEquals:
                 aws:SourceAccount: !Ref "AWS::AccountId"
               ArnLike:
-                aws:SourceArn: !Sub "arn:aws:s3:::${CloudTrailTargetS3BucketName}"
+                aws:SourceArn: !Sub "arn:aws:s3:::${CloudTrailLogsBucketName}"
             Effect: Allow
             Principal:
               AWS: "*"
             Resource:
-              - !Ref sumoSNSTopic
+              - !Ref SumoSNSTopic
       Topics:
-        -
-          Ref: sumoSNSTopic
-    Type: "AWS::SNS::TopicPolicy"
+        - Ref: SumoSNSTopic
 
-  SumoHostedCollector:
-      Type: Custom::Collector
-      Properties:
-        ServiceToken: !GetAtt SumoAppUtils.Arn
-        Region: !Ref "AWS::Region"
-        CollectorType: Hosted
-        RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-        CollectorName: !Ref CollectorName
-        SumoAccessID: !Ref SumoAccessID
-        SumoAccessKey: !Ref SumoAccessKey
-        SumoDeployment: !Ref SumoDeployment
+  TargetS3Bucket:
+    Condition: create_target_s3_bucket
+    Type: AWS::S3::Bucket
+    DependsOn:
+      - SumoSNSpolicy
+    Properties:
+      BucketName: !Ref CloudTrailLogsBucketName
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Event: s3:ObjectCreated:Put
+            Topic: !Ref SumoSNSTopic
 
-  SumoS3Source:
-      Type: Custom::AwsCloudTrail
-      Properties:
-        ServiceToken: !GetAtt SumoAppUtils.Arn
-        Region: !Ref "AWS::Region"
-        SourceName: !Ref SourceName
-        TargetBucketName: !Ref CloudTrailTargetS3BucketName
-        RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-        SourceCategory: !Ref SourceCategoryName
-        CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
-        SumoAccessID: !Ref SumoAccessID
-        SumoAccessKey: !Ref SumoAccessKey
-        SumoDeployment: !Ref SumoDeployment
-        PathExpression: !Ref PathExpression
-        RoleArn: !GetAtt SumoRole.Arn
+  SumoCloudTrailExportPolicy:
+    Condition: create_target_s3_bucket
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref CloudTrailLogsBucketName
+      PolicyDocument:
+        Statement:
+          - Sid: AWSCloudTrailAclCheck
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: s3:GetBucketAcl
+            Resource:
+              - !Sub "arn:aws:s3:::${CloudTrailLogsBucketName}"
+          - Sid: AWSCloudTrailWrite
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: s3:PutObject
+            Resource:
+              - !Sub "arn:aws:s3:::${CloudTrailLogsBucketName}/*"
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+          - Sid: AWSBucketExistenceCheck
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: s3:ListBucket
+            Resource:
+              - !Sub "arn:aws:s3:::${CloudTrailLogsBucketName}"
+    DependsOn:
+      - TargetS3Bucket
 
-  SumoCloudTrailApp:
-      Type: Custom::App
-      Properties:
-        ServiceToken: !GetAtt SumoAppUtils.Arn
-        Region: !Ref "AWS::Region"
-        AppName: "AWS CloudTrail"
-        AppId: "ceb7fac5-1137-4a04-a5b8-2e49190be3d4"
-        RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-        AppSources:
-          logsrc: !Sub "_sourceCategory=${SourceCategoryName}"
-        SumoAccessID: !Ref SumoAccessID
-        SumoAccessKey: !Ref SumoAccessKey
-        SumoDeployment: !Ref SumoDeployment
+  SumoCloudTrail:
+    Condition: create_target_s3_bucket
+    Type: Custom::AWSTrail
+    DependsOn:
+      - SumoCloudTrailExportPolicy
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      IsLogging: true
+      IsMultiRegionTrail: false
+      S3BucketName: !Ref CloudTrailLogsBucketName
+      TrailName: !Sub "SumoCloudTrail-${AWS::StackName}"
+
+  SumoCloudTrailSource:
+    Condition: install_cloudtrail_logs_source
+    Type: Custom::AWSSource
+    Properties:
+      SourceType: AwsCloudTrailBucket
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      Region: !Ref "AWS::Region"
+      SourceName: !Ref CloudTrailLogsSourceName
+      TargetBucketName: !Ref CloudTrailLogsBucketName
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      SourceCategory: !Ref CloudTrailLogsSourceCategoryName
+      CollectorId: !If
+        - install_cloudtrail_logs_source
+        - !GetAtt
+          - SumoHostedCollector
+          - COLLECTOR_ID
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-CollectorID'
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
+      PathExpression: !Ref CloudTrailBucketPathExpression
+      RoleArn: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoRole
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoSourceRoleARN'
 
 Outputs:
   SumoRoleArn:
     Description: ARN of the cretaed Role.
+    Condition: do_not_use_parent_stack
     Value: !GetAtt SumoRole.Arn
 
   SumoEndpoint:
     Description: SNS Subscription Endpoint
-    Value: !GetAtt SumoS3Source.SUMO_ENDPOINT
+    Condition: install_cloudtrail_logs_source
+    Value: !GetAtt SumoCloudTrailSource.SUMO_ENDPOINT
