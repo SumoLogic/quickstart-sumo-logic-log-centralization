@@ -16,7 +16,8 @@ Metadata:
       - Label:
           default: "App Details - Collector Configuration"
         Parameters:
-          - InstallApp
+          - InstallGuardDutyApp
+          - InstallGuardDutyBenchMarkApp
           - CollectorName
 
       - Label:
@@ -48,8 +49,10 @@ Metadata:
       RemoveSumoResourcesOnDeleteStack:
         default: "Delete Sumo Logic Resources when stack is deleted"
 
-      InstallApp:
-        default: "Install Sumo Logic App"
+      InstallGuardDutyApp:
+        default: "Install Sumo Logic Amazon GuardDuty App"
+      InstallGuardDutyBenchMarkApp:
+        default: "Install Sumo Logic Amazon GuardDuty BenchMark App"
       CollectorName:
         default: "Collector Name"
 
@@ -105,9 +108,17 @@ Parameters:
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
 
-  InstallApp:
+  InstallGuardDutyApp:
     Type: String
-    Description: "Yes -> To Install App in Sumo Logic for AWS Quick Start Solution.
+    Description: "Yes -> To Install Amazon GuardDuty App in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  InstallGuardDutyBenchMarkApp:
+    Type: String
+    Description: "Yes -> To Install Amazon GuardDuty BenchMark App in Sumo Logic for AWS Quick Start Solution.
                   No -> Skip Installation of the app."
     Default: 'Yes'
     AllowedValues:
@@ -161,7 +172,8 @@ Conditions:
   do_not_use_parent_stack: !Equals [ !Ref ParentStackName, "ParentStackName"]
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
-  install_app: !Equals [!Ref InstallApp, 'Yes']
+  install_guardduty_app: !Equals [!Ref InstallGuardDutyApp, 'Yes']
+  install_guardduty_benchmark_app: !Equals [!Ref InstallGuardDutyBenchMarkApp, 'Yes']
   install_http_logs_source: !Equals [!Ref CreateHttpLogsSource, 'Yes']
 
 Resources:
@@ -275,9 +287,9 @@ Resources:
       DateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
       DateLocatorRegex: '.*"updatedAt":"(.*)".*'
 
-  sumoApp:
+  sumoGuardDutyApp:
     Type: Custom::App
-    Condition: install_app
+    Condition: install_guardduty_app
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -296,6 +308,27 @@ Resources:
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
 
+  sumoGuardDutyBenchmarkApp:
+    Type: Custom::App
+    Condition: install_guardduty_benchmark_app
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      Region: !Ref "AWS::Region"
+      AppName: "Amazon QuickStart - Amazon GuardDuty Benchmark"
+      AppId: "8e7efcb3-040a-4a92-9f8d-922fafb24afb"
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      AppSources:
+        gdbenchmark: !Sub "_sourceCategory=${HttpLogsSourceCategoryName}"
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
+
 Outputs:
 
   CloudWatchEventFunction:
@@ -304,5 +337,9 @@ Outputs:
     Value: !GetAtt CloudWatchEventFunction.Arn
   GuarddutyBenchmarkAppFolder:
     Description: "Folder Name"
-    Condition: install_app
-    Value: !GetAtt sumoApp.APP_FOLDER_NAME
+    Condition: install_guardduty_benchmark_app
+    Value: !GetAtt sumoGuardDutyBenchmarkApp.APP_FOLDER_NAME
+  GuarddutyAppFolder:
+    Description: "Folder Name"
+    Condition: install_guardduty_app
+    Value: !GetAtt sumoGuardDutyApp.APP_FOLDER_NAME
