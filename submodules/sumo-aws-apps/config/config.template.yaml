@@ -1,7 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: >
-  This template is used to install collection mechanism, app and AWS Resources required for Sumo Logic AWS Config app.
+Description: "Template to setup the AWS Config app with AWS and Sumo Logic resources for AWS Quick Start Solution."
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -40,6 +39,7 @@ Metadata:
           default: "AWS Quick Start configuration"
         Parameters:
           - QSS3BucketName
+          - QSS3BucketRegion
           - QSS3KeyPrefix
 
       - Label:
@@ -82,6 +82,8 @@ Metadata:
 
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
+      QSS3BucketRegion:
+        default: "Quick Start S3 bucket region"
       QSS3KeyPrefix:
         default: "Quick Start S3 key prefix"
 
@@ -107,15 +109,18 @@ Parameters:
     Type: String
     Description: "The Sumo Logic Access ID. Used for Sumo Logic API calls."
     AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access ID can not be empty."
   SumoAccessKey:
     Type: String
     Description: "The Sumo Logic Access Key. Used for Sumo Logic API calls."
     AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access Key can not be empty."
     NoEcho: true
   SumoOrganizationId:
     Description: "The Account Overview page displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources."
     Type: String
     AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
   RemoveSumoResourcesOnDeleteStack:
     AllowedValues:
       - true
@@ -127,7 +132,8 @@ Parameters:
 
   InstallApp:
     Type: String
-    Description: Install Sumo Logic App. Select Yes for different source category.
+    Description: "Yes -> To Install App in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
     Default: 'Yes'
     AllowedValues:
       - 'Yes'
@@ -185,6 +191,10 @@ Parameters:
     Default: "aws-quickstart"
     Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Type: "String"
+  QSS3BucketRegion:
+    Default: "us-east-1"
+    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
+    Type: String
   QSS3KeyPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
     ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
@@ -199,6 +209,7 @@ Parameters:
 
 Conditions:
   do_not_use_parent_stack: !Equals [ !Ref ParentStackName, "ParentStackName"]
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
   install_app: !Equals [!Ref InstallApp, 'Yes']
   create_sns_topic: !Equals [!Ref CreateSNSTopic, 'Yes']
@@ -242,7 +253,9 @@ Resources:
       Handler: main.handler
       Runtime: python3.7
       CodeUri:
-        Bucket: !Ref QSS3BucketName
+        Bucket: !Sub
+                - "${QSS3BucketName}-${S3Region}"
+                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
         Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
       MemorySize: 128
       Timeout: 900
@@ -420,7 +433,7 @@ Resources:
         - !ImportValue
           'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
-      AppName: "AWS Config"
+      AppName: "Amazon QuickStart - AWS Config"
       AppId: "61be4a8f-6702-4035-bc55-e56d149b181d"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       AppSources:
