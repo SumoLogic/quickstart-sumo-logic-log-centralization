@@ -1,39 +1,39 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: A CloudFormation template that creates a role for authenticating with Sumo’s AWS integrations.
+Description: "Template to setup the AWS WAF app with AWS and Sumo Logic resources for AWS Quick Start Solution."
 
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      -
-        Label:
+      - Label:
           default: "Sumo Logic Deployment Configuration"
         Parameters:
           - SumoDeployment
           - SumoAccessID
           - SumoAccessKey
-      -
-        Label:
-          default: "Sumo Logic Collection/Source Configuration"
-        Parameters:
-          - CollectorName
-          - SourceName
-          - SourceCategoryName
-          - PathExpression
-          - ExternalID
+          - SumoOrganizationId
           - RemoveSumoResourcesOnDeleteStack
-      -
-        Label:
-          default: "KinesisFirehose DeliveryStream Configuration"
+
+      - Label:
+          default: "App Details - Collector Configuration"
+        Parameters:
+          - InstallApp
+          - CollectorName
+
+      - Label:
+          default: "App Details - S3 Source Configuration"
+        Parameters:
+          - CreateS3Bucket
+          - LogsS3BucketName
+          - CreateS3Source
+          - S3BucketLogsPathExpression
+          - S3SourceName
+          - S3SourceCategoryName
+
+      - Label:
+          default: "Kinesis Firehose Delivery Stream Configuration"
         Parameters:
           - DeliveryStreamName
-          
-      -
-        Label:
-          default: "Kinesis Destination S3 Configuration"
-        Parameters:
-          - KinesisDestinationS3BucketName
-          - CreateKinesisDestinationS3Bucket
           - CompressionFormat
           - S3BackupMode
 
@@ -41,53 +41,62 @@ Metadata:
           default: "AWS Quick Start configuration"
         Parameters:
           - QSS3BucketName
+          - QSS3BucketRegion
           - QSS3KeyPrefix
+
+      - Label:
+          default: "Local Parameters. Do Not Edit the values."
+        Parameters:
+          - ParentStackName
 
     ParameterLabels:
       SumoDeployment:
-        default: "Deployment Name"
+        default: "Sumo Logic Deployment Name"
       SumoAccessID:
-        default: "Access ID"
+        default: "Sumo Logic Access ID"
       SumoAccessKey:
-        default: "Access Key"
+        default: "Sumo Logic Access Key"
+      SumoOrganizationId:
+        default: "Sumo Logic Organization Id"
+      RemoveSumoResourcesOnDeleteStack:
+        default: "Delete Sumo Logic Resources when stack is deleted"
+
+      InstallApp:
+        default: "Install Sumo Logic App"
       CollectorName:
         default: "Collector Name"
-      SourceName:
-        default: "Source Name"
-      SourceCategoryName:
-        default: "Source Category"
-      PathExpression:
-        default: "Path Expression"
-      
-      RemoveSumoResourcesOnDeleteStack:
-        default: "Remove Sumo Resources On Delete Stack"
-      ExternalID:
-        default: "IAM Role ExternalID"
-      KinesisDestinationS3BucketName:
-        default: "Target BucketName"
+
       CreateS3Bucket:
-        default: "Do you want to create a target S3 bucket?"
+        default: "Create AWS S3 Bucket"
+      LogsS3BucketName:
+        default: "AWS S3 Bucket Name"
+      CreateS3Source:
+        default: "Create Sumo Logic Amazon S3 Logs Source"
+      S3BucketLogsPathExpression:
+        default: "Path Expression for the logs"
+      S3SourceName:
+        default: "Sumo Logic Amazon S3 Logs Source Name"
+      S3SourceCategoryName:
+        default: "Sumo Logic Amazon S3 Logs Source Category Name"
+
       DeliveryStreamName:
-        default: "Name of the delivery stream."
+        default: "Amazon Kinesis Data Firehose delivery stream name"
+      CompressionFormat:
+        default: "Compression format"
+      S3BackupMode:
+        default: "Amazon S3 backup mode"
+
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
+      QSS3BucketRegion:
+        default: "Quick Start S3 bucket region"
       QSS3KeyPrefix:
         default: "Quick Start S3 key prefix"
-      
+
+      ParentStackName:
+        default: "If Any, Name of parent Stack"
+
 Parameters:
-  CollectorName:
-    Type: String
-    Default: WAFCollector
-  SourceName:
-    Type: String
-    Default: WAFEvents
-  SourceCategoryName:
-    Type: String
-    Description: Category metadata to use later for querying, e.g. prod/web/apache/access . This data is queried using the '_sourceCategory' key name.
-  SumoAccessID:
-    Type: String
-  SumoAccessKey:
-    Type: String
   SumoDeployment:
     Type: String
     AllowedValues:
@@ -98,45 +107,105 @@ Parameters:
       - jp
       - us2
       - us1
-    Description: "Enter au, ca, de, eu, jp, us2, or us1"
+      - in
+      - fed
+    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1."
+  SumoAccessID:
+    Type: String
+    Description: "The Sumo Logic Access ID. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access ID can not be empty."
+  SumoAccessKey:
+    Type: String
+    Description: "The Sumo Logic Access Key. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access Key can not be empty."
+    NoEcho: true
+  SumoOrganizationId:
+    Description: "The Account Overview page displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources."
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
   RemoveSumoResourcesOnDeleteStack:
     AllowedValues:
       - true
       - false
-    Default: false
-    Description: To delete collector, sources and app when stack is deleted, set this parameter to true. Default is false.
+    Default: true
+    Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to true. Default is true.
+                  Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
-  ExternalID:
+
+  InstallApp:
     Type: String
-    Description: An ID used in the trust policy to designate who can assume the role, formatted as deployment:accountId. Eg. us1:0000000000000131
-  KinesisDestinationS3BucketName:
+    Description: "Yes -> To Install Sumo Logic App in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  CollectorName:
     Type: String
-    Description: S3 access logs target buket name.
-  CreateKinesisDestinationS3Bucket:
+    Description: Change the collector name to be created else default name will be used.
+    Default: AWS-Waf-Collector
+
+  CreateS3Bucket:
     Type: String
-    Default: "no"
-    AllowedValues: ["yes", "no"]
-  PathExpression:
+    Description: "Yes - Create a new S3 bucket in AWS S3.
+                  No - Use an existing S3 bucket from AWS S3 which has WAF Logs."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  LogsS3BucketName:
+    Type: String
+    Description: "Existing Bucket Name - Provide value if the Flag is set to No.
+                  New Bucket Name - Provide a unique Bucket Name if the flag is set to Yes."
+  CreateS3Source:
+    Type: String
+    Description: "Yes - to create Sumo Logic Amazon S3 Log Source with provided bucket Name.
+                  No - to skip creation of the Sumo Logic Amazon S3 Log Source."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  S3BucketLogsPathExpression:
     Type: String
     Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
+    Default: "WAF_LOGS*/*"
+  S3SourceName:
+    Type: String
+    Description: Change the Sumo Logic Amazon S3 Source name to be created else default name will be used.
+    Default: AWS-Waf-Source
+  S3SourceCategoryName:
+    Type: String
+    Description: "Existing - Change to an existing Source Category from Sumo Logic if Amazon S3 Source is not created.
+                  New - Default will be used if Amazon S3 Source is Created."
+    Default: AWS/Waf/Logs
+
   DeliveryStreamName:
     Type: String
-    Description: "Name of the delivery stream."
-  
+    Description: "Amazon Kinesis Data Firehose (Kinesis Data Firehose) delivery stream Name"
   CompressionFormat:
     Type: String
+    Description: "The compression format. If no value is specified, the default is ZIP."
     Default: "ZIP"
-    AllowedValues: ["UNCOMPRESSED","GZIP","ZIP", "Snappy"]
+    AllowedValues: ["UNCOMPRESSED", "GZIP", "ZIP", "Snappy"]
   S3BackupMode:
     Type: String
+    Description: "The Amazon S3 backup mode."
     Default: "Disabled"
     AllowedValues: ["Disabled","Enabled"]
+
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Default: "aws-quickstart"
     Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Type: "String"
+  QSS3BucketRegion:
+    Default: "us-east-1"
+    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
+    Type: String
   QSS3KeyPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
     ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
@@ -144,171 +213,198 @@ Parameters:
     Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Type: "String"
 
+  ParentStackName:
+    Type: String
+    Default: "ParentStackName"
+    Description: Parent Stack Name. Do Not Edit the value.
+
 Conditions:
-  CreateBucket: !Equals [ !Ref CreateKinesisDestinationS3Bucket, "yes" ]
+  do_not_use_parent_stack: !Equals [ !Ref ParentStackName, "ParentStackName"]
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+
+  install_app: !Equals [!Ref InstallApp, 'Yes']
+  create_target_s3_bucket: !Equals [!Ref CreateS3Bucket, 'Yes']
+  install_s3_source: !Equals [!Ref CreateS3Source, 'Yes']
 
 Resources:
-  KinesisDestinationS3Bucket:
-    Type: AWS::S3::Bucket
-    Condition: CreateBucket
-    Properties:
-      BucketName: !Ref KinesisDestinationS3BucketName
-      NotificationConfiguration:
-        TopicConfigurations:
-          -
-            Event: s3:ObjectCreated:Put
-            Topic: !Ref sumoSNSTopic
 
-  KinesisFirehoseDeliveryStream:
-    Condition: CreateBucket
-    DependsOn:
-      - KinesisDestinationS3Bucket
-    Type: AWS::KinesisFirehose::DeliveryStream
-    Properties: 
-      DeliveryStreamName: !Ref DeliveryStreamName
-      DeliveryStreamType: "DirectPut"
-
-      ExtendedS3DestinationConfiguration: 
-        BucketARN: !Sub "arn:aws:s3:::${KinesisDestinationS3BucketName}"
-        RoleARN: !GetAtt KinesisS3Role.Arn
-        BufferingHints: 
-          IntervalInSeconds: 300
-          SizeInMBs: 5
-        CompressionFormat: !Ref CompressionFormat
-        S3BackupMode: !Ref S3BackupMode
-        EncryptionConfiguration: 
-          NoEncryptionConfig: "NoEncryption"
-
-
-  KinesisS3Role:
-    Condition: CreateBucket
+  SumoLogicHelperRole:
     Type: AWS::IAM::Role
+    Condition: do_not_use_parent_stack
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
-        - Effect: Allow
-          Principal:
-            Service: firehose.amazonaws.com
-          Action: sts:AssumeRole
-          Condition:
-            StringEquals:
-              sts:ExternalId: !Ref AWS::AccountId
-                
-      Path: "/"
-      Policies:
-      - PolicyName: KinesisS3RolePolicy
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
           - Effect: Allow
-            Action:
-              - s3:PutObject
-              - s3:GetObject
-              - s3:ListBucketMultipartUploads
-              - s3:AbortMultipartUpload
-              - s3:ListBucket
-              - s3:GetBucketLocation
-            Resource:
-              - !Sub 
-                - arn:aws:s3:::${S3bucketName}
-                - { S3bucketName: !Ref KinesisDestinationS3BucketName }
-              - !Sub
-                - arn:aws:s3:::${S3bucketName}/*
-                - { S3bucketName: !Ref KinesisDestinationS3BucketName  }  
-  SumoRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-        - Effect: Allow
-          Principal:
-            AWS: arn:aws:iam::926226587429:root
-          Action: sts:AssumeRole
-          Condition:
-            StringEquals:
-              sts:ExternalId:
-                Ref: ExternalID
-      Path: "/"
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
       Policies:
-      - PolicyName: SumoPolicy
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-          - Effect: Allow
-            Action:
-              - s3:GetObject
-              - s3:GetObjectVersion
-              - s3:ListBucketVersions
-              - s3:ListBucket
-            Resource:
-              - !Sub 
-                - arn:aws:s3:::${S3bucketName}
-                - { S3bucketName: !Ref KinesisDestinationS3BucketName }
-              - !Sub
-                - arn:aws:s3:::${S3bucketName}/*
-                - { S3bucketName: !Ref KinesisDestinationS3BucketName  }
+        - PolicyName: SumoPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
 
-  sumoSNSTopic:
-    Type: 'AWS::SNS::Topic'
-    Properties:
-      TopicName: !Sub "SumoSNSTopic-${AWS::StackName}"
-  
-  sumoSNSSubscription:
-    Type: 'AWS::SNS::Subscription'
-    Properties:
-      TopicArn: 
-        Ref: sumoSNSTopic
-      Endpoint: !GetAtt S3Source.SUMO_ENDPOINT
-      Protocol: https
-      DeliveryPolicy:
-       healthyRetryPolicy:
-         numRetries: 40
-         minDelayTarget: 10
-         maxDelayTarget: 300
-         numMinDelayRetries: 3
-         numMaxDelayRetries: 5
-         numNoDelayRetries: 0
-         backoffFunction: exponential
-  
-  sumoSNSpolicy:
-    Type: "AWS::SNS::TopicPolicy"
-    Properties:
-     PolicyDocument:
-       Id: SumoTopicPolicy
-       Statement:
-         -
-           Action: "sns:Publish"
-           Condition:
-             StringEquals:
-               aws:SourceAccount: !Ref "AWS::AccountId"
-             ArnLike:
-               aws:SourceArn: !Sub "arn:aws:s3:*:*:${KinesisDestinationS3BucketName}"
-           Effect: Allow
-           Principal:
-             AWS: "*"
-           Resource:
-             Ref: sumoSNSTopic
-     Topics:
-       -
-         Ref: sumoSNSTopic
-  
-  SumoAppUtils:
+  SumoLogicHelperFunction:
     Type: 'AWS::Serverless::Function'
+    DependsOn: SumoLogicHelperRole
+    Condition: do_not_use_parent_stack
     Properties:
       Handler: main.handler
       Runtime: python3.7
       CodeUri:
-        Bucket: !Ref QSS3BucketName
+        Bucket: !Sub
+          - "${QSS3BucketName}-${S3Region}"
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
         Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
       MemorySize: 128
-      Timeout: 300
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+          - SumoLogicHelperRole
+          - Arn
+
+  SumoRole:
+    Type: AWS::IAM::Role
+    Condition: do_not_use_parent_stack
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::926226587429:root
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Sub "${SumoDeployment}:${SumoOrganizationId}"
+      Path: "/"
+      Policies:
+        - PolicyName: SumoPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:ListBucketVersions
+                  - s3:ListBucket
+                Resource:
+                  "*"
+
+  SumoSNSTopic:
+    Condition: install_s3_source
+    Type: "AWS::SNS::Topic"
+    Properties:
+      TopicName: !Sub "SumoSNSTopic-${AWS::StackName}"
+
+  SumoSNSSubscription:
+    Condition: install_s3_source
+    Type: "AWS::SNS::Subscription"
+    Properties:
+      TopicArn:
+        Ref: SumoSNSTopic
+      Endpoint: !GetAtt SumoS3Source.SUMO_ENDPOINT
+      Protocol: https
+      DeliveryPolicy:
+        healthyRetryPolicy:
+          numRetries: 40
+          minDelayTarget: 10
+          maxDelayTarget: 300
+          numMinDelayRetries: 3
+          numMaxDelayRetries: 5
+          numNoDelayRetries: 0
+          backoffFunction: exponential
+
+  SumoSNSpolicy:
+    Condition: install_s3_source
+    Type: "AWS::SNS::TopicPolicy"
+    Properties:
+      PolicyDocument:
+        Id: SumoTopicPolicy
+        Statement:
+          - Action:
+              - sns:Publish
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref "AWS::AccountId"
+              ArnLike:
+                aws:SourceArn: !Sub "arn:aws:s3:::${LogsS3BucketName}"
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Resource:
+              - !Ref SumoSNSTopic
+      Topics:
+        - Ref: SumoSNSTopic
+
+  TargetS3Bucket:
+    Condition: create_target_s3_bucket
+    Type: AWS::S3::Bucket
+    DependsOn:
+      - SumoSNSpolicy
+    Properties:
+      BucketName: !Ref LogsS3BucketName
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Event: s3:ObjectCreated:Put
+            Topic: !Ref SumoSNSTopic
+
+  KinesisS3Role:
+    Condition: create_target_s3_bucket
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Ref AWS::AccountId
+      Path: "/"
+      Policies:
+        - PolicyName: KinesisS3RolePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:ListBucketMultipartUploads
+                  - s3:AbortMultipartUpload
+                  - s3:ListBucket
+                  - s3:GetBucketLocation
+                Resource:
+                  - !Sub
+                    - arn:aws:s3:::${S3bucketName}
+                    - { S3bucketName: !Ref LogsS3BucketName }
+                  - !Sub
+                    - arn:aws:s3:::${S3bucketName}/*
+                    - { S3bucketName: !Ref LogsS3BucketName  }
 
   SumoHostedCollector:
     Type: Custom::Collector
+    Condition: install_s3_source
     Properties:
-      ServiceToken: !GetAtt SumoAppUtils.Arn
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
       CollectorType: Hosted
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
@@ -317,33 +413,74 @@ Resources:
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
 
-  S3Source:
-    Type: Custom::S3Source
+  KinesisFirehoseDeliveryStream:
+    Condition: create_target_s3_bucket
+    DependsOn:
+      - TargetS3Bucket
+    Type: AWS::KinesisFirehose::DeliveryStream
     Properties:
-      ServiceToken: !GetAtt SumoAppUtils.Arn
+      DeliveryStreamName: !Ref DeliveryStreamName
+      DeliveryStreamType: "DirectPut"
+      ExtendedS3DestinationConfiguration:
+        BucketARN: !Sub "arn:aws:s3:::${LogsS3BucketName}"
+        Prefix: "WAF_LOGS"
+        ErrorOutputPrefix: "WAF_LOGS"
+        RoleARN: !GetAtt KinesisS3Role.Arn
+        BufferingHints:
+          IntervalInSeconds: 300
+          SizeInMBs: 5
+        CompressionFormat: !Ref CompressionFormat
+        S3BackupMode: !Ref S3BackupMode
+        EncryptionConfiguration:
+          NoEncryptionConfig: "NoEncryption"
+
+  SumoS3Source:
+    Type: Custom::AWSSource
+    Condition: install_s3_source
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      SourceType: AwsS3Bucket
       Region: !Ref "AWS::Region"
-      SourceName: !Ref SourceName
+      SourceName: !Ref S3SourceName
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-      SourceCategory: !Ref SourceCategoryName
+      SourceCategory: !Ref S3SourceCategoryName
       CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
-      TargetBucketName: !Ref KinesisDestinationS3BucketName
-      PathExpression: !Ref PathExpression
-      RoleArn: !GetAtt SumoRole.Arn
+      TargetBucketName: !Ref LogsS3BucketName
+      PathExpression: !Ref S3BucketLogsPathExpression
+      RoleArn: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoRole
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoSourceRoleARN'
 
-  SumoAWSWAFApp:
+  SumoApp:
     Type: Custom::App
+    Condition: install_app
     Properties:
-      ServiceToken: !GetAtt SumoAppUtils.Arn
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
-      AppName: "AWS WAF"
+      AppName: "Amazon QuickStart - AWS WAF"
       AppId: "87c2e6ca-a526-4745-af48-0c7225127b22"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       AppSources:
-        awsWAF: !Sub "_sourceCategory=${SourceCategoryName}"
+        awsWAF: !Sub "_sourceCategory=${S3SourceCategoryName}"
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
-       
