@@ -5,7 +5,7 @@ export AWS_PROFILE="personal"
 # App to test
 export AppTemplateName="cloudtrail"
 export AppName="cloudtrail"
-export InstallTypes=("onlypcicloudtrailapp")
+export InstallTypes=("onlycisfoundationapp")
 
 for InstallType in "${InstallTypes[@]}"
 do
@@ -17,24 +17,35 @@ do
     then
         export InstallCloudTrailApp="Yes"
         export InstallPCICloudTrailApp="Yes"
+        export InstallCISFoundationApp="Yes"
         export CreateCloudTrailBucket="Yes"
         export CreateCloudTrailLogSource="Yes"
     elif [[ "${InstallType}" == "onlycloudtrailapp" ]]
     then
         export InstallCloudTrailApp="Yes"
         export InstallPCICloudTrailApp="No"
+        export InstallCISFoundationApp="No"
         export CreateCloudTrailBucket="No"
         export CreateCloudTrailLogSource="No"
     elif [[ "${InstallType}" == "onlypcicloudtrailapp" ]]
     then
         export InstallCloudTrailApp="No"
         export InstallPCICloudTrailApp="Yes"
+        export InstallCISFoundationApp="No"
+        export CreateCloudTrailBucket="No"
+        export CreateCloudTrailLogSource="No"
+    elif [[ "${InstallType}" == "onlycisfoundationapp" ]]
+    then
+        export InstallCloudTrailApp="No"
+        export InstallPCICloudTrailApp="No"
+        export InstallCISFoundationApp="Yes"
         export CreateCloudTrailBucket="No"
         export CreateCloudTrailLogSource="No"
     elif [[ "${InstallType}" == "appexistingS3" ]]
     then
         export InstallCloudTrailApp="Yes"
         export InstallPCICloudTrailApp="Yes"
+        export InstallCISFoundationApp="Yes"
         export CreateCloudTrailBucket="No"
         export CreateCloudTrailLogSource="Yes"
         export CloudTrailLogsBucketName="lambda-all-randmomstring"
@@ -42,6 +53,7 @@ do
     then
         export InstallCloudTrailApp="No"
         export InstallPCICloudTrailApp="No"
+        export InstallCISFoundationApp="No"
         export CreateCloudTrailBucket="Yes"
         export CreateCloudTrailLogSource="Yes"
     else
@@ -73,7 +85,7 @@ do
     CloudTrailLogsSourceName="${CloudTrailLogsSourceName}" CloudTrailLogsSourceCategoryName="${CloudTrailLogsSourceCategoryName}" \
     CreateCloudTrailBucket="${CreateCloudTrailBucket}" CreateCloudTrailLogSource="${CreateCloudTrailLogSource}" \
     QSS3BucketName="${QSS3BucketName}" QSS3BucketRegion="${QSS3BucketRegion}" InstallCloudTrailApp="${InstallCloudTrailApp}" \
-    InstallPCICloudTrailApp="${InstallPCICloudTrailApp}"
+    InstallPCICloudTrailApp="${InstallPCICloudTrailApp}" InstallCISFoundationApp="${InstallCISFoundationApp}"
 
 done
 
