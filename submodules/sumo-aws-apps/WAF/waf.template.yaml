@@ -33,6 +33,7 @@ Metadata:
       - Label:
           default: "Kinesis Firehose Delivery Stream Configuration"
         Parameters:
+          - CreateDeliveryStream
           - DeliveryStreamName
           - CompressionFormat
           - S3BackupMode
@@ -79,6 +80,8 @@ Metadata:
       S3SourceCategoryName:
         default: "Sumo Logic Amazon S3 Logs Source Category Name"
 
+      CreateDeliveryStream:
+        default: "Create a Delivery Stream for the Bucket"
       DeliveryStreamName:
         default: "Amazon Kinesis Data Firehose delivery stream name"
       CompressionFormat:
@@ -182,6 +185,14 @@ Parameters:
                   New - Default will be used if Amazon S3 Source is Created."
     Default: AWS/Waf/Logs
 
+  CreateDeliveryStream:
+    Type: String
+    Description: "Yes - to create Kinesis Delivery Stream with provided bucket Name.
+                  No - to skip creation Kinesis Delivery Stream."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
   DeliveryStreamName:
     Type: String
     Description: "Amazon Kinesis Data Firehose (Kinesis Data Firehose) delivery stream Name"
@@ -225,6 +236,7 @@ Conditions:
   install_app: !Equals [!Ref InstallApp, 'Yes']
   create_target_s3_bucket: !Equals [!Ref CreateS3Bucket, 'Yes']
   install_s3_source: !Equals [!Ref CreateS3Source, 'Yes']
+  create_delivery_stream: !Equals [!Ref CreateDeliveryStream, 'Yes']
 
 Resources:
 
@@ -358,8 +370,43 @@ Resources:
           - Event: s3:ObjectCreated:Put
             Topic: !Ref SumoSNSTopic
 
-  KinesisS3Role:
+  SumoHostedCollector:
+    Type: Custom::Collector
+    Condition: install_s3_source
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      Region: !Ref "AWS::Region"
+      CollectorType: Hosted
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      CollectorName: !Ref CollectorName
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
+
+  WaitHandle:
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  CreateDeliveryStreamWaitHandle:
     Condition: create_target_s3_bucket
+    DependsOn: TargetS3Bucket
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  CreateDeliveryStreamWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [create_target_s3_bucket, !Ref CreateDeliveryStreamWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
+  KinesisS3Role:
+    Condition: create_delivery_stream
+    DependsOn: CreateDeliveryStreamWaitCondition
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -394,30 +441,10 @@ Resources:
                     - arn:aws:s3:::${S3bucketName}/*
                     - { S3bucketName: !Ref LogsS3BucketName  }
 
-  SumoHostedCollector:
-    Type: Custom::Collector
-    Condition: install_s3_source
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
-      Region: !Ref "AWS::Region"
-      CollectorType: Hosted
-      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-      CollectorName: !Ref CollectorName
-      SumoAccessID: !Ref SumoAccessID
-      SumoAccessKey: !Ref SumoAccessKey
-      SumoDeployment: !Ref SumoDeployment
-
   KinesisFirehoseDeliveryStream:
-    Condition: create_target_s3_bucket
-    DependsOn:
-      - TargetS3Bucket
+    Condition: create_delivery_stream
     Type: AWS::KinesisFirehose::DeliveryStream
+    DependsOn: CreateDeliveryStreamWaitCondition
     Properties:
       DeliveryStreamName: !Ref DeliveryStreamName
       DeliveryStreamType: "DirectPut"
