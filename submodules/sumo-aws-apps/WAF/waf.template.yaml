@@ -174,7 +174,7 @@ Parameters:
   S3BucketLogsPathExpression:
     Type: String
     Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
-    Default: "WAF_LOGS*/*"
+    Default: "WAF_LOGS/*"
   S3SourceName:
     Type: String
     Description: Change the Sumo Logic Amazon S3 Source name to be created else default name will be used.
@@ -450,8 +450,8 @@ Resources:
       DeliveryStreamType: "DirectPut"
       ExtendedS3DestinationConfiguration:
         BucketARN: !Sub "arn:aws:s3:::${LogsS3BucketName}"
-        Prefix: "WAF_LOGS"
-        ErrorOutputPrefix: "WAF_LOGS"
+        Prefix: "WAF_LOGS/"
+        ErrorOutputPrefix: "WAF_LOGS/"
         RoleARN: !GetAtt KinesisS3Role.Arn
         BufferingHints:
           IntervalInSeconds: 300

@@ -22,7 +22,7 @@ export FilterExpression="sumologiclambdahelper"
 
 # AWS Quick Start configuration
 export QSS3BucketName="sumologiclambdahelper"
-export QSS3BucketRegion="us-east-1"
+export QSS3BucketRegion=${AWS_REGION}
 
 if [[ "${InstallType}" == "all" ]]
 then

@@ -250,6 +250,8 @@ Resources:
                   - s3:GetBucketLocation
                   - s3:GetBucketLogging
                   - s3:PutBucketLogging
+                  - s3:PutBucketAcl
+                  - s3:GetBucketAcl
                 Resource: '*'
 
   SumoLogicHelperFunction:
@@ -443,7 +445,7 @@ Resources:
       AWSResource: s3
       BucketName: !Ref LogsS3BucketName
       Filter: !Ref FilterExpression
-      BucketPrefix: !Sub "S3-AUDIT-LOGS"
+      BucketPrefix: !Sub "S3-AUDIT-LOGS/"
 
 Outputs:
   SumoRoleArn:

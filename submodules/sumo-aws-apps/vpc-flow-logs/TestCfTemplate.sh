@@ -22,7 +22,7 @@ export FilterExpression="'VpcId': 'vpc-148e3a6e'|'VpcId': 'vpc-09b7ffdf2115d2aa6
 
 # AWS Quick Start configuration
 export QSS3BucketName="sumologiclambdahelper"
-export QSS3BucketRegion="us-east-1"
+export QSS3BucketRegion=${AWS_REGION}
 
 if [[ "${InstallType}" == "all" ]]
 then
