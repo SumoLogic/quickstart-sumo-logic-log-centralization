@@ -34,6 +34,12 @@ Metadata:
           - ExcludeRuleRegex
 
       - Label:
+          default: "Auto Enable VPC Flow logs for VPC Resources"
+          Parameters:
+            - AutoEnableVpcFlowLogs
+            - FilterExpression
+
+      - Label:
           default: "AWS Quick Start configuration"
         Parameters:
           - QSS3BucketName
@@ -80,6 +86,11 @@ Metadata:
         default: "S3 Logs processing rule name"
       ExcludeRuleRegex:
         default: "Regex to filter logs"
+
+      AutoEnableVpcFlowLogs:
+        default: "Enable VPC Flow logs for Existing Resources"
+      FilterExpression:
+        default: "Provide Filter Regular Expression"
 
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
@@ -193,6 +204,19 @@ Parameters:
     Description: "Enter a regex to match the log format to filter the logs."
     Default: version account-id interface-id srcaddr dstaddr srcport dstport protocol packets bytes start end action log-status
 
+  AutoEnableVpcFlowLogs:
+    Type: String
+    Description: "Yes - to enable VPC Flow logs for existing resources in the region.
+                  No - to skip VPC Flow logs for existing buckets."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  FilterExpression:
+    Type: String
+    Default: ""
+    Description: "Empty means all resources. Provide regular expression for matching aws resources. For eg;- 'VpcId': 't1.micro.*?'|'NetworkInterfaceId': 'Test.*?']|'SubnetId': 'prod.*?'|test|prod'"
+
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
@@ -224,6 +248,8 @@ Conditions:
   create_target_s3_bucket: !Equals [!Ref CreateS3Bucket, 'Yes']
   install_s3_source: !Equals [!Ref CreateS3Source, 'Yes']
 
+  auto_enable_vpc_logging: !Equals [!Ref AutoEnableVpcFlowLogs, 'Yes']
+
 Resources:
   SumoLogicHelperRole:
     Type: AWS::IAM::Role
@@ -251,6 +277,14 @@ Resources:
                   - cloudtrail:DeleteTrail
                   - cloudtrail:UpdateTrail
                   - cloudtrail:StartLogging
+                  - ec2:Describe*
+                  - ec2:DeleteFlowLogs
+                  - ec2:CreateFlowLogs
+                  - ec2:DescribeFlowLogs
+                  - logs:CreateLogDelivery
+                  - logs:DeleteLogDelivery
+                  - s3:GetBucketPolicy
+                  - s3:PutBucketPolicy
                 Resource: '*'
 
   SumoLogicHelperFunction:
@@ -455,6 +489,24 @@ Resources:
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
+
+  EnableVpcFlowLogsResources:
+    Type: Custom::EnableS3LogsResources
+    Condition: auto_enable_vpc_logging
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      AWSResource: vpc
+      BucketName: !Ref LogsS3BucketName
+      Filter: !Ref FilterExpression
+      BucketPrefix: !Sub "VPC-FLOW-LOGS"
+      AccountID: !Ref "AWS::AccountId"
 
 Outputs:
   SumoRoleArn:
