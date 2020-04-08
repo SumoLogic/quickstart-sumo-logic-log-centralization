@@ -34,11 +34,6 @@ Metadata:
           - QSS3BucketRegion
           - QSS3KeyPrefix
 
-      - Label:
-          default: "Local Parameters. Do Not Edit the values."
-        Parameters:
-          - ParentStackName
-
     ParameterLabels:
       SumoDeployment:
         default: "Sumo Logic Deployment Name"
@@ -69,9 +64,6 @@ Metadata:
         default: "Quick Start S3 bucket region"
       QSS3KeyPrefix:
         default: "Quick Start S3 key prefix"
-
-      ParentStackName:
-        default: "If Any, Name of parent Stack"
 
 Parameters:
   SumoDeployment:
