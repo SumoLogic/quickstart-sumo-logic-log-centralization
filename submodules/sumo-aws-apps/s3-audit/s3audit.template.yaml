@@ -31,12 +31,6 @@ Metadata:
           - S3AuditSourceCategoryName
 
       - Label:
-          default: "Auto Enable S3 Logging for Existing S3 Buckets"
-          Parameters:
-            - AutoEnableS3Logging
-            - FilterExpression
-
-      - Label:
           default: "AWS Quick Start configuration"
         Parameters:
           - QSS3BucketName
@@ -78,10 +72,6 @@ Metadata:
       S3AuditSourceCategoryName:
         default: "Sumo Logic Amazon S3 Audit Logs Source Category Name"
 
-      AutoEnableS3Logging:
-        default: "Enable S3 Logging for Existing S3 Resources"
-      FilterExpression:
-        default: "Provide Filter Regular Expression"
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
       QSS3BucketRegion:
@@ -178,19 +168,6 @@ Parameters:
                   New - Default will be used if Amazon S3 Source is Created."
     Default: AWS/S3/Audit/Logs
 
-  AutoEnableS3Logging:
-    Type: String
-    Description: "Yes - to enable S3 logging for existing S3 buckets in the region. Buckets with already enable logging will not be affected.
-                  No - to skip s3 logging for existing buckets."
-    Default: 'Yes'
-    AllowedValues:
-      - 'Yes'
-      - 'No'
-  FilterExpression:
-    Type: String
-    Default: ""
-    Description: "Empty means all resources. Provide regular expression for matching AWS Bucket Names. For eg;- 'Test|Prod|Dev'"
-
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
@@ -220,8 +197,6 @@ Conditions:
   install_app: !Equals [!Ref InstallApp, 'Yes']
   create_target_s3_bucket: !Equals [!Ref CreateS3Bucket, 'Yes']
   install_s3_audit_source: !Equals [!Ref CreateS3AuditSource, 'Yes']
-
-  auto_enable_s3_logging: !Equals [!Ref AutoEnableS3Logging, 'Yes']
 
   create_sns_topic: !And
     - !Condition do_not_use_parent_stack
@@ -436,23 +411,6 @@ Resources:
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
-
-  EnableS3LogsResources:
-    Type: Custom::EnableS3LogsResources
-    Condition: auto_enable_s3_logging
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
-      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-      AWSResource: s3
-      BucketName: !Ref LogsS3BucketName
-      Filter: !Ref FilterExpression
-      BucketPrefix: !Sub "S3-AUDIT-LOGS/"
 
 Outputs:
   SumoRoleArn:

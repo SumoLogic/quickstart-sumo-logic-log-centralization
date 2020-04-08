@@ -67,6 +67,56 @@ Metadata:
         - Section5bElasticLoadBalancerSourceCategory
 
     - Label:
+        default: "6. Sumo Logic Amazon S3 Audit app Configurations"
+      Parameters:
+        - Section6aInstallS3AuditApp
+    - Label:
+        default: "6.1 AWS S3 Bucket Configuration"
+      Parameters:
+        - Section6bS3AuditCreateBucket
+        - Section6cS3AuditLogsBucketName
+    - Label:
+        default: "6.2 Sumo Logic VPC S3 Source Configuration"
+      Parameters:
+        - Section6dS3AuditCreateS3Source
+        - Section6eS3AuditBucketPathExpression
+        - Section6fS3AuditLogsSourceCategoryName
+
+    - Label:
+        default: "7. Sumo Logic AWS Security Hub app Configurations"
+      Parameters:
+        - Section7aInstallSecurityHubAuditApp
+        - Section7bEnableSecurityHub
+    - Label:
+        default: "7.1 AWS S3 Bucket Configuration"
+      Parameters:
+        - Section7cSecurityHubCreateBucket
+        - Section7dSecurityHubLogsBucketName
+    - Label:
+        default: "7.2 Sumo Logic Security Hub S3 Source Configuration"
+      Parameters:
+        - Section7eSecurityHubCreateS3Source
+        - Section7fSecurityHubBucketPathExpression
+        - Section7gSecurityHubLogsSourceCategoryName
+
+    - Label:
+        default: "8. Sumo Logic AWS WAF app Configurations"
+      Parameters:
+        - Section8aInstallWafApp
+        - Section8bCreateDeliveryStream
+    - Label:
+        default: "8.1 AWS S3 Bucket Configuration"
+      Parameters:
+        - Section8cWafCreateBucket
+        - Section8dWafLogsBucketName
+    - Label:
+        default: "8.2 Sumo Logic AWS WAF S3 Source Configuration"
+      Parameters:
+        - Section8eWafCreateS3Source
+        - Section8fWafBucketPathExpression
+        - Section8gWafLogsSourceCategoryName
+
+    - Label:
         default: "AWS Quick Start configuration"
       Parameters:
         - QSS3BucketName
@@ -134,6 +184,52 @@ Metadata:
       default: "Install Sumo Logic Threat Intel for AWS App"
     Section5bElasticLoadBalancerSourceCategory:
       default: "Sumo Logic Amazon Elastic Load Balancer Classic Category Name"
+
+    # S3 Audit App Parameters
+    Section6aInstallS3AuditApp:
+      default: "Install Sumo Logic Amazon S3 Audit app"
+    Section6bS3AuditCreateBucket:
+      default: "Create AWS S3 Bucket"
+    Section6cS3AuditLogsBucketName:
+      default: "AWS S3 Bucket Name"
+    Section6dS3AuditCreateS3Source:
+      default: "Create Sumo Logic Amazon S3 Audit Logs Source"
+    Section6eS3AuditBucketPathExpression:
+      default: "Path Expression for the logs"
+    Section6fS3AuditLogsSourceCategoryName:
+      default: "Sumo Logic Amazon S3 Audit Logs Source Category Name"
+
+    # Security Hub App Parameters
+    Section7aInstallSecurityHubAuditApp:
+      default: "Install Sumo Logic AWS Security Hub app"
+    Section7bEnableSecurityHub:
+      default: "Enable Security Hub for the Region"
+    Section7cSecurityHubCreateBucket:
+      default: "Create AWS S3 Bucket"
+    Section7dSecurityHubLogsBucketName:
+      default: "AWS S3 Bucket Name"
+    Section7eSecurityHubCreateS3Source:
+      default: "Create Sumo Logic Amazon S3 Logs Source"
+    Section7fSecurityHubBucketPathExpression:
+      default: "Path Expression for the logs"
+    Section7gSecurityHubLogsSourceCategoryName:
+      default: "Sumo Logic Amazon S3 Logs Source Category Name"
+
+    # WAF App Parameters
+    Section8aInstallWafApp:
+      default: "Install Sumo Logic AWS WAF app"
+    Section8bCreateDeliveryStream:
+      default: "Create a Delivery Stream for the Bucket"
+    Section8cWafCreateBucket:
+      default: "Create AWS S3 Bucket"
+    Section8dWafLogsBucketName:
+      default: "AWS S3 Bucket Name"
+    Section8eWafCreateS3Source:
+      default: "Create Sumo Logic Amazon S3 Logs Source"
+    Section8fWafBucketPathExpression:
+      default: "Path Expression for the logs"
+    Section8gWafLogsSourceCategoryName:
+      default: "Sumo Logic Amazon S3 Logs Source Category Name"
 
     QSS3BucketName:
       default: "Quick Start S3 bucket name"
@@ -325,6 +421,133 @@ Parameters:
     Description: "Provide an existing Source Category from Sumo Logic with Elastic Load Balancer Classic Logs."
     Default: ""
 
+  # S3 Audit Apps Parameters
+  Section6aInstallS3AuditApp:
+    Type: String
+    Description: "Yes -> Install Sumo Logic Amazon S3 Audit App in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section6bS3AuditCreateBucket:
+    Type: String
+    Description: "Yes - Create a new bucket in AWS S3.
+                  No - Use an existing bucket from AWS S3 which has S3 Audit Logs."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section6cS3AuditLogsBucketName:
+    Type: String
+    Description: "Required when Flag = No. Provide an Existing bucket name which has S3 Audit logs."
+    Default: ""
+  Section6dS3AuditCreateS3Source:
+    Type: String
+    Description: "Yes - Create Sumo Logic S3 Audit Log Source with provided bucket Name.
+                  No - Skip creation of the Sumo Logic S3 Audit Log Source."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section6eS3AuditBucketPathExpression:
+    Type: String
+    Description: "Path expression to match the folder structure for S3 Audit logs. For Eg:- S3-AUDIT-LOGS/*"
+    Default: "S3-AUDIT-LOGS/*"
+  Section6fS3AuditLogsSourceCategoryName:
+    Type: String
+    Description: "Required when Flag = No. Provide an existing source category name from Sumo Logic collecting S3 Audit Logs. Used for app installation."
+    Default: ""
+
+  # Security Hub App Parameters
+  Section7aInstallSecurityHubAuditApp:
+    Type: String
+    Description: "Yes -> Install Sumo Logic AWS Security Hub App in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section7bEnableSecurityHub:
+    Type: String
+    Description: "Select Yes if security hub needs to be enabled for the region else no."
+    Default: "No"
+    AllowedValues: ["Yes", "No"]
+  Section7cSecurityHubCreateBucket:
+    Type: String
+    Description: "Yes - Create a new bucket in AWS S3.
+                  No - Use an existing bucket from AWS S3 which has Security Hub Logs."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section7dSecurityHubLogsBucketName:
+    Type: String
+    Description: "Required when Flag = No. Provide an Existing bucket name which has Security Hub logs."
+    Default: ""
+  Section7eSecurityHubCreateS3Source:
+    Type: String
+    Description: "Yes - Create Sumo Logic S3 Log Source with provided bucket Name.
+                  No - Skip creation of the Sumo Logic S3 Log Source."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section7fSecurityHubBucketPathExpression:
+    Type: String
+    Description: "Path expression to match the folder structure for Security Hub logs. For Eg:- *securityhub*/*"
+    Default: "*securityhub*/*"
+  Section7gSecurityHubLogsSourceCategoryName:
+    Type: String
+    Description: "Required when Flag = No. Provide an existing source category name from Sumo Logic collecting Security Hub Logs. Used for app installation."
+    Default: ""
+
+  # WAF App Parameters
+  Section8aInstallWafApp:
+    Type: String
+    Description: "Yes -> Install Sumo Logic AWS WAF App in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section8bCreateDeliveryStream:
+    Type: String
+    Description: "Yes - to create Kinesis Delivery Stream with provided bucket Name.
+                  No - to skip creation Kinesis Delivery Stream."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section8cWafCreateBucket:
+    Type: String
+    Description: "Yes - Create a new bucket in AWS S3.
+                  No - Use an existing bucket from AWS S3 which has AWS WAF Logs."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section8dWafLogsBucketName:
+    Type: String
+    Description: "Required when Flag = No. Provide an Existing bucket name which has AWS WAF logs."
+    Default: ""
+  Section8eWafCreateS3Source:
+    Type: String
+    Description: "Yes - Create Sumo Logic S3 Log Source with provided bucket Name.
+                  No - Skip creation of the Sumo Logic S3 Log Source."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section8fWafBucketPathExpression:
+    Type: String
+    Description: "Path expression to match the folder structure for WAF logs. For Eg:- WAF_LOGS/*"
+    Default: "WAF_LOGS/*"
+  Section8gWafLogsSourceCategoryName:
+    Type: String
+    Description: "Required when Flag = No. Provide an existing source category name from Sumo Logic collecting WAF Logs. Used for app installation."
+    Default: ""
+
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
@@ -364,14 +587,37 @@ Conditions:
   # Conditions for Threat Intel App
   install_threat_intel_app: !Equals [ !Ref Section5aInstallThreatIntelApp, 'Yes' ]
 
+  # Conditions for S3 Audit App
+  install_s3_audit_app: !Equals [ !Ref Section6aInstallS3AuditApp, 'Yes' ]
+  create_s3_audit_bucket: !Equals [ !Ref Section6bS3AuditCreateBucket, 'Yes' ]
+  create_s3_audit_source: !Equals [ !Ref Section6dS3AuditCreateS3Source, 'Yes' ]
+
+  # Conditions for Security Hub App
+  install_security_hub_app: !Equals [ !Ref Section7aInstallSecurityHubAuditApp, 'Yes' ]
+  enable_security_hub: !Equals [ !Ref Section7bEnableSecurityHub, 'Yes' ]
+  create_security_hub_bucket: !Equals [ !Ref Section7cSecurityHubCreateBucket, 'Yes' ]
+  create_security_hub_source: !Equals [ !Ref Section7eSecurityHubCreateS3Source, 'Yes' ]
+
+  # Conditions for WAF App
+  install_waf_app: !Equals [ !Ref Section8aInstallWafApp, 'Yes' ]
+  enable_waf: !Equals [ !Ref Section8bCreateDeliveryStream, 'Yes' ]
+  create_waf_bucket: !Equals [ !Ref Section8cWafCreateBucket, 'Yes' ]
+  create_waf_source: !Equals [ !Ref Section8eWafCreateS3Source, 'Yes' ]
+
   # Conditions for Common
   create_common_s3_bucket: !Or
     - !Condition create_cloudtrail_bucket
     - !Condition create_vpc_bucket
+    - !Condition create_s3_audit_bucket
+    - !Condition create_security_hub_bucket
+    - !Condition create_waf_bucket
   create_common_collector: !Or
     - !Condition create_cloudtrail_source
     - !Condition create_guardduty_source
     - !Condition create_vpc_source
+    - !Condition create_s3_audit_source
+    - !Condition create_security_hub_source
+    - !Condition create_waf_source
   create_cloudtrail: !Condition create_cloudtrail_bucket
 
   # Conditions for calling child stack of each app. If any resource create condition is true.
@@ -389,6 +635,17 @@ Conditions:
     - !Condition install_pci_vpc_app
     - !Condition create_vpc_source
   call_threat_intel_stack: !Condition install_threat_intel_app
+  call_s3_audit_stack: !Or
+    - !Condition install_s3_audit_app
+    - !Condition create_s3_audit_source
+  call_security_hub_stack: !Or
+    - !Condition install_security_hub_app
+    - !Condition enable_security_hub
+    - !Condition create_security_hub_source
+  call_waf_stack: !Or
+    - !Condition install_waf_app
+    - !Condition enable_waf
+    - !Condition create_waf_source
 
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
@@ -522,9 +779,6 @@ Resources:
         S3BucketLogsPathExpression: !If [create_vpc_bucket, !Sub "VPC-FLOW-LOGS/*", !Ref Section4fVpcBucketPathExpression]
         S3SourceName: !Sub "aws-quickstart-vpc-${AWS::Region}"
         S3SourceCategoryName: !If [create_vpc_source, "aws/quickstart/vpc/logs", !Ref Section4gVpcLogsSourceCategoryName]
-        # TODO
-        AutoEnableVpcFlowLogs: "No"
-        FilterExpression: ""
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
@@ -559,6 +813,132 @@ Resources:
         CloudTrailSourceCategory: !If [create_cloudtrail_source, "aws/quickstart/cloudtrail/logs", !Ref Section2hCloudTrailLogsSourceCategoryName]
         VPCFlowLogsSourceCategory: !If [create_vpc_source, "aws/quickstart/vpc/logs", !Ref Section4gVpcLogsSourceCategoryName]
         ElasticLoadBalancerSourceCategory: !Ref Section5bElasticLoadBalancerSourceCategory
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        ParentStackName: !GetAtt CreateCommonResources.Outputs.StackName
+
+  sumoS3AuditStackWaitHandle:
+    Condition: call_threat_intel_stack
+    DependsOn: sumoThreatIntelAppsStack
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  sumoS3AuditStackWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [call_threat_intel_stack, !Ref sumoS3AuditStackWaitHandle, !Ref WaitHandle]
+      Timeout: "5"
+      Count: 0
+
+  sumoS3AuditAppsStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: call_s3_audit_stack
+    DependsOn: sumoS3AuditStackWaitCondition
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/sumo-aws-apps/s3-audit/s3audit.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        SumoDeployment: !Ref Section1aSumoLogicDeployment
+        SumoAccessID: !Ref Section1bSumoLogicAccessID
+        SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        SumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
+        RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        InstallApp: !Ref Section6aInstallS3AuditApp
+        CollectorName: !Sub "aws-quickstart-collector"
+        CreateS3Bucket: "No"
+        LogsS3BucketName: !If [create_s3_audit_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section6cS3AuditLogsBucketName]
+        CreateS3AuditSource: !If [create_s3_audit_source, "Yes", "No"]
+        S3BucketLogsPathExpression: !If [create_s3_audit_bucket, "S3-AUDIT-LOGS/*", !Ref Section6eS3AuditBucketPathExpression]
+        S3AuditSourceName: !Sub "aws-quickstart-s3-audit-${AWS::Region}"
+        S3AuditSourceCategoryName: !If [create_s3_audit_source, "aws/quickstart/s3/audit/logs", !Ref Section6fS3AuditLogsSourceCategoryName]
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        ParentStackName: !GetAtt CreateCommonResources.Outputs.StackName
+
+  sumoSecurityHubStackWaitHandle:
+    Condition: call_s3_audit_stack
+    DependsOn: sumoS3AuditAppsStack
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  sumoSecurityHubStackWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [call_s3_audit_stack, !Ref sumoSecurityHubStackWaitHandle, !Ref WaitHandle]
+      Timeout: "5"
+      Count: 0
+
+  sumoSecurityHubAppsStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: call_security_hub_stack
+    DependsOn: sumoSecurityHubStackWaitCondition
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/sumo-aws-apps/security-hub/securityhub.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        SumoDeployment: !Ref Section1aSumoLogicDeployment
+        SumoAccessID: !Ref Section1bSumoLogicAccessID
+        SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        SumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
+        RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        InstallApp: !Ref Section7aInstallSecurityHubAuditApp
+        CollectorName: !Sub "aws-quickstart-collector"
+        CreateS3Bucket: "No"
+        LogsS3BucketName: !If [create_security_hub_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section7dSecurityHubLogsBucketName]
+        CreateS3Source: !If [create_security_hub_source, "Yes", "No"]
+        S3BucketLogsPathExpression: !If [create_security_hub_bucket, "*securityhub*/*", !Ref Section7fSecurityHubBucketPathExpression]
+        S3SourceName: !Sub "aws-quickstart-securityhub-${AWS::Region}"
+        S3SourceCategoryName: !If [create_security_hub_source, "aws/quickstart/securityhub/logs", !Ref Section7gSecurityHubLogsSourceCategoryName]
+        EnableSecurityHub: !If [enable_security_hub, "Yes", "No"]
+        ConnectionName: !Sub "SecurityHubConnection${AWS::Region}-${AWS::AccountId}"
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        ParentStackName: !GetAtt CreateCommonResources.Outputs.StackName
+
+  sumoWafStackWaitHandle:
+    Condition: call_security_hub_stack
+    DependsOn: sumoSecurityHubAppsStack
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  sumoWafStackWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [call_security_hub_stack, !Ref sumoWafStackWaitHandle, !Ref WaitHandle]
+      Timeout: "5"
+      Count: 0
+
+  sumoWafAppsStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: call_waf_stack
+    DependsOn: sumoWafStackWaitCondition
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/sumo-aws-apps/WAF/waf.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        SumoDeployment: !Ref Section1aSumoLogicDeployment
+        SumoAccessID: !Ref Section1bSumoLogicAccessID
+        SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        SumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
+        RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        InstallApp: !Ref Section8aInstallWafApp
+        CollectorName: !Sub "aws-quickstart-collector"
+        CreateS3Bucket: "No"
+        LogsS3BucketName: !If [create_waf_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section8dWafLogsBucketName]
+        CreateS3Source: !If [create_waf_source, "Yes", "No"]
+        S3BucketLogsPathExpression: !If [create_waf_bucket, "WAF_LOGS/*", !Ref Section8fWafBucketPathExpression]
+        S3SourceName: !Sub "aws-quickstart-waf-${AWS::Region}"
+        S3SourceCategoryName: !If [create_waf_source, "aws/quickstart/waf/logs", !Ref Section8gWafLogsSourceCategoryName]
+        CreateDeliveryStream: !If [enable_waf, "Yes", "No"]
+        DeliveryStreamName: !Sub "QuickStartDeliveryStream${AWS::Region}"
+        CompressionFormat: "ZIP"
+        S3BackupMode: "Disabled"
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix

@@ -63,7 +63,7 @@ aws cloudformation deploy --profile ${AWS_PROFILE} --template-file ./s3audit.tem
 RemoveSumoResourcesOnDeleteStack="${RemoveSumoResourcesOnDeleteStack}" \
 QSS3BucketName="${QSS3BucketName}" InstallApp="${InstallApp}" CollectorName="${CollectorName}" \
 QSS3BucketRegion="${QSS3BucketRegion}" LogsS3BucketName="${LogsS3BucketName}" CreateS3AuditSource="${CreateS3AuditSource}" \
-CreateS3Bucket="${CreateS3Bucket}" SumoOrganizationId="${SumoOrganizationId}" FilterExpression="${FilterExpression}" AutoEnableS3Logging="${AutoEnableS3Logging}"
+CreateS3Bucket="${CreateS3Bucket}" SumoOrganizationId="${SumoOrganizationId}"
 
 
 

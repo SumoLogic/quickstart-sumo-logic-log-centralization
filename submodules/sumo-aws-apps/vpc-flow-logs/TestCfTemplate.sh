@@ -18,8 +18,6 @@ export CollectorName="AWS-Sourabh-Collector-${AppName}-${InstallType}"
 
 export LogsS3BucketName="vpc-flow-logs-${AppName}-${InstallType}"
 
-export FilterExpression="'VpcId': 'vpc-148e3a6e'|'VpcId': 'vpc-09b7ffdf2115d2aa6'"
-
 # AWS Quick Start configuration
 export QSS3BucketName="sumologiclambdahelper"
 export QSS3BucketRegion=${AWS_REGION}
@@ -30,28 +28,24 @@ then
     export InstallPCIVpcApp="Yes"
     export CreateS3Bucket="Yes"
     export CreateS3Source="Yes"
-    export AutoEnableVpcFlowLogs="Yes"
 elif [[ "${InstallType}" == "onlyvpcapp" ]]
 then
     export InstallVpcApp="Yes"
     export InstallPCIVpcApp="No"
     export CreateS3Bucket="No"
     export CreateS3Source="No"
-    export AutoEnableVpcFlowLogs="No"
 elif [[ "${InstallType}" == "onlypcivpcapp" ]]
 then
     export InstallVpcApp="No"
     export InstallPCIVpcApp="Yes"
     export CreateS3Bucket="No"
     export CreateS3Source="No"
-    export AutoEnableVpcFlowLogs="No"
 elif [[ "${InstallType}" == "sourcewithoutbucket" ]]
 then
     export InstallVpcApp="Yes"
     export InstallPCIVpcApp="Yes"
     export CreateS3Bucket="No"
     export CreateS3Source="Yes"
-    export AutoEnableVpcFlowLogs="No"
     export LogsS3BucketName="sumologiclambdahelper-us-east-1"
 elif [[ "${InstallType}" == "enablevpcasdas" ]]
 then
@@ -59,7 +53,6 @@ then
     export InstallPCIVpcApp="No"
     export CreateS3Bucket="No"
     export CreateS3Source="No"
-    export AutoEnableVpcFlowLogs="Yes"
     export LogsS3BucketName="sumologiclambdahelper-us-east-1"
 else
     echo "No Choice"
@@ -74,5 +67,4 @@ aws cloudformation deploy --profile ${AWS_PROFILE} --template-file ./vpcflowlogs
 RemoveSumoResourcesOnDeleteStack="${RemoveSumoResourcesOnDeleteStack}" \
 QSS3BucketName="${QSS3BucketName}" InstallVpcApp="${InstallVpcApp}" CollectorName="${CollectorName}" \
 QSS3BucketRegion="${QSS3BucketRegion}" LogsS3BucketName="${LogsS3BucketName}" CreateS3Source="${CreateS3Source}" \
-CreateS3Bucket="${CreateS3Bucket}" InstallPCIVpcApp="${InstallPCIVpcApp}" SumoOrganizationId="${SumoOrganizationId}" \
-AutoEnableVpcFlowLogs="${AutoEnableVpcFlowLogs}" FilterExpression="${FilterExpression}"
+CreateS3Bucket="${CreateS3Bucket}" InstallPCIVpcApp="${InstallPCIVpcApp}" SumoOrganizationId="${SumoOrganizationId}"
