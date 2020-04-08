@@ -214,8 +214,8 @@ Resources:
       Runtime: python3.7
       CodeUri:
         Bucket: !Sub
-                - "${QSS3BucketName}-${S3Region}"
-                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          - "${S3Bucket}"
+          - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
         Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
       MemorySize: 128
       Timeout: 900
@@ -230,8 +230,8 @@ Resources:
     Properties:
       CodeUri:
         Bucket: !Sub
-                - "${QSS3BucketName}-${S3Region}"
-                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          - "${S3Bucket}"
+          - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
         Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/guardduty/cloudwatchevents.zip"
       Handler: cloudwatchevents.handler
       Runtime: nodejs10.x
