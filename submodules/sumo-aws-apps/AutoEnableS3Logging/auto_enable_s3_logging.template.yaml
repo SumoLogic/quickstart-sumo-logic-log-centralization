@@ -18,6 +18,15 @@ Parameters:
       - 'S3'
       - 'VPC'
 
+  ExistingResource:
+    Type: String
+    Description: "Yes - Enable Logging for existing resources.
+                  No - Skip Existing resources."
+    Default: "Yes"
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+
   BucketName:
     Type: String
     Description: "Provide an bucket name where you need to send logs."
@@ -25,8 +34,9 @@ Parameters:
 
   BucketPrefix:
     Type: String
-    Description: "Provide an bucket prefix."
-    AllowedPattern: ".+"
+    Description: "Provide an bucket prefix. It Should have / in the end."
+    AllowedPattern: ".*\\/$"
+    ConstraintDescription: "Bucket Prefix Should have / in the end."
 
   FilterExpression:
     Type: String
@@ -53,6 +63,8 @@ Parameters:
 Conditions:
   enable_s3_buckets_logging: !Equals [!Ref EnableLogging, 'S3']
   enable_vpc_flow_logs_logging: !Equals [!Ref EnableLogging, 'VPC']
+
+  enable_existing_resources: !Equals [!Ref ExistingResource, 'Yes']
 
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
@@ -100,8 +112,8 @@ Resources:
     Properties:
       Code:
         S3Bucket: !Sub
-          - "${QSS3BucketName}-${S3Region}"
-          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          - "${S3Bucket}"
+          - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
         S3Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
       Handler: "awsresource.enable_s3_logs"
       Runtime: python3.7
@@ -177,6 +189,37 @@ Resources:
       Targets:
         - Arn: !GetAtt AwsS3LogsResourcesLambda.Arn
           Id: Main
+
+  SumoLogicHelperFunction:
+    Type: 'AWS::Serverless::Function'
+    DependsOn: SumoLambdaRole
+    Condition: enable_existing_resources
+    Properties:
+      Handler: main.handler
+      Runtime: python3.7
+      CodeUri:
+        Bucket: !Sub
+          - "${S3Bucket}"
+          - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+        Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
+      MemorySize: 128
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+          - SumoLambdaRole
+          - Arn
+
+  EnableS3LogsResources:
+    Type: Custom::EnableS3LogsResources
+    Condition: enable_existing_resources
+    DependsOn: AwsS3LogsResourcesLambda
+    Properties:
+      ServiceToken: !GetAtt SumoLogicHelperFunction.Arn
+      AWSResource: !If [enable_s3_buckets_logging, "s3", "vpc"]
+      BucketName: !Ref BucketName
+      Filter: !Ref FilterExpression
+      BucketPrefix: !Ref BucketPrefix
+      AccountID: !Ref "AWS::AccountId"
 
 Outputs:
 

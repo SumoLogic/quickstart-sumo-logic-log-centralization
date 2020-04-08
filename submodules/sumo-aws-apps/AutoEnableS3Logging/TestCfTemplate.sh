@@ -4,17 +4,17 @@ export AWS_REGION="us-east-1"
 export AWS_PROFILE="personal"
 # App to test
 export AppName=autoenable
-export InstallType=S3
+export InstallType=vpcExisting
 
 # App Details - Collector Configuration
 export BucketName="lambda-all-randmomstring"
 
-export BucketPrefix=${InstallType}"-LOGS"
+export BucketPrefix=${InstallType}"-LOGS/"
 
-export FilterExpression=""
+export FilterExpression="sumologiclambdahelper"
 
 # AWS Quick Start configuration
-export QSS3BucketName="sumologiclambdahelper"
+export QSS3BucketName="sumologiclambdahelper"-${AWS_REGION}
 export QSS3BucketRegion=${AWS_REGION}
 
 if [[ "${InstallType}" == "VPC" ]]
@@ -23,6 +23,14 @@ then
 elif [[ "${InstallType}" == "S3" ]]
 then
     export EnableLogging="S3"
+elif [[ "${InstallType}" == "S3Existing" ]]
+then
+    export EnableLogging="S3"
+    export ExistingResource="Yes"
+elif [[ "${InstallType}" == "vpcExisting" ]]
+then
+    export EnableLogging="VPC"
+    export ExistingResource="Yes"
 else
     echo "No Choice"
 fi
