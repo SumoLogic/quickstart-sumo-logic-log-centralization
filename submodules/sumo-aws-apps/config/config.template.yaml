@@ -353,7 +353,7 @@ Resources:
         - !ImportValue
           'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       DeliveryFrequency: Six_Hours
-      S3BucketName: !If [create_bukcet, !Ref TargetS3Bucket, !Ref BucketName]
+      S3BucketName: !If [enable_config, !Ref BucketName, ""]
       SnsTopicARN: !Ref SumoSNSTopic
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
 
