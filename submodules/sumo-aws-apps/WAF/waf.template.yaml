@@ -238,6 +238,10 @@ Conditions:
   install_s3_source: !Equals [!Ref CreateS3Source, 'Yes']
   create_delivery_stream: !Equals [!Ref CreateDeliveryStream, 'Yes']
 
+  create_sns_topic: !And
+    - !Condition do_not_use_parent_stack
+    - !Condition install_s3_source
+
 Resources:
 
   SumoLogicHelperRole:
@@ -313,7 +317,7 @@ Resources:
                   "*"
 
   SumoSNSTopic:
-    Condition: install_s3_source
+    Condition: create_sns_topic
     Type: "AWS::SNS::Topic"
     Properties:
       TopicName: !Sub "SumoSNSTopic-${AWS::StackName}"
@@ -322,8 +326,11 @@ Resources:
     Condition: install_s3_source
     Type: "AWS::SNS::Subscription"
     Properties:
-      TopicArn:
-        Ref: SumoSNSTopic
+      TopicArn: !If
+        - create_sns_topic
+        - !Ref SumoSNSTopic
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SNSTopicArn'
       Endpoint: !GetAtt SumoS3Source.SUMO_ENDPOINT
       Protocol: https
       DeliveryPolicy:
@@ -337,7 +344,7 @@ Resources:
           backoffFunction: exponential
 
   SumoSNSpolicy:
-    Condition: install_s3_source
+    Condition: create_sns_topic
     Type: "AWS::SNS::TopicPolicy"
     Properties:
       PolicyDocument:

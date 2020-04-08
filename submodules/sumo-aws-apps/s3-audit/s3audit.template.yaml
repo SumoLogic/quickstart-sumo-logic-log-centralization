@@ -223,6 +223,10 @@ Conditions:
 
   auto_enable_s3_logging: !Equals [!Ref AutoEnableS3Logging, 'Yes']
 
+  create_sns_topic: !And
+    - !Condition do_not_use_parent_stack
+    - !Condition install_s3_audit_source
+
 Resources:
   SumoLogicHelperRole:
     Type: AWS::IAM::Role
@@ -303,7 +307,7 @@ Resources:
                   "*"
 
   SumoSNSTopic:
-    Condition: install_s3_audit_source
+    Condition: create_sns_topic
     Type: "AWS::SNS::Topic"
     Properties:
       TopicName: !Sub "SumoSNSTopic-${AWS::StackName}"
@@ -312,8 +316,11 @@ Resources:
     Condition: install_s3_audit_source
     Type: "AWS::SNS::Subscription"
     Properties:
-      TopicArn:
-        Ref: SumoSNSTopic
+      TopicArn: !If
+        - create_sns_topic
+        - !Ref SumoSNSTopic
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SNSTopicArn'
       Endpoint: !GetAtt SumoS3AuditSource.SUMO_ENDPOINT
       Protocol: https
       DeliveryPolicy:
@@ -327,7 +334,7 @@ Resources:
           backoffFunction: exponential
 
   SumoSNSpolicy:
-    Condition: install_s3_audit_source
+    Condition: create_sns_topic
     Type: "AWS::SNS::TopicPolicy"
     Properties:
       PolicyDocument:
