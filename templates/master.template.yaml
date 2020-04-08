@@ -35,30 +35,28 @@ Metadata:
     - Label:
         default: "3. Sumo Logic GuardDuty Apps Configurations"
       Parameters:
-        - Section3aInstallGuardDutyApp
-        - Section3bInstallGuardDutyBenchMarkApp
+        - Section3aInstallGuardDutyApps
     - Label:
         default: "3.1 Sumo Logic GuardDuty Logs Source Configuration"
       Parameters:
-        - Section3cGuardDutyCreateHttpLogsSource
-        - Section3dGuardDutyHttpLogsSourceCategoryName
+        - Section3bGuardDutyCreateHttpLogsSource
+        - Section3cGuardDutyHttpLogsSourceCategoryName
 
     - Label:
         default: "4. Sumo Logic VPC Flow Logs Apps Configurations"
       Parameters:
-        - Section4aInstallVpcApp
-        - Section4bInstallPCIVpcApp
+        - Section4aInstallVpcApps
     - Label:
         default: "4.1 AWS S3 Bucket Configuration"
       Parameters:
-        - Section4cVpcCreateBucket
-        - Section4dVpcLogsBucketName
+        - Section4bVpcCreateBucket
+        - Section4cVpcLogsBucketName
     - Label:
         default: "4.2 Sumo Logic VPC S3 Source Configuration"
       Parameters:
-        - Section4eVpcCreateS3Source
-        - Section4fVpcBucketPathExpression
-        - Section4gVpcLogsSourceCategoryName
+        - Section4dVpcCreateS3Source
+        - Section4eVpcBucketPathExpression
+        - Section4fVpcLogsSourceCategoryName
 
     - Label:
         default: "5. Sumo Logic Threat Intel for AWS Configurations"
@@ -117,6 +115,38 @@ Metadata:
         - Section8gWafLogsSourceCategoryName
 
     - Label:
+        default: "9. Sumo Logic AWS Config app Configurations"
+      Parameters:
+        - Section9aInstallConfigApp
+    - Label:
+        default: "9.1 AWS Config Configuration"
+      Parameters:
+        - Section9bConfigEnableConfig
+        - Section9cConfigCreateSNSTopic
+        - Section9dConfigExistingTopicName
+    - Label:
+        default: "9.2 Sumo Logic AWS Config HTTP Logs Source Configuration"
+      Parameters:
+        - Section9eConfigCreateHttpLogsSource
+        - Section9fConfigHttpLogsSourceCategoryName
+
+    - Label:
+        default: "10. Auto Enable Logging Configuration"
+      Parameters:
+        - Section91aEnableAutoLogging
+        - Section91bEnableLoggingForExistingResources
+    - Label:
+        default: "10.1 S3 Audit Logging Auto Enable Configuration"
+      Parameters:
+        - Section91cS3LoggingBucketPrefix
+        - Section91dS3LoggingFilterExpression
+    - Label:
+        default: "10.2 VPC Flow logs Logging Auto Enable Configuration"
+      Parameters:
+        - Section91eVPCLoggingBucketPrefix
+        - Section91fVPCLoggingFilterExpression
+
+    - Label:
         default: "AWS Quick Start configuration"
       Parameters:
         - QSS3BucketName
@@ -154,29 +184,25 @@ Metadata:
       default: "Sumo Logic CloudTrail Logs Source Category Name"
 
     # GuardDuty Apps Parameters
-    Section3aInstallGuardDutyApp:
-      default: "Install Sumo Logic Amazon GuardDuty App"
-    Section3bInstallGuardDutyBenchMarkApp:
-      default: "Install Sumo Logic Amazon GuardDuty BenchMark App"
-    Section3cGuardDutyCreateHttpLogsSource:
+    Section3aInstallGuardDutyApps:
+      default: "Install Sumo Logic Amazon GuardDuty Apps"
+    Section3bGuardDutyCreateHttpLogsSource:
       default: "Create Sumo Logic HTTP Logs Source"
-    Section3dGuardDutyHttpLogsSourceCategoryName:
+    Section3cGuardDutyHttpLogsSourceCategoryName:
       default: "Sumo Logic HTTP Logs Source Category Name"
 
     # VPC Flow Logs Apps Parameters
-    Section4aInstallVpcApp:
-      default: "Install Sumo Logic Amazon VPC Flow Logs App"
-    Section4bInstallPCIVpcApp:
-      default: "Install Sumo Logic PCI Compliance For Amazon VPC Flow App"
-    Section4cVpcCreateBucket:
+    Section4aInstallVpcApps:
+      default: "Install Sumo Logic Amazon VPC Flow Logs Apps"
+    Section4bVpcCreateBucket:
       default: "Create AWS S3 Bucket"
-    Section4dVpcLogsBucketName:
+    Section4cVpcLogsBucketName:
       default: "AWS S3 Bucket Name"
-    Section4eVpcCreateS3Source:
+    Section4dVpcCreateS3Source:
       default: "Create Sumo Logic Amazon S3 Logs Source"
-    Section4fVpcBucketPathExpression:
+    Section4eVpcBucketPathExpression:
       default: "Path Expression for the logs"
-    Section4gVpcLogsSourceCategoryName:
+    Section4fVpcLogsSourceCategoryName:
       default: "Sumo Logic Amazon S3 Logs Source Category Name"
 
     # Threat Intel for AWS Parameters
@@ -230,6 +256,34 @@ Metadata:
       default: "Path Expression for the logs"
     Section8gWafLogsSourceCategoryName:
       default: "Sumo Logic Amazon S3 Logs Source Category Name"
+
+    # Config App Parameters
+    Section9aInstallConfigApp:
+      default: "Install Sumo Logic AWS Config app"
+    Section9bConfigEnableConfig:
+      default: "Enable AWS Config for the region"
+    Section9cConfigCreateSNSTopic:
+      default: "Create SNS Topic for logs delivery"
+    Section9dConfigExistingTopicName:
+      default: "Existing Topic Name where logs are delivered"
+    Section9eConfigCreateHttpLogsSource:
+      default: "Create Sumo Logic HTTP Logs Source"
+    Section9fConfigHttpLogsSourceCategoryName:
+      default: "Sumo Logic Amazon HTTP Logs Source Category Name"
+
+    # Auto Enable parameters
+    Section91aEnableAutoLogging:
+      default: "Choose resource to Auto Enable S3 logging"
+    Section91bEnableLoggingForExistingResources:
+      default: "Auto Enable logging for Existing AWS resources"
+    Section91cS3LoggingBucketPrefix:
+      default: "Bucket Prefix to store S3 Audit logs"
+    Section91dS3LoggingFilterExpression:
+      default: "Regex expression to Filter AWS S3 Buckets"
+    Section91eVPCLoggingBucketPrefix:
+      default: "Bucket Prefix to store VPC Flow logs"
+    Section91fVPCLoggingFilterExpression:
+      default: "Regex expression to Filter AWS VPC Resources"
 
     QSS3BucketName:
       default: "Quick Start S3 bucket name"
@@ -332,23 +386,19 @@ Parameters:
     Default: ""
 
   # GuardDuty Apps Parameters
-  Section3aInstallGuardDutyApp:
+  Section3aInstallGuardDutyApps:
     Type: String
-    Description: "Yes -> Install Amazon GuardDuty App in Sumo Logic for AWS Quick Start Solution.
-                  No -> Skip Installation of the app."
-    Default: 'Yes'
+    Description: "GuardDuty -> Install Amazon GuardDuty App in Sumo Logic for AWS Quick Start Solution.
+                  GuardDutyBenchmark -> Install Amazon GuardDuty Benchmark App in Sumo Logic for AWS Quick Start Solution.
+                  Both -> Install Both the apps.
+                  Skip -> Skip Installation of the apps."
+    Default: 'Both'
     AllowedValues:
-      - 'Yes'
-      - 'No'
-  Section3bInstallGuardDutyBenchMarkApp:
-    Type: String
-    Description: "Yes -> Install Amazon GuardDuty BenchMark App in Sumo Logic for AWS Quick Start Solution.
-                  No -> Skip Installation of the app."
-    Default: 'Yes'
-    AllowedValues:
-      - 'Yes'
-      - 'No'
-  Section3cGuardDutyCreateHttpLogsSource:
+      - 'GuardDuty'
+      - 'GuardDutyBenchmark'
+      - 'Both'
+      - 'Skip'
+  Section3bGuardDutyCreateHttpLogsSource:
     Type: String
     Description: "Yes - Create Sumo Logic HTTP Log Source to collect GuardDuty logs..
                   No - Skip creation of the Sumo Logic HTTP Log Source."
@@ -356,29 +406,25 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  Section3dGuardDutyHttpLogsSourceCategoryName:
+  Section3cGuardDutyHttpLogsSourceCategoryName:
     Type: String
     Description: "Required when Flag = No. Provide an existing source category name from Sumo Logic collecting GuardDuty Logs. Used for app installation."
     Default: ""
 
   # VPC Flow Logs Apps Parameters
-  Section4aInstallVpcApp:
+  Section4aInstallVpcApps:
     Type: String
-    Description: "Yes -> Install Sumo Logic Amazon VPC Flow Logs in Sumo Logic for AWS Quick Start Solution.
-                  No -> Skip Installation of the app."
-    Default: 'Yes'
+    Description: "VPC -> Install Amazon VPC Flow Logs App in Sumo Logic for AWS Quick Start Solution.
+                  PCI_VPC -> Install PCI Compliance For Amazon VPC Flow App in Sumo Logic for AWS Quick Start Solution.
+                  Both -> Install Both the apps.
+                  Skip -> Skip Installation of the apps."
+    Default: 'Both'
     AllowedValues:
-      - 'Yes'
-      - 'No'
-  Section4bInstallPCIVpcApp:
-    Type: String
-    Description: "Yes -> Install PCI Compliance For Amazon VPC Flow App in Sumo Logic for AWS Quick Start Solution.
-                  No -> Skip Installation of the app."
-    Default: 'Yes'
-    AllowedValues:
-      - 'Yes'
-      - 'No'
-  Section4cVpcCreateBucket:
+      - 'VPC'
+      - 'PCI_VPC'
+      - 'Both'
+      - 'Skip'
+  Section4bVpcCreateBucket:
     Type: String
     Description: "Yes - Create a new S3 bucket in AWS S3.
                   No - Use an existing S3 bucket from AWS S3 which has VPC Logs."
@@ -386,11 +432,11 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  Section4dVpcLogsBucketName:
+  Section4cVpcLogsBucketName:
     Type: String
     Description: "Required when Flag = No. Provide an Existing bucket name which has VPC Flow logs."
     Default: ""
-  Section4eVpcCreateS3Source:
+  Section4dVpcCreateS3Source:
     Type: String
     Description: "Yes - Create Sumo Logic Amazon S3 Log Source with provided bucket Name.
                   No - Skip creation of the Sumo Logic Amazon S3 Log Source."
@@ -398,11 +444,11 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  Section4fVpcBucketPathExpression:
+  Section4eVpcBucketPathExpression:
     Type: String
     Description: "Path expression to match the folder structure for VPC Flow logs. For Eg:- VPC-FLOW-LOGS/*."
     Default: "VPC-FLOW-LOGS/*"
-  Section4gVpcLogsSourceCategoryName:
+  Section4fVpcLogsSourceCategoryName:
     Type: String
     Description: "Required when Flag = No. Provide an existing source category name from Sumo Logic collecting VPC Flow Logs. Used for Threat Intel for AWS app installation also."
     Default: ""
@@ -548,6 +594,90 @@ Parameters:
     Description: "Required when Flag = No. Provide an existing source category name from Sumo Logic collecting WAF Logs. Used for app installation."
     Default: ""
 
+  # Config App Parameters
+  Section9aInstallConfigApp:
+    Type: String
+    Description: "Yes -> Install Sumo Logic AWS Config App in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section9bConfigEnableConfig:
+    Type: String
+    Description: "Choose Yes to enable config for the region.
+                  Choose No if config is already enabled."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section9cConfigCreateSNSTopic:
+    Type: String
+    Description: "Choose Yes to create SNS Topic and attach the SNS topic to AWS Config setting to deliver the logs.
+                  Choose No if config logs are already delivered to an existing SNS topic."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section9dConfigExistingTopicName:
+    Type: String
+    Description: "Required when flag -> No. Provide existing config SNS topic from Config settings to stream configuration changes and notifications."
+    Default: ""
+  Section9eConfigCreateHttpLogsSource:
+    Type: String
+    Description: "Yes - Create Sumo Logic HTTP Log Source to collect Config Logs.
+                  No - Skip creation of the Sumo Logic HTTP Log Source."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section9fConfigHttpLogsSourceCategoryName:
+    Type: String
+    Description: "Required when Flag = No. Provide an existing source category name from Sumo Logic collecting Config Logs. Used for app installation."
+    Default: ""
+
+  # Auto Enable parameters
+  Section91aEnableAutoLogging:
+    Type: String
+    Description: "S3 - To Enable S3 Audit Logging for new S3 buckets.
+                  VPC - To Enable VPC flow logs for new VPC, Subnets and Network Interfaces.
+                  S3_VPC - to enable logging for both."
+    AllowedPattern: ".+"
+    Default: 'S3_VPC'
+    AllowedValues:
+      - 'S3'
+      - 'VPC'
+      - 'S3_VPC'
+      - 'Skip'
+  Section91bEnableLoggingForExistingResources:
+    Type: String
+    Description: "Yes - Enable Logging for existing resources.
+                  No - Skip Existing resources."
+    Default: "Yes"
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section91cS3LoggingBucketPrefix:
+    Type: String
+    Description: "Provide an bucket prefix for S3 Audit logs. It Should have / in the end."
+    AllowedPattern: ".*\\/$"
+    ConstraintDescription: "Bucket Prefix Should have / in the end."
+    Default: "S3_AUDIT_LOGS/"
+  Section91dS3LoggingFilterExpression:
+    Type: String
+    Default: ""
+    Description: "Provide regular expression for matching S3 Buckets. For eg;- 'test|prod'"
+  Section91eVPCLoggingBucketPrefix:
+    Type: String
+    Description: "Provide an bucket prefix VPC Flow logs. It Should have / in the end."
+    AllowedPattern: ".*\\/$"
+    ConstraintDescription: "Bucket Prefix Should have / in the end."
+    Default: "VPC_LOGS/"
+  Section91fVPCLoggingFilterExpression:
+    Type: String
+    Default: ""
+    Description: "Provide regular expression for matching VPC resources. For eg;- 'VpcId': 't1.micro.*?'|'NetworkInterfaceId': 'Test.*?']|'SubnetId': 'prod.*?'|test|prod'"
+
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
@@ -574,15 +704,23 @@ Conditions:
   create_cloudtrail_source: !Equals [ !Ref Section2fCloudTrailCreateLogSource, 'Yes' ]
 
   # Conditions for GuardDuty Apps
-  install_guardduty_app: !Equals [ !Ref Section3aInstallGuardDutyApp, 'Yes' ]
-  install_guardduty_benchmark_app: !Equals [ !Ref Section3bInstallGuardDutyBenchMarkApp, 'Yes' ]
-  create_guardduty_source: !Equals [ !Ref Section3cGuardDutyCreateHttpLogsSource, 'Yes' ]
+  install_guardduty_app: !Or
+    - !Equals [ !Ref Section3aInstallGuardDutyApps, 'GuardDuty' ]
+    - !Equals [ !Ref Section3aInstallGuardDutyApps, 'Both' ]
+  install_guardduty_benchmark_app: !Or
+    - !Equals [ !Ref Section3aInstallGuardDutyApps, 'GuardDutyBenchmark' ]
+    - !Equals [ !Ref Section3aInstallGuardDutyApps, 'Both' ]
+  create_guardduty_source: !Equals [ !Ref Section3bGuardDutyCreateHttpLogsSource, 'Yes' ]
 
   # Conditions for VPC Flow Logs Apps
-  install_vpc_app: !Equals [ !Ref Section4aInstallVpcApp, 'Yes' ]
-  install_pci_vpc_app: !Equals [ !Ref Section4bInstallPCIVpcApp, 'Yes' ]
-  create_vpc_bucket: !Equals [ !Ref Section4cVpcCreateBucket, 'Yes' ]
-  create_vpc_source: !Equals [ !Ref Section4eVpcCreateS3Source, 'Yes' ]
+  install_vpc_app: !Or
+    - !Equals [ !Ref Section4aInstallVpcApps, 'VPC' ]
+    - !Equals [ !Ref Section4aInstallVpcApps, 'Both' ]
+  install_pci_vpc_app: !Or
+    - !Equals [ !Ref Section4aInstallVpcApps, 'PCI_VPC' ]
+    - !Equals [ !Ref Section4aInstallVpcApps, 'Both' ]
+  create_vpc_bucket: !Equals [ !Ref Section4bVpcCreateBucket, 'Yes' ]
+  create_vpc_source: !Equals [ !Ref Section4dVpcCreateS3Source, 'Yes' ]
 
   # Conditions for Threat Intel App
   install_threat_intel_app: !Equals [ !Ref Section5aInstallThreatIntelApp, 'Yes' ]
@@ -604,6 +742,21 @@ Conditions:
   create_waf_bucket: !Equals [ !Ref Section8cWafCreateBucket, 'Yes' ]
   create_waf_source: !Equals [ !Ref Section8eWafCreateS3Source, 'Yes' ]
 
+  # Conditions for Config App
+  install_config_app: !Equals [ !Ref Section9aInstallConfigApp, 'Yes' ]
+  enable_config: !Equals [ !Ref Section9bConfigEnableConfig, 'Yes' ]
+  create_sns_topic: !Equals [ !Ref Section9cConfigCreateSNSTopic, 'Yes' ]
+  create_config_source: !Equals [ !Ref Section9eConfigCreateHttpLogsSource, 'Yes' ]
+
+  # Conditions for Auto Enable
+  auto_enable_s3_audit: !Or
+    - !Equals [ !Ref Section91aEnableAutoLogging, 'S3' ]
+    - !Equals [ !Ref Section91aEnableAutoLogging, 'S3_VPC' ]
+  auto_enable_vpc_logs: !Or
+    - !Equals [ !Ref Section91aEnableAutoLogging, 'VPC' ]
+    - !Equals [ !Ref Section91aEnableAutoLogging, 'S3_VPC' ]
+  auto_exisitng_resources: !Equals [ !Ref Section91bEnableLoggingForExistingResources, 'Yes' ]
+
   # Conditions for Common
   create_common_s3_bucket: !Or
     - !Condition create_cloudtrail_bucket
@@ -611,6 +764,7 @@ Conditions:
     - !Condition create_s3_audit_bucket
     - !Condition create_security_hub_bucket
     - !Condition create_waf_bucket
+    - !Condition enable_config
   create_common_collector: !Or
     - !Condition create_cloudtrail_source
     - !Condition create_guardduty_source
@@ -618,6 +772,7 @@ Conditions:
     - !Condition create_s3_audit_source
     - !Condition create_security_hub_source
     - !Condition create_waf_source
+    - !Condition create_config_source
   create_cloudtrail: !Condition create_cloudtrail_bucket
 
   # Conditions for calling child stack of each app. If any resource create condition is true.
@@ -646,6 +801,11 @@ Conditions:
     - !Condition install_waf_app
     - !Condition enable_waf
     - !Condition create_waf_source
+  call_config_stack: !Or
+    - !Condition install_config_app
+    - !Condition enable_config
+    - !Condition create_sns_topic
+    - !Condition create_config_source
 
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
@@ -732,12 +892,12 @@ Resources:
         SumoAccessID: !Ref Section1bSumoLogicAccessID
         SumoAccessKey: !Ref Section1cSumoLogicAccessKey
         RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        InstallGuardDutyApp: !Ref Section3aInstallGuardDutyApp
-        InstallGuardDutyBenchMarkApp: !Ref Section3bInstallGuardDutyBenchMarkApp
+        InstallGuardDutyApp: !If [install_guardduty_app, "Yes", "No"]
+        InstallGuardDutyBenchMarkApp: !If [install_guardduty_benchmark_app, "Yes", "No"]
         CollectorName: !Sub "aws-quickstart-collector"
         CreateHttpLogsSource: !If [create_guardduty_source, "Yes", "No"]
         HttpLogsSourceName: !Sub "aws-quickstart-guardduty-${AWS::Region}"
-        HttpLogsSourceCategoryName: !If [create_guardduty_source, "aws/quickstart/guardduty/logs", !Ref Section3dGuardDutyHttpLogsSourceCategoryName]
+        HttpLogsSourceCategoryName: !If [create_guardduty_source, "aws/quickstart/guardduty/logs", !Ref Section3cGuardDutyHttpLogsSourceCategoryName]
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
@@ -770,15 +930,15 @@ Resources:
         SumoAccessKey: !Ref Section1cSumoLogicAccessKey
         SumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
         RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        InstallVpcApp: !Ref Section4aInstallVpcApp
-        InstallPCIVpcApp: !Ref Section4bInstallPCIVpcApp
+        InstallVpcApp: !If [install_vpc_app, "Yes", "No"]
+        InstallPCIVpcApp: !If [install_pci_vpc_app, "Yes", "No"]
         CollectorName: !Sub "aws-quickstart-collector"
         CreateS3Bucket: "No"
-        LogsS3BucketName: !If [create_vpc_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section4dVpcLogsBucketName]
+        LogsS3BucketName: !If [create_vpc_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section4cVpcLogsBucketName]
         CreateS3Source: !If [create_vpc_source, "Yes", "No"]
-        S3BucketLogsPathExpression: !If [create_vpc_bucket, !Sub "VPC-FLOW-LOGS/*", !Ref Section4fVpcBucketPathExpression]
+        S3BucketLogsPathExpression: !If [create_vpc_bucket, !Sub "VPC-FLOW-LOGS/*", !Ref Section4eVpcBucketPathExpression]
         S3SourceName: !Sub "aws-quickstart-vpc-${AWS::Region}"
-        S3SourceCategoryName: !If [create_vpc_source, "aws/quickstart/vpc/logs", !Ref Section4gVpcLogsSourceCategoryName]
+        S3SourceCategoryName: !If [create_vpc_source, "aws/quickstart/vpc/logs", !Ref Section4fVpcLogsSourceCategoryName]
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
@@ -811,7 +971,7 @@ Resources:
         SumoAccessKey: !Ref Section1cSumoLogicAccessKey
         RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         CloudTrailSourceCategory: !If [create_cloudtrail_source, "aws/quickstart/cloudtrail/logs", !Ref Section2hCloudTrailLogsSourceCategoryName]
-        VPCFlowLogsSourceCategory: !If [create_vpc_source, "aws/quickstart/vpc/logs", !Ref Section4gVpcLogsSourceCategoryName]
+        VPCFlowLogsSourceCategory: !If [create_vpc_source, "aws/quickstart/vpc/logs", !Ref Section4fVpcLogsSourceCategoryName]
         ElasticLoadBalancerSourceCategory: !Ref Section5bElasticLoadBalancerSourceCategory
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
@@ -943,3 +1103,79 @@ Resources:
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         ParentStackName: !GetAtt CreateCommonResources.Outputs.StackName
+
+  sumoConfigStackWaitHandle:
+    Condition: call_waf_stack
+    DependsOn: sumoWafAppsStack
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  sumoConfigStackWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [call_waf_stack, !Ref sumoConfigStackWaitHandle, !Ref WaitHandle]
+      Timeout: "5"
+      Count: 0
+
+  sumoConfigAppsStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: call_config_stack
+    DependsOn: sumoConfigStackWaitCondition
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/sumo-aws-apps/config/config.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        SumoDeployment: !Ref Section1aSumoLogicDeployment
+        SumoAccessID: !Ref Section1bSumoLogicAccessID
+        SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        InstallApp: !Ref Section9aInstallConfigApp
+        CollectorName: !Sub "aws-quickstart-collector"
+        EnableConfig: !If [enable_config, "Yes", "No"]
+        BucketName: !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}"
+        CreateSNSTopic: !If [create_sns_topic, "Yes", "No"]
+        TopicName: !Ref Section9dConfigExistingTopicName
+        CreateHttpLogsSource: !If [create_config_source, "Yes", "No"]
+        HttpLogsSourceName: !Sub "aws-quickstart-config-${AWS::Region}"
+        HttpLogsSourceCategoryName: !If [create_config_source, "aws/quickstart/config/logs", !Ref Section9fConfigHttpLogsSourceCategoryName]
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        ParentStackName: !GetAtt CreateCommonResources.Outputs.StackName
+
+  sumoAutoEnableS3AuditLogs:
+    Type: AWS::CloudFormation::Stack
+    Condition: auto_enable_s3_audit
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/sumo-aws-apps/AutoEnableS3Logging/auto_enable_s3_logging.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        EnableLogging: 'S3'
+        ExistingResource: !If [auto_exisitng_resources, 'Yes', 'No']
+        BucketName: !If [create_s3_audit_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section6cS3AuditLogsBucketName]
+        BucketPrefix: !Ref Section91cS3LoggingBucketPrefix
+        FilterExpression: !Ref Section91dS3LoggingFilterExpression
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+
+  sumoAutoEnableVPCAuditLogs:
+    Type: AWS::CloudFormation::Stack
+    Condition: auto_enable_vpc_logs
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/sumo-aws-apps/AutoEnableS3Logging/auto_enable_s3_logging.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        EnableLogging: 'VPC'
+        ExistingResource: !If [auto_exisitng_resources, 'Yes', 'No']
+        BucketName: !If [create_vpc_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section4cVpcLogsBucketName]
+        BucketPrefix: !Ref Section91eVPCLoggingBucketPrefix
+        FilterExpression: !Ref Section91fVPCLoggingFilterExpression
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix

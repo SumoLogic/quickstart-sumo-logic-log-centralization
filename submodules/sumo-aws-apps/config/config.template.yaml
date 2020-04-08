@@ -286,10 +286,10 @@ Resources:
             Statement:
               - Effect: Allow
                 Action: s3:GetBucketAcl
-                Resource: !Join ['', ['arn:aws:s3:::', !Ref 'TargetS3Bucket']]
+                Resource: !Join ['', ['arn:aws:s3:::', !Ref BucketName]]
               - Effect: Allow
                 Action: s3:PutObject
-                Resource: !Join ['', ['arn:aws:s3:::', !Ref 'TargetS3Bucket', /AWSLogs/,
+                Resource: !Join ['', ['arn:aws:s3:::', !Ref BucketName, /AWSLogs/,
                                       !Ref 'AWS::AccountId', /*]]
                 Condition:
                   StringEquals:

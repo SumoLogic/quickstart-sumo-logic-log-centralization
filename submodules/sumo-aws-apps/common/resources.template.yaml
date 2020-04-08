@@ -204,6 +204,9 @@ Resources:
                   - logs:DeleteLogDelivery
                   - s3:GetBucketPolicy
                   - s3:PutBucketPolicy
+                  - config:DescribeDeliveryChannels
+                  - config:PutDeliveryChannel
+                  - config:DeleteDeliveryChannel
                 Resource: '*'
 
   SumoLogicLambdaHelper:
