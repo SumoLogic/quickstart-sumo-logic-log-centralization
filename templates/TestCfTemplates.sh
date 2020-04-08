@@ -8,9 +8,9 @@ export InstallType=wafall
 
 # Export Sumo Properties
 export Section1aSumoLogicDeployment="us1"
-export Section1bSumoLogicAccessID="suv1UhvjV0PgE0"
-export Section1cSumoLogicAccessKey="P0jqVLlNzWwYNAkXwF4SPWVlOMKnll8M9qlAcgrTuDiaqEBxvjyKamp4nzE8wM4L"
-export Section1dSumoLogicOrganizationId="0000000000285A74"
+export Section1bSumoLogicAccessID=""
+export Section1cSumoLogicAccessKey=""
+export Section1dSumoLogicOrganizationId=""
 export Section1eSumoLogicResourceRemoveOnDeleteStack=true
 
 for AWS_REGION in "${regions[@]}"
