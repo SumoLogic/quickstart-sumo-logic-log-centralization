@@ -208,6 +208,10 @@ Conditions:
   enable_config: !Equals [!Ref EnableConfig, 'Yes']
   install_http_logs_source: !Equals [!Ref CreateHttpLogsSource, 'Yes']
 
+  create_bukcet: !And
+    - !Condition enable_config
+    - !Condition do_not_use_parent_stack
+
 Resources:
 
   SumoLogicHelperRole:
@@ -296,7 +300,7 @@ Resources:
 
   TargetS3Bucket:
     Type: AWS::S3::Bucket
-    Condition: enable_config
+    Condition: create_bukcet
     Properties:
       BucketName: !Ref BucketName
 
@@ -349,7 +353,7 @@ Resources:
         - !ImportValue
           'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       DeliveryFrequency: Six_Hours
-      S3BucketName: !If [enable_config, !Ref TargetS3Bucket, ""]
+      S3BucketName: !If [create_bukcet, !Ref TargetS3Bucket, !Ref BucketName]
       SnsTopicARN: !Ref SumoSNSTopic
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
 
