@@ -400,6 +400,8 @@ Resources:
       SumoDeployment: !Ref SumoDeployment
       TargetBucketName: !Ref LogsS3BucketName
       PathExpression: !Ref S3BucketLogsPathExpression
+      DateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+      DateLocatorRegex: '.*"updatedAt":"(.*)".*'
       RoleArn: !If
         - do_not_use_parent_stack
         - !GetAtt
