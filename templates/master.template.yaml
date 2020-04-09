@@ -378,8 +378,8 @@ Parameters:
       - 'No'
   Section2gCloudTrailBucketPathExpression:
     Type: String
-    Description: "Path expression to match the folder structure for CloudTrail logs. For Eg:- AWSLogs/*/cloudtrail/*"
-    Default: "*"
+    Description: "Path expression to match the folder structure for CloudTrail logs. For Eg:- AWSLogs/*/CloudTrail/*"
+    Default: "AWSLogs/*/CloudTrail/*"
   Section2hCloudTrailLogsSourceCategoryName:
     Type: String
     Description: "Required when Flag = No. Provide an existing source category name from Sumo Logic collecting CloudTrail Logs. Used for Threat Intel for AWS app installation also."
@@ -936,7 +936,7 @@ Resources:
         CreateS3Bucket: "No"
         LogsS3BucketName: !If [create_vpc_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section4cVpcLogsBucketName]
         CreateS3Source: !If [create_vpc_source, "Yes", "No"]
-        S3BucketLogsPathExpression: !If [create_vpc_bucket, !Sub "VPC-FLOW-LOGS/*", !Ref Section4eVpcBucketPathExpression]
+        S3BucketLogsPathExpression: !If [auto_enable_vpc_logs, !Sub "${Section91eVPCLoggingBucketPrefix}*", !Ref Section4eVpcBucketPathExpression]
         S3SourceName: !Sub "aws-quickstart-vpc-${AWS::Region}"
         S3SourceCategoryName: !If [create_vpc_source, "aws/quickstart/vpc/logs", !Ref Section4fVpcLogsSourceCategoryName]
         QSS3BucketName: !Ref QSS3BucketName
@@ -1010,7 +1010,7 @@ Resources:
         CreateS3Bucket: "No"
         LogsS3BucketName: !If [create_s3_audit_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section6cS3AuditLogsBucketName]
         CreateS3AuditSource: !If [create_s3_audit_source, "Yes", "No"]
-        S3BucketLogsPathExpression: !If [create_s3_audit_bucket, "S3-AUDIT-LOGS/*", !Ref Section6eS3AuditBucketPathExpression]
+        S3BucketLogsPathExpression: !If [auto_enable_s3_audit, !Sub "${Section91cS3LoggingBucketPrefix}*", !Ref Section6eS3AuditBucketPathExpression]
         S3AuditSourceName: !Sub "aws-quickstart-s3-audit-${AWS::Region}"
         S3AuditSourceCategoryName: !If [create_s3_audit_source, "aws/quickstart/s3/audit/logs", !Ref Section6fS3AuditLogsSourceCategoryName]
         QSS3BucketName: !Ref QSS3BucketName
@@ -1092,7 +1092,7 @@ Resources:
         CreateS3Bucket: "No"
         LogsS3BucketName: !If [create_waf_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section8dWafLogsBucketName]
         CreateS3Source: !If [create_waf_source, "Yes", "No"]
-        S3BucketLogsPathExpression: !If [create_waf_bucket, "WAF_LOGS/*", !Ref Section8fWafBucketPathExpression]
+        S3BucketLogsPathExpression: !If [enable_waf, "WAF_LOGS/*", !Ref Section8fWafBucketPathExpression]
         S3SourceName: !Sub "aws-quickstart-waf-${AWS::Region}"
         S3SourceCategoryName: !If [create_waf_source, "aws/quickstart/waf/logs", !Ref Section8gWafLogsSourceCategoryName]
         CreateDeliveryStream: !If [enable_waf, "Yes", "No"]
