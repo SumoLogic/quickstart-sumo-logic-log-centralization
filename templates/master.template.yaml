@@ -305,20 +305,20 @@ Parameters:
       - us1
       - in
       - fed
-    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1."
+    Description: "Enter the geographic location of the deployment au, ca, de, eu, jp, us2, in, fed or us1."
   Section1bSumoLogicAccessID:
     Type: String
-    Description: "The Sumo Logic Access ID. Used for Sumo Logic API calls."
+    Description: "Enter the Sumo Logic Console Access ID, which you received when you created the Access Key."
     AllowedPattern: ".+"
     ConstraintDescription: "Sumo Logic Access ID can not be empty."
   Section1cSumoLogicAccessKey:
     Type: String
-    Description: "The Sumo Logic Access Key. Used for Sumo Logic API calls."
+    Description: "Enter your Sumo Logic Access Key. You can obtain this from your Sumo Logic account (choose Administration > Security > Access Keys)."
     AllowedPattern: ".+"
     ConstraintDescription: "Sumo Logic Access Key can not be empty."
     NoEcho: true
   Section1dSumoLogicOrganizationId:
-    Description: "The Account Overview page displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources."
+    Description: "Enter your Sumo Logic Organization ID, which you can find on your Sumo Logic console under Account."
     Type: String
     AllowedPattern: ".+"
     ConstraintDescription: "Sumo Logic Organization Id can not be empty."
@@ -327,8 +327,8 @@ Parameters:
       - true
       - false
     Default: true
-    Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to true. Default is true.
-                  Deletes the resources created by the stack. Deletion of updated resources will be skipped."
+    Description: "If this parameter is set to true, the collector, sources, and Sumo Logic apps will be deleted.
+                  If this parameter is set to false then the collector, sources, and Sumo Logic apps will not be deleted."
     Type: String
 
   # CloudTrail Apps Parameters
@@ -959,7 +959,7 @@ Resources:
   sumoThreatIntelAppsStack:
     Type: AWS::CloudFormation::Stack
     Condition: call_threat_intel_stack
-    DependsOn: sumoVpcStackWaitCondition
+    DependsOn: sumoThreatIntelStackWaitCondition
     Properties:
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/sumo-aws-apps/threat-intel-for-aws/threatintel.template.yaml'
@@ -1147,6 +1147,7 @@ Resources:
   sumoAutoEnableS3AuditLogs:
     Type: AWS::CloudFormation::Stack
     Condition: auto_enable_s3_audit
+    DependsOn: CreateCommonResources
     Properties:
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/sumo-aws-apps/AutoEnableS3Logging/auto_enable_s3_logging.template.yaml'
@@ -1165,6 +1166,7 @@ Resources:
   sumoAutoEnableVPCAuditLogs:
     Type: AWS::CloudFormation::Stack
     Condition: auto_enable_vpc_logs
+    DependsOn: CreateCommonResources
     Properties:
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/sumo-aws-apps/AutoEnableS3Logging/auto_enable_s3_logging.template.yaml'
