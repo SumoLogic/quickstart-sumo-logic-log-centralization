@@ -1,6 +1,18 @@
 [
   {
-    "ParameterKey": "Section7bEnableSecurityHub",
-    "ParameterValue": "Yes"
+    "ParameterKey": "Section9bConfigEnableConfig",
+    "ParameterValue": "No"
+  },
+  {
+    "ParameterKey": "Section9cConfigCreateSNSTopic",
+    "ParameterValue": "No"
+  },
+  {
+    "ParameterKey": "Section9eConfigCreateHttpLogsSource",
+    "ParameterValue": "No"
+  },
+  {
+    "ParameterKey": "Section9fConfigHttpLogsSourceCategoryName",
+    "ParameterValue": "SUMO/CONFIG"
   }
 ]
