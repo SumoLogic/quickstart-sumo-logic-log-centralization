@@ -1,0 +1,117 @@
+[
+  {
+    "ParameterKey": "Section2aInstallCloudTrailApp",
+    "ParameterValue": "No"
+  },
+  {
+    "ParameterKey": "Section2bInstallPCICloudTrailApp",
+    "ParameterValue": "No"
+  },
+  {
+    "ParameterKey": "Section2cInstallCISFoundationApp",
+    "ParameterValue": "No"
+  },
+  {
+    "ParameterKey": "Section2dCloudTrailCreateBucket",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "Section2fCloudTrailCreateLogSource",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "Section3aInstallGuardDutyApps",
+    "ParameterValue": "Skip"
+  },
+  {
+    "ParameterKey": "Section3bGuardDutyCreateHttpLogsSource",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "Section4aInstallVpcApps",
+    "ParameterValue": "Skip"
+  },
+  {
+    "ParameterKey": "Section4bVpcCreateBucket",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "Section4dVpcCreateS3Source",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "Section5aInstallThreatIntelApp",
+    "ParameterValue": "No"
+  },{
+    "ParameterKey": "Section6aInstallS3AuditApp",
+    "ParameterValue": "No"
+  },
+  {
+    "ParameterKey": "Section6bS3AuditCreateBucket",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "Section6dS3AuditCreateS3Source",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "Section7aInstallSecurityHubAuditApp",
+    "ParameterValue": "No"
+  },
+  {
+    "ParameterKey": "Section7bEnableSecurityHub",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "Section7cSecurityHubCreateBucket",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "Section7eSecurityHubCreateS3Source",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "Section8aInstallWafApp",
+    "ParameterValue": "No"
+  },
+  {
+    "ParameterKey": "Section8bCreateDeliveryStream",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "Section8cWafCreateBucket",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "Section8eWafCreateS3Source",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "Section9aInstallConfigApp",
+    "ParameterValue": "No"
+  },
+  {
+    "ParameterKey": "Section9bConfigEnableConfig",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "Section9cConfigCreateSNSTopic",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "Section9eConfigCreateHttpLogsSource",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "Section91aEnableAutoLogging",
+    "ParameterValue": "Skip"
+  },
+  {
+    "ParameterKey": "Section91bEnableLoggingForExistingResources",
+    "ParameterValue": "Skip"
+  },
+  {
+    "ParameterKey": "QSS3BucketRegion",
+    "ParameterValue": "eu-central-1"
+  }
+]

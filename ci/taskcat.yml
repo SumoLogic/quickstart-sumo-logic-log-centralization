@@ -19,58 +19,18 @@ global:
     - us-west-2
   reporting: true
 tests:
-  install-cis-foundations-app:
-    parameter_input: cis-foundations-parameters.json
+  test-apps-install-eu-central-1:
+    parameter_input: test-apps-install-eu-central-1.json
+    template_file: master.template.yaml
+    regions:
+      - eu-central-1
+  test-apps-install-us-east-1:
+    parameter_input: test-apps-install-us-east-1.json
     template_file: master.template.yaml
     regions:
       - us-east-1
-  install-guardduty-app:
-    parameter_input: guardduty-parameters.json
+  test-apps-install-us-west-1:
+    parameter_input: test-apps-install-us-west-1.json
     template_file: master.template.yaml
     regions:
-      - us-east-1
-  # install-guarddutybenchmark-app:
-  #   parameter_input: guardduty-benchmark-parameters.json
-  #   template_file: master.template.yaml
-  #   regions:
-  #     - us-east-1
-  install-cloudtrail-app:
-    parameter_input: cloudtrail-parameters.json
-    template_file: master.template.yaml
-    regions:
-      - us-east-1
-  install-s3audit-app:
-    parameter_input: s3audit-parameters.json
-    template_file: master.template.yaml
-    regions:
-      - us-east-1
-  # install-securityhub-app:
-  #   parameter_input: securityhub-parameters.json
-  #   template_file: master.template.yaml
-  #   regions:
-  #     - us-east-1
-  install-threatintel-app:
-    parameter_input: threatintel-parameters.json
-    template_file: master.template.yaml
-    regions:
-      - us-east-1
-  install-vpcflowlogs-app:
-    parameter_input: vpcflowlogs-parameters.json
-    template_file: master.template.yaml
-    regions:
-      - us-east-1
-  install-waf-app:
-    parameter_input: waf-parameters.json
-    template_file: master.template.yaml
-    regions:
-      - us-east-1
-  install-pcivpcflowlogs-app:
-    parameter_input: pcivpcflowlogs-parameters.json
-    template_file: master.template.yaml
-    regions:
-      - us-east-1
-  install-pcicloudtrail-app:
-    parameter_input: pcicloudtrail-parameters.json
-    template_file: master.template.yaml
-    regions:
-      - us-east-1
+      - us-west-1

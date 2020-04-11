@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "Section7bEnableSecurityHub",
+    "ParameterValue": "Yes"
+  },
+  {
+    "ParameterKey": "QSS3BucketRegion",
+    "ParameterValue": "us-west-1"
+  }
+]

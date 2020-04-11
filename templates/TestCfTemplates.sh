@@ -26,7 +26,6 @@ do
     export Section2dCloudTrailCreateBucket="No"
     export Section2fCloudTrailCreateLogSource="No"
     export Section3aInstallGuardDutyApps="Skip"
-    export Section3bInstallGuardDutyBenchMarkApp="No"
     export Section3bGuardDutyCreateHttpLogsSource="No"
     export Section4aInstallVpcApps="Skip"
     export Section4bVpcCreateBucket="No"
@@ -120,7 +119,6 @@ do
         export Section2bInstallPCICloudTrailApp="Yes"
         export Section2cInstallCISFoundationApp="Yes"
         export Section3aInstallGuardDutyApps="Both"
-        export Section3bInstallGuardDutyBenchMarkApp="Yes"
     elif [[ "${InstallType}" == "threatintelapp" ]]
     then
         export Section5aInstallThreatIntelApp="Yes"
