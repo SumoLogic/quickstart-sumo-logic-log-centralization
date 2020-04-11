@@ -3,13 +3,12 @@
 export AWS_REGION="us-east-1"
 export AWS_PROFILE="personal"
 # App to test
-export AppName=$1
-export InstallType=$2
+export AppName=config
+export InstallType=configapponly
 
 # Sumo Logic Access Configuration
 export SumoAccessID=""
 export SumoAccessKey=""
-export SumoOrganizationId=""
 export SumoDeployment="us1"
 export RemoveSumoResourcesOnDeleteStack=true
 
@@ -20,7 +19,7 @@ export CollectorName="AWS-Sourabh-Collector${AppName}-${InstallType}"
 export BucketName="sourabh-bucket-quickstart-${InstallType}"
 
 # AWS Quick Start configuration
-export QSS3BucketName="sumologiclambdahelper-${AWS_REGION}"
+export QSS3BucketName="sumologiclambdahelper"
 
 if [[ "${InstallType}" == "configall" ]]
 then
@@ -55,12 +54,12 @@ fi
 # Stack Name
 export stackName="${AppName}-${InstallType}"
 
-aws cloudformation deploy --profile ${AWS_PROFILE} --template-file ./${AppName}/${AppName}.template.yaml --region ${AWS_REGION}\
+aws cloudformation deploy --profile ${AWS_PROFILE} --template-file ./config.template.yaml --region ${AWS_REGION}\
     --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND --stack-name ${stackName} \
     --parameter-overrides SumoDeployment="${SumoDeployment}" SumoAccessID="${SumoAccessID}" SumoAccessKey="${SumoAccessKey}" \
-    SumoOrganizationId="${SumoOrganizationId}" RemoveSumoResourcesOnDeleteStack="${RemoveSumoResourcesOnDeleteStack}" \
+    RemoveSumoResourcesOnDeleteStack="${RemoveSumoResourcesOnDeleteStack}" \
     QSS3BucketName="${QSS3BucketName}" InstallApp="${InstallApp}" CollectorName="${CollectorName}" BucketName="${BucketName}" \
     EnableConfig="${EnableConfig}" CreateSNSTopic="${CreateSNSTopic}" CreateHttpLogsSource="${CreateHttpLogsSource}" TopicName="${TopicName}"
- 
+
 
 

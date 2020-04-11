@@ -1,94 +1,99 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: An AWS Serverless Specification template describing your function.
+Description: "Template to setup the AWS Security Hub app with AWS and Sumo Logic resources for AWS Quick Start Solution."
 
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
-      -
-        Label:
+      - Label:
           default: "Sumo Logic Deployment Configuration"
         Parameters:
           - SumoDeployment
           - SumoAccessID
           - SumoAccessKey
-      -
-        Label:
-          default: "Sumo Logic Collection Configuration"
-        Parameters:
-          - CollectorName
-          - SourceName
-          - SourceCategoryName
-          - PathExpression
+          - SumoOrganizationId
           - RemoveSumoResourcesOnDeleteStack
-      -
-        Label:
-          default: "Security Hub S3 Configuration"
-        Parameters:
-          - ExternalID
-          - S3BucketName
-          - CreateTargetS3Bucket
 
-      -
-        Label:
-          default: "AWS Quick Start configuration"
+      - Label:
+          default: "App Details - Collector Configuration"
         Parameters:
-          - QSS3BucketName
-          - QSS3KeyPrefix
+          - InstallApp
+          - CollectorName
 
-      -
-        Label:
+      - Label:
+          default: "App Details - S3 Source Configuration"
+        Parameters:
+          - CreateS3Bucket
+          - LogsS3BucketName
+          - CreateS3Source
+          - S3BucketLogsPathExpression
+          - S3SourceName
+          - S3SourceCategoryName
+
+      - Label:
           default: "Security Hub configuration"
         Parameters:
           - EnableSecurityHub
           - ConnectionName
 
+      - Label:
+          default: "AWS Quick Start configuration"
+        Parameters:
+          - QSS3BucketName
+          - QSS3BucketRegion
+          - QSS3KeyPrefix
+
+      - Label:
+          default: "Local Parameters. Do Not Edit the values."
+        Parameters:
+          - ParentStackName
+
     ParameterLabels:
       SumoDeployment:
-        default: "Deployment Name"
+        default: "Sumo Logic Deployment Name"
       SumoAccessID:
-        default: "Access ID"
+        default: "Sumo Logic Access ID"
       SumoAccessKey:
-        default: "Access Key"
+        default: "Sumo Logic Access Key"
+      SumoOrganizationId:
+        default: "Sumo Logic Organization Id"
+      RemoveSumoResourcesOnDeleteStack:
+        default: "Delete Sumo Logic Resources when stack is deleted"
+
+      InstallApp:
+        default: "Install Sumo Logic App"
       CollectorName:
         default: "Collector Name"
-      SourceName:
-        default: "Source Name"
-      SourceCategoryName:
-        default: "Source Category"
-      PathExpression:
-        default: "Path Expression"
-      RemoveSumoResourcesOnDeleteStack:
-        default: "Remove Sumo Resources On Delete Stack"
-      ExternalID:
-        default: "IAM Role ExternalID"
-      S3BucketName:
-        default: "Target BucketName"
-      CreateTargetS3Bucket:
-        default: "Do you want to create a target S3 bucket?"
+
+      CreateS3Bucket:
+        default: "Create AWS S3 Bucket"
+      LogsS3BucketName:
+        default: "AWS S3 Bucket Name"
+      CreateS3Source:
+        default: "Create Sumo Logic Amazon S3 Logs Source"
+      S3BucketLogsPathExpression:
+        default: "Path Expression for the logs"
+      S3SourceName:
+        default: "Sumo Logic Amazon S3 Logs Source Name"
+      S3SourceCategoryName:
+        default: "Sumo Logic Amazon S3 Logs Source Category Name"
+
+      EnableSecurityHub:
+        default: "Enable Security Hub for the Region"
+      ConnectionName:
+        default: "Webhook Lambda Connection Name"
+
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
+      QSS3BucketRegion:
+        default: "Quick Start S3 bucket region"
       QSS3KeyPrefix:
         default: "Quick Start S3 key prefix"
-      EnableSecurityHub:
-        default: "Enable Security Hub"
-      ConnectionName:
-        default: "Connection Name"
+
+      ParentStackName:
+        default: "If Any, Name of parent Stack"
 
 Parameters:
-  CollectorName:
-    Type: String
-    Default: SecurityHubCollector
-  SourceName:
-    Type: String
-    Default: SecurityHubEvents
-  SourceCategoryName:
-    Type: String
-    Description: Category metadata to use later for querying, e.g. prod/web/apache/access . This data is queried using the '_sourceCategory' key name.
-  SumoAccessID:
-    Type: String
-  SumoAccessKey:
-    Type: String
   SumoDeployment:
     Type: String
     AllowedValues:
@@ -99,53 +104,315 @@ Parameters:
       - jp
       - us2
       - us1
-    Description: "Enter au, ca, de, eu, jp, us2, or us1"
+      - in
+      - fed
+    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1."
+  SumoAccessID:
+    Type: String
+    Description: "The Sumo Logic Access ID. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access ID can not be empty."
+  SumoAccessKey:
+    Type: String
+    Description: "The Sumo Logic Access Key. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access Key can not be empty."
+    NoEcho: true
+  SumoOrganizationId:
+    Description: "The Account Overview page displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources."
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
   RemoveSumoResourcesOnDeleteStack:
     AllowedValues:
       - true
       - false
-    Default: false
-    Description: To delete collector, sources and app when stack is deleted, set this parameter to true. Default is false.
+    Default: true
+    Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to true. Default is true.
+                  Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
-  ExternalID:
+
+  InstallApp:
     Type: String
-    Description: An ID used in the trust policy to designate who can assume the role, formatted as deployment:accountId. Eg. us1:0000000000000131
-  S3BucketName:
+    Description: "Yes -> To Install Sumo Logic App in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  CollectorName:
     Type: String
-    Description: Security Hub target buket name.
-  CreateTargetS3Bucket:
+    Description: Change the collector name to be created else default name will be used.
+    Default: AWS-Security-Hub-Collector
+
+  CreateS3Bucket:
     Type: String
-    Default: "no"
-    AllowedValues: ["yes", "no"]
-  PathExpression:
+    Description: "Yes - Create a new S3 bucket in AWS S3.
+                  No - Use an existing S3 bucket from AWS S3 which has Security Hub Logs."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  LogsS3BucketName:
+    Type: String
+    Description: "Existing Bucket Name - Provide value if the Flag is set to No.
+                  New Bucket Name - Provide a unique Bucket Name if the flag is set to Yes."
+  CreateS3Source:
+    Type: String
+    Description: "Yes - to create Sumo Logic Amazon S3 Log Source with provided bucket Name.
+                  No - to skip creation of the Sumo Logic Amazon S3 Log Source."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  S3BucketLogsPathExpression:
     Type: String
     Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
+    Default: "*"
+  S3SourceName:
+    Type: String
+    Description: Change the Sumo Logic Amazon S3 Source name to be created else default name will be used.
+    Default: AWS-Security-Hub-Source
+  S3SourceCategoryName:
+    Type: String
+    Description: "Existing - Change to an existing Source Category from Sumo Logic if Amazon S3 Source is not created.
+                  New - Default will be used if Amazon S3 Source is Created."
+    Default: AWS/Security/Hub/Logs
+
+  EnableSecurityHub:
+    Type: String
+    Description: "Select Yes if security hub needs to be enabled for the region else no."
+    Default: "No"
+    AllowedValues: ["Yes", "No"]
+  ConnectionName:
+    Type: String
+    Description: "Provide a name for the Webhook Connection for Security Hub Forwarder."
+    Default: "SecurityHubConnection"
+
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Default: "aws-quickstart"
     Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Type: "String"
+  QSS3BucketRegion:
+    Default: "us-east-1"
+    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
+    Type: String
   QSS3KeyPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
     ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Default: "quickstart-sumo-logic-log-centralization/"
     Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Type: "String"
-  EnableSecurityHub:
+
+  ParentStackName:
     Type: String
-    Default: "no"
-    AllowedValues: ["yes", "no"]
-  ConnectionName:
-    Type: String
+    Default: "ParentStackName"
+    Description: Parent Stack Name. Do Not Edit the value.
 
 Conditions:
-  EnableSecurityHub: !Equals [ !Ref EnableSecurityHub, "yes" ]
-  CreateBucket: !Equals [ !Ref CreateTargetS3Bucket, "yes" ]
+  do_not_use_parent_stack: !Equals [ !Ref ParentStackName, "ParentStackName"]
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+
+  install_app: !Equals [!Ref InstallApp, 'Yes']
+  create_target_s3_bucket: !Equals [!Ref CreateS3Bucket, 'Yes']
+  install_s3_source: !Equals [!Ref CreateS3Source, 'Yes']
+  enable_security_hub: !Equals [ !Ref EnableSecurityHub, "Yes" ]
+
+  create_sns_topic: !And
+    - !Condition do_not_use_parent_stack
+    - !Condition install_s3_source
 
 Resources:
+
+  SumoLogicHelperRole:
+    Type: AWS::IAM::Role
+    Condition: do_not_use_parent_stack
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: SumoPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+  SumoLogicHelperFunction:
+    Type: 'AWS::Serverless::Function'
+    DependsOn: SumoLogicHelperRole
+    Condition: do_not_use_parent_stack
+    Properties:
+      Handler: main.handler
+      Runtime: python3.7
+      CodeUri:
+        Bucket: !Sub
+          - "${S3Bucket}"
+          - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+        Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
+      MemorySize: 128
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+          - SumoLogicHelperRole
+          - Arn
+
+  SumoRole:
+    Type: AWS::IAM::Role
+    Condition: do_not_use_parent_stack
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::926226587429:root
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Sub "${SumoDeployment}:${SumoOrganizationId}"
+      Path: "/"
+      Policies:
+        - PolicyName: SumoPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:ListBucketVersions
+                  - s3:ListBucket
+                Resource:
+                  "*"
+
+  SumoSNSTopic:
+    Condition: create_sns_topic
+    Type: "AWS::SNS::Topic"
+    Properties:
+      TopicName: !Sub "SumoSNSTopic-${AWS::StackName}"
+
+  SumoSNSSubscription:
+    Condition: install_s3_source
+    Type: "AWS::SNS::Subscription"
+    Properties:
+      TopicArn: !If
+        - create_sns_topic
+        - !Ref SumoSNSTopic
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SNSTopicArn'
+      Endpoint: !GetAtt SumoS3Source.SUMO_ENDPOINT
+      Protocol: https
+      DeliveryPolicy:
+        healthyRetryPolicy:
+          numRetries: 40
+          minDelayTarget: 10
+          maxDelayTarget: 300
+          numMinDelayRetries: 3
+          numMaxDelayRetries: 5
+          numNoDelayRetries: 0
+          backoffFunction: exponential
+
+  SumoSNSpolicy:
+    Condition: create_sns_topic
+    Type: "AWS::SNS::TopicPolicy"
+    Properties:
+      PolicyDocument:
+        Id: SumoTopicPolicy
+        Statement:
+          - Action:
+              - sns:Publish
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref "AWS::AccountId"
+              ArnLike:
+                aws:SourceArn: !Sub "arn:aws:s3:::${LogsS3BucketName}"
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Resource:
+              - !Ref SumoSNSTopic
+      Topics:
+        - Ref: SumoSNSTopic
+
+  TargetS3Bucket:
+    Condition: create_target_s3_bucket
+    Type: AWS::S3::Bucket
+    DependsOn:
+      - SumoSNSpolicy
+    Properties:
+      BucketName: !Ref LogsS3BucketName
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Event: s3:ObjectCreated:Put
+            Topic: !Ref SumoSNSTopic
+
+  SumoHostedCollector:
+    Type: Custom::Collector
+    Condition: install_s3_source
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      Region: !Ref "AWS::Region"
+      CollectorType: Hosted
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      CollectorName: !Ref CollectorName
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
+
+  SumoS3Source:
+    Type: Custom::AWSSource
+    Condition: install_s3_source
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      SourceType: AwsS3Bucket
+      Region: !Ref "AWS::Region"
+      SourceName: !Ref S3SourceName
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      SourceCategory: !Ref S3SourceCategoryName
+      CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
+      TargetBucketName: !Ref LogsS3BucketName
+      PathExpression: !Ref S3BucketLogsPathExpression
+      DateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+      DateLocatorRegex: '.*"updatedAt":"(.*)".*'
+      RoleArn: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoRole
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoSourceRoleARN'
+
   SecurityHubForwarder:
     Type: 'AWS::Serverless::Application'
+    Condition: install_s3_source
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-securityhub-forwarder
@@ -153,23 +420,35 @@ Resources:
 
   SecurityHubCollector:
     Type: 'AWS::Serverless::Application'
+    Condition: install_s3_source
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-securityhub-collector
         SemanticVersion: 1.0.8
       Parameters:
-        S3SourceBucketName: !Ref S3BucketName
+        S3SourceBucketName: !Ref LogsS3BucketName
 
   SecurityHubUserKey:
     Type: AWS::IAM::AccessKey
+    Condition: install_s3_source
     Properties:
       UserName:
         Ref: SecurityHubUser
 
   SecurityHubUser:
     Type: AWS::IAM::User
+    Condition: install_s3_source
     Properties:
-      UserName: !Sub "SecurityHubUser-${AWS::StackName}"
+      UserName: !Join
+        - ""
+        - - "SecurityHubUser-"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split ["/", !Ref "AWS::StackId"]
       Policies:
         - PolicyName: apigatewayaccess
           PolicyDocument:
@@ -181,51 +460,19 @@ Resources:
 
   SecurityHubConfiguration:
     Type: AWS::SecurityHub::Hub
-    Condition: EnableSecurityHub
-
-  SumoAppUtils:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      Handler: main.handler
-      Runtime: python3.7
-      CodeUri:
-        Bucket: !Ref QSS3BucketName
-        Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
-      MemorySize: 128
-      Timeout: 300
-
-  SumoHostedCollector:
-    Type: Custom::Collector
-    Properties:
-      ServiceToken: !GetAtt SumoAppUtils.Arn
-      Region: !Ref "AWS::Region"
-      CollectorType: Hosted
-      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-      CollectorName: !Ref CollectorName
-      SumoAccessID: !Ref SumoAccessID
-      SumoAccessKey: !Ref SumoAccessKey
-      SumoDeployment: !Ref SumoDeployment
-
-  SumoS3Source:
-    Type: Custom::S3Source
-    Properties:
-      ServiceToken: !GetAtt SumoAppUtils.Arn
-      Region: !Ref "AWS::Region"
-      SourceName: !Ref SourceName
-      TargetBucketName: !Ref S3BucketName
-      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-      SourceCategory: !Ref SourceCategoryName
-      CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
-      SumoAccessID: !Ref SumoAccessID
-      SumoAccessKey: !Ref SumoAccessKey
-      SumoDeployment: !Ref SumoDeployment
-      PathExpression: !Ref PathExpression
-      RoleArn: !GetAtt SumoRole.Arn
+    Condition: enable_security_hub
 
   Connections:
     Type: Custom::Connections
+    Condition: install_s3_source
     Properties:
-      ServiceToken: !GetAtt SumoAppUtils.Arn
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Type: "WebhookDefinition"
       Name: !Ref ConnectionName
       Description: "Webhook Lambda connection for SecurityHub"
@@ -239,105 +486,23 @@ Resources:
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
 
-  SumoRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-        - Effect: Allow
-          Principal:
-            AWS: arn:aws:iam::926226587429:root
-          Action: sts:AssumeRole
-          Condition:
-            StringEquals:
-              sts:ExternalId:
-                Ref: ExternalID
-      Path: "/"
-      Policies:
-      - PolicyName: SumoPolicy
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-          - Effect: Allow
-            Action:
-              - s3:GetObject
-              - s3:GetObjectVersion
-              - s3:ListBucketVersions
-              - s3:ListBucket
-            Resource:
-              - !Sub 
-                - arn:aws:s3:::${S3bucketName}
-                - { S3bucketName: !Ref S3BucketName }
-              - !Sub
-                - arn:aws:s3:::${S3bucketName}/*
-                - { S3bucketName: !Ref S3BucketName  }
-
-  SecurityHubCollectorS3BucketName:
-    Type: AWS::S3::Bucket
-    Condition: CreateBucket
-    Properties:
-      BucketName: !Ref S3BucketName
-      NotificationConfiguration:
-          TopicConfigurations:
-            -
-              Event: s3:ObjectCreated:Put
-              Topic: !Ref sumoS3SorceTopic
-
-  sumoS3SorceTopic:
-    Type: 'AWS::SNS::Topic'
-    Properties:
-      TopicName: !Sub "SumoSNSTopic-${AWS::StackName}"
-
-  sumoSNSSubscription:
-    Type: 'AWS::SNS::Subscription'
-    Properties:
-      TopicArn: 
-        Ref: sumoS3SorceTopic
-      Endpoint: !GetAtt SumoS3Source.SUMO_ENDPOINT
-      Protocol: https
-      DeliveryPolicy:
-       healthyRetryPolicy:
-         numRetries: 40
-         minDelayTarget: 10
-         maxDelayTarget: 300
-         numMinDelayRetries: 3
-         numMaxDelayRetries: 5
-         numNoDelayRetries: 0
-         backoffFunction: exponential
-
-  sumoSNSpolicy:
-   Properties:
-     PolicyDocument:
-       Id: SumoTopicPolicy
-       Statement:
-         -
-           Action: "sns:Publish"
-           Condition:
-             StringEquals:
-               aws:SourceAccount: !Ref "AWS::AccountId"
-             ArnLike:
-               aws:SourceArn: !Sub "arn:aws:s3:*:*:${S3BucketName}"
-           Effect: Allow
-           Principal:
-             AWS: "*"
-           Resource:
-             Ref: sumoS3SorceTopic
-     Topics:
-       -
-         Ref: sumoS3SorceTopic
-   Type: "AWS::SNS::TopicPolicy"
-
-  SumoAWSSecurityHubApp:
+  SumoApp:
     Type: Custom::App
+    Condition: install_app
     Properties:
-      ServiceToken: !GetAtt SumoAppUtils.Arn
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
-      AppName: "AWS Security Hub"
+      AppName: "Amazon QuickStart - AWS Security Hub"
       AppId: "246cf87b-99b6-47cb-bde0-3fe1cb76c6b4"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       AppSources:
-        findingSrc: !Sub "_sourceCategory=${SourceCategoryName}"
+        findingSrc: !Sub "_sourceCategory=${S3SourceCategoryName}"
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
@@ -345,15 +510,17 @@ Resources:
 Outputs:
   SecurityHubUserKey:
     Description: Access Key of User
+    Condition: install_s3_source
     Value:
       Ref: SecurityHubUserKey
   SecretKeyForSecurityHubUser:
     Description: Security Access Key of User
+    Condition: install_s3_source
     Value:
       Fn::GetAtt:
         - SecurityHubUserKey
         - SecretAccessKey
   SecurityHubArn:
-    Condition: EnableSecurityHub
+    Condition: enable_security_hub
     Value:
       Ref: SecurityHubConfiguration
