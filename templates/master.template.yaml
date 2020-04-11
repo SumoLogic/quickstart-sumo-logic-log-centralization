@@ -465,7 +465,7 @@ Parameters:
   Section5bElasticLoadBalancerSourceCategory:
     Type: String
     Description: "Provide an existing Source Category from Sumo Logic with Elastic Load Balancer Classic Logs."
-    Default: ""
+    Default: "*elb*"
 
   # S3 Audit Apps Parameters
   Section6aInstallS3AuditApp:
