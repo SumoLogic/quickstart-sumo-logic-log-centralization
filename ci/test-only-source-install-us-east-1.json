@@ -108,7 +108,7 @@
   },
   {
     "ParameterKey": "Section91bEnableLoggingForExistingResources",
-    "ParameterValue": "Skip"
+    "ParameterValue": "No"
   },
   {
     "ParameterKey": "QSS3BucketRegion",
