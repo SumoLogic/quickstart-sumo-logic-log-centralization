@@ -9,7 +9,7 @@
   },
   {
     "ParameterKey": "QSS3KeyPrefix",
-    "ParameterValue": "$[taskcat_random-string]"
+    "ParameterValue": "quickstart-sumo-logic-log-centralization/"
   },
   {
     "ParameterKey": "QSS3BucketName",

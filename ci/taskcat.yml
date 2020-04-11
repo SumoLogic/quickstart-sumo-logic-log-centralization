@@ -19,18 +19,18 @@ global:
     - us-west-2
   reporting: true
 tests:
-  test-apps-install-eu-central-1:
-    parameter_input: test-apps-install-eu-central-1.json
-    template_file: master.template.yaml
-    regions:
-      - eu-central-1
-  test-apps-install-us-east-1:
-    parameter_input: test-apps-install-us-east-1.json
+  test-only-apps-install:
+    parameter_input: test-only-apps-install.json
     template_file: master.template.yaml
     regions:
       - us-east-1
-  test-apps-install-us-west-1:
-    parameter_input: test-apps-install-us-west-1.json
+  test-with-default-parameters:
+    parameter_input: test-with-default-parameters.json
     template_file: master.template.yaml
     regions:
-      - us-west-1
+      - us-east-1
+  test-only-source-install:
+    parameter_input: test-only-source-install.json
+    template_file: master.template.yaml
+    regions:
+      - us-east-1

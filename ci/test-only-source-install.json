@@ -60,15 +60,15 @@
   },
   {
     "ParameterKey": "Section7bEnableSecurityHub",
-    "ParameterValue": "Yes"
+    "ParameterValue": "No"
   },
   {
     "ParameterKey": "Section7cSecurityHubCreateBucket",
-    "ParameterValue": "Yes"
+    "ParameterValue": "No"
   },
   {
     "ParameterKey": "Section7eSecurityHubCreateS3Source",
-    "ParameterValue": "Yes"
+    "ParameterValue": "No"
   },
   {
     "ParameterKey": "Section8aInstallWafApp",
@@ -76,7 +76,7 @@
   },
   {
     "ParameterKey": "Section8bCreateDeliveryStream",
-    "ParameterValue": "Yes"
+    "ParameterValue": "No"
   },
   {
     "ParameterKey": "Section8cWafCreateBucket",
@@ -92,15 +92,15 @@
   },
   {
     "ParameterKey": "Section9bConfigEnableConfig",
-    "ParameterValue": "Yes"
+    "ParameterValue": "No"
   },
   {
     "ParameterKey": "Section9cConfigCreateSNSTopic",
-    "ParameterValue": "Yes"
+    "ParameterValue": "No"
   },
   {
     "ParameterKey": "Section9eConfigCreateHttpLogsSource",
-    "ParameterValue": "Yes"
+    "ParameterValue": "No"
   },
   {
     "ParameterKey": "Section91aEnableAutoLogging",
@@ -109,9 +109,5 @@
   {
     "ParameterKey": "Section91bEnableLoggingForExistingResources",
     "ParameterValue": "No"
-  },
-  {
-    "ParameterKey": "QSS3BucketRegion",
-    "ParameterValue": "us-east-1"
   }
 ]
