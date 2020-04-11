@@ -42,7 +42,8 @@
   {
     "ParameterKey": "Section5aInstallThreatIntelApp",
     "ParameterValue": "Yes"
-  },{
+  },
+  {
     "ParameterKey": "Section6aInstallS3AuditApp",
     "ParameterValue": "Yes"
   },
@@ -109,5 +110,37 @@
   {
     "ParameterKey": "Section91bEnableLoggingForExistingResources",
     "ParameterValue": "No"
+  },
+  {
+    "ParameterKey": "Section2hCloudTrailLogsSourceCategoryName",
+    "ParameterValue": "SUMO/CloudTrail"
+  },
+  {
+    "ParameterKey": "Section3cGuardDutyHttpLogsSourceCategoryName",
+    "ParameterValue": "SUMO/GuardDuty"
+  },
+  {
+    "ParameterKey": "Section4fVpcLogsSourceCategoryName",
+    "ParameterValue": "SUMO/VPC"
+  },
+  {
+    "ParameterKey": "Section5bElasticLoadBalancerSourceCategory",
+    "ParameterValue": "SUMO/ALB"
+  },
+  {
+    "ParameterKey": "Section6fS3AuditLogsSourceCategoryName",
+    "ParameterValue": "SUMO/SECURITY"
+  },
+  {
+    "ParameterKey": "Section7gSecurityHubLogsSourceCategoryName",
+    "ParameterValue": "SUMO/SECURITY"
+  },
+  {
+    "ParameterKey": "Section8gWafLogsSourceCategoryName",
+    "ParameterValue": "SUMO/WAF"
+  },
+  {
+    "ParameterKey": "Section9fConfigHttpLogsSourceCategoryName",
+    "ParameterValue": "SUMO/CONFIG"
   }
 ]

@@ -29,8 +29,3 @@ tests:
     template_file: master.template.yaml
     regions:
       - us-east-1
-  test-only-source-install:
-    parameter_input: test-only-source-install.json
-    template_file: master.template.yaml
-    regions:
-      - us-east-1
