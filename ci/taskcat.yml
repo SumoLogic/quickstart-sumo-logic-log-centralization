@@ -29,8 +29,3 @@ tests:
     template_file: master.template.yaml
     regions:
       - us-east-1
-  test-apps-install-us-west-1:
-    parameter_input: test-apps-install-us-west-1.json
-    template_file: master.template.yaml
-    regions:
-      - us-west-1
