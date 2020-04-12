@@ -14,5 +14,17 @@
   {
     "ParameterKey": "QSS3BucketName",
     "ParameterValue": "$[taskcat_autobucket]"
+  },
+  {
+    "ParameterKey": "Section1bSumoLogicAccessID",
+    "ParameterValue": "suv1UhvjV0PgE0"
+  },
+  {
+    "ParameterKey": "Section1cSumoLogicAccessKey",
+    "ParameterValue": "P0jqVLlNzWwYNAkXwF4SPWVlOMKnll8M9qlAcgrTuDiaqEBxvjyKamp4nzE8wM4L"
+  },
+  {
+    "ParameterKey": "Section1dSumoLogicOrganizationId",
+    "ParameterValue": "0000000000285A74"
   }
 ]
