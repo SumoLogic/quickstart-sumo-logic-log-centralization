@@ -757,7 +757,7 @@ Conditions:
     - !Equals [ !Ref Section91aEnableAutoLogging, 'S3_VPC' ]
   auto_exisitng_resources: !Equals [ !Ref Section91bEnableLoggingForExistingResources, 'Yes' ]
 
-  # Conditions for Common
+  # Conditions for Common Resources
   create_common_s3_bucket: !Or
     - !Condition create_cloudtrail_bucket
     - !Condition create_vpc_bucket
