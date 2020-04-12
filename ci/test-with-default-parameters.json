@@ -14,5 +14,9 @@
   {
     "ParameterKey": "Section9fConfigHttpLogsSourceCategoryName",
     "ParameterValue": "SUMO/CONFIG"
+  },
+  {
+    "ParameterKey": "Section91bEnableLoggingForExistingResources",
+    "ParameterValue": "No"
   }
 ]
