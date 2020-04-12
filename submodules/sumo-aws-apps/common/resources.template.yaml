@@ -380,3 +380,6 @@ Outputs:
     Value: !Ref SumoSNSTopic
     Export:
       Name: !Sub "${AWS::StackName}-SNSTopicArn"
+  BucketName:
+    Description: "BucketName"
+    Value: !Ref BucketName

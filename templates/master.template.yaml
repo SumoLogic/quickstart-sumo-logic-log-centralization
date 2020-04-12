@@ -830,7 +830,16 @@ Resources:
         CreateCollector: !If [create_common_collector, 'Yes', 'No']
         CollectorName: !Sub "aws-quickstart-collector"
         CreateBucket: !If [create_common_s3_bucket, 'Yes', 'No']
-        BucketName: !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}"
+        BucketName: !Join
+          - ""
+          - - "aws-quickstart-logs-"
+            - !Select
+              - 0
+              - !Split
+                - "-"
+                - !Select
+                  - 2
+                  - !Split ["/", !Ref "AWS::StackId"]
         CreateTrail: !If [create_cloudtrail, 'Yes', 'No']
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
@@ -856,7 +865,7 @@ Resources:
         InstallCISFoundationApp: !Ref Section2cInstallCISFoundationApp
         CollectorName: !Sub "aws-quickstart-collector"
         CreateCloudTrailBucket: "No"
-        CloudTrailLogsBucketName: !If [create_cloudtrail_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section2eCloudTrailLogsBucketName]
+        CloudTrailLogsBucketName: !If [create_cloudtrail_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section2eCloudTrailLogsBucketName]
         CreateCloudTrailLogSource: !If [create_cloudtrail_source, "Yes", "No"]
         CloudTrailBucketPathExpression: !If [create_cloudtrail_bucket, !Sub "AWSLogs/${AWS::AccountId}/CloudTrail/*", !Ref Section2gCloudTrailBucketPathExpression]
         CloudTrailLogsSourceName: !Sub "aws-quickstart-cloudtrail-${AWS::Region}"
@@ -934,7 +943,7 @@ Resources:
         InstallPCIVpcApp: !If [install_pci_vpc_app, "Yes", "No"]
         CollectorName: !Sub "aws-quickstart-collector"
         CreateS3Bucket: "No"
-        LogsS3BucketName: !If [create_vpc_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section4cVpcLogsBucketName]
+        LogsS3BucketName: !If [create_vpc_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section4cVpcLogsBucketName]
         CreateS3Source: !If [create_vpc_source, "Yes", "No"]
         S3BucketLogsPathExpression: !If [auto_enable_vpc_logs, !Sub "${Section91eVPCLoggingBucketPrefix}*", !Ref Section4eVpcBucketPathExpression]
         S3SourceName: !Sub "aws-quickstart-vpc-${AWS::Region}"
@@ -1008,7 +1017,7 @@ Resources:
         InstallApp: !Ref Section6aInstallS3AuditApp
         CollectorName: !Sub "aws-quickstart-collector"
         CreateS3Bucket: "No"
-        LogsS3BucketName: !If [create_s3_audit_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section6cS3AuditLogsBucketName]
+        LogsS3BucketName: !If [create_s3_audit_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section6cS3AuditLogsBucketName]
         CreateS3AuditSource: !If [create_s3_audit_source, "Yes", "No"]
         S3BucketLogsPathExpression: !If [auto_enable_s3_audit, !Sub "${Section91cS3LoggingBucketPrefix}*", !Ref Section6eS3AuditBucketPathExpression]
         S3AuditSourceName: !Sub "aws-quickstart-s3-audit-${AWS::Region}"
@@ -1048,7 +1057,7 @@ Resources:
         InstallApp: !Ref Section7aInstallSecurityHubAuditApp
         CollectorName: !Sub "aws-quickstart-collector"
         CreateS3Bucket: "No"
-        LogsS3BucketName: !If [create_security_hub_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section7dSecurityHubLogsBucketName]
+        LogsS3BucketName: !If [create_security_hub_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section7dSecurityHubLogsBucketName]
         CreateS3Source: !If [create_security_hub_source, "Yes", "No"]
         S3BucketLogsPathExpression: !If [create_security_hub_bucket, "*securityhub*/*", !Ref Section7fSecurityHubBucketPathExpression]
         S3SourceName: !Sub "aws-quickstart-securityhub-${AWS::Region}"
@@ -1090,7 +1099,7 @@ Resources:
         InstallApp: !Ref Section8aInstallWafApp
         CollectorName: !Sub "aws-quickstart-collector"
         CreateS3Bucket: "No"
-        LogsS3BucketName: !If [create_waf_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section8dWafLogsBucketName]
+        LogsS3BucketName: !If [create_waf_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section8dWafLogsBucketName]
         CreateS3Source: !If [create_waf_source, "Yes", "No"]
         S3BucketLogsPathExpression: !If [enable_waf, "WAF_LOGS/*", !Ref Section8fWafBucketPathExpression]
         S3SourceName: !Sub "aws-quickstart-waf-${AWS::Region}"
@@ -1133,7 +1142,7 @@ Resources:
         InstallApp: !Ref Section9aInstallConfigApp
         CollectorName: !Sub "aws-quickstart-collector"
         EnableConfig: !If [enable_config, "Yes", "No"]
-        BucketName: !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}"
+        BucketName: !GetAtt CreateCommonResources.Outputs.BucketName
         CreateSNSTopic: !If [create_sns_topic, "Yes", "No"]
         TopicName: !Ref Section9dConfigExistingTopicName
         CreateHttpLogsSource: !If [create_config_source, "Yes", "No"]
@@ -1156,7 +1165,7 @@ Resources:
       Parameters:
         EnableLogging: 'S3'
         ExistingResource: !If [auto_exisitng_resources, 'Yes', 'No']
-        BucketName: !If [create_s3_audit_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section6cS3AuditLogsBucketName]
+        BucketName: !If [create_s3_audit_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section6cS3AuditLogsBucketName]
         BucketPrefix: !Ref Section91cS3LoggingBucketPrefix
         FilterExpression: !Ref Section91dS3LoggingFilterExpression
         QSS3BucketName: !Ref QSS3BucketName
@@ -1175,7 +1184,7 @@ Resources:
       Parameters:
         EnableLogging: 'VPC'
         ExistingResource: !If [auto_exisitng_resources, 'Yes', 'No']
-        BucketName: !If [create_vpc_bucket, !Sub "aws-quickstart-logs-${AWS::Region}-${AWS::AccountId}", !Ref Section4cVpcLogsBucketName]
+        BucketName: !If [create_vpc_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section4cVpcLogsBucketName]
         BucketPrefix: !Ref Section91eVPCLoggingBucketPrefix
         FilterExpression: !Ref Section91fVPCLoggingFilterExpression
         QSS3BucketName: !Ref QSS3BucketName
