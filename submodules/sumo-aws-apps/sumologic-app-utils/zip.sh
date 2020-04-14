@@ -1,11 +1,10 @@
-if [ ! -f sumo_app_utils.zip ]; then
-    echo "creating zip file"
-    mkdir python
-    cd python
-    pip install  crhelper -t .
-    pip install requests -t .
-    cp -v ../src/*.py .
-    zip -r ../sumo_app_utils.zip .
-    cd ..
-    rm -r python
+if [[ -f sumo_app_utils.zip ]]; then
+    rm sumo_app_utils.zip
+fi
+
+if [[ ! -f sumo_app_utils.zip ]]; then
+    echo "copying zip file from sumoloigc-aws-lambda repo."
+    curl -LJO https://github.com/SumoLogic/sumologic-aws-lambda/raw/sourabh-aws-observability/sumologic-aws-observability/SumoLogicAWSObservabilityHelper/SumoLogicAWSObservabilityHelper.zip
+    mv SumoLogicAWSObservabilityHelper.zip sumo_app_utils.zip
+    echo "copy done."
 fi

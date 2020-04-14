@@ -1,4 +1,8 @@
-if [ ! -f sumo_app_utils.zip ]; then
+if [[ -f cloudwatchevents.zip ]]; then
+    rm cloudwatchevents.zip
+fi
+
+if [[ ! -f cloudwatchevents.zip ]]; then
     echo "creating zip file"
     mkdir python
     cd python

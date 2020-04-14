@@ -1,0 +1,22 @@
+[
+  {
+    "ParameterKey": "Section9bConfigEnableConfig",
+    "ParameterValue": "No"
+  },
+  {
+    "ParameterKey": "Section9cConfigCreateSNSTopic",
+    "ParameterValue": "No"
+  },
+  {
+    "ParameterKey": "Section9eConfigCreateHttpLogsSource",
+    "ParameterValue": "No"
+  },
+  {
+    "ParameterKey": "Section9fConfigHttpLogsSourceCategoryName",
+    "ParameterValue": "SUMO/CONFIG"
+  },
+  {
+    "ParameterKey": "Section91bEnableLoggingForExistingResources",
+    "ParameterValue": "No"
+  }
+]

@@ -1,15 +1,15 @@
 [
   {
-    "ParameterKey": "SumoDeployment",
-    "ParameterValue": "us2"
+    "ParameterKey": "Section1aSumoLogicDeployment",
+    "ParameterValue": "us1"
   },
   {
-    "ParameterKey": "RemoveSumoResourcesOnDeleteStack",
+    "ParameterKey": "Section1eSumoLogicResourceRemoveOnDeleteStack",
     "ParameterValue": "true"
   },
   {
-    "ParameterKey": "S3BucketPrefix",
-    "ParameterValue": "$[taskcat_random-string]"
+    "ParameterKey": "QSS3KeyPrefix",
+    "ParameterValue": "quickstart-sumo-logic-log-centralization/"
   },
   {
     "ParameterKey": "QSS3BucketName",

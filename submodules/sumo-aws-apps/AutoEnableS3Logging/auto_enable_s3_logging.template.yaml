@@ -1,0 +1,228 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "Lambda Function for auto enable s3 logging for S3 Buckets, VPCs, Subnets and Network Interfaces."
+
+Globals:
+  Function:
+    Timeout: 300
+    MemorySize: 128
+
+Parameters:
+
+  EnableLogging:
+    Type: String
+    Description: "S3 - To Enable S3 Audit Logging for new S3 buckets.
+                  VPC - To Enable VPC flow logs for new VPC, Subnets and Network Interfaces."
+    AllowedPattern: ".+"
+    AllowedValues:
+      - 'S3'
+      - 'VPC'
+
+  ExistingResource:
+    Type: String
+    Description: "Yes - Enable Logging for existing resources.
+                  No - Skip Existing resources."
+    Default: "Yes"
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+
+  BucketName:
+    Type: String
+    Description: "Provide an bucket name where you need to send logs."
+    AllowedPattern: ".+"
+
+  BucketPrefix:
+    Type: String
+    Description: "Provide an bucket prefix. It Should have / in the end."
+    AllowedPattern: ".*\\/$"
+    ConstraintDescription: "Bucket Prefix Should have / in the end."
+
+  FilterExpression:
+    Type: String
+    Default: ""
+    Description: "Provide regular expression for matching aws resources. For eg;- 'VpcId': 't1.micro.*?'|'NetworkInterfaceId': 'Test.*?']|'SubnetId': 'prod.*?'|test|prod'"
+
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: "aws-quickstart"
+    Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Type: "String"
+  QSS3BucketRegion:
+    Default: "us-east-1"
+    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: "quickstart-sumo-logic-log-centralization/"
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: "String"
+
+Conditions:
+  enable_s3_buckets_logging: !Equals [!Ref EnableLogging, 'S3']
+  enable_vpc_flow_logs_logging: !Equals [!Ref EnableLogging, 'VPC']
+
+  enable_existing_resources: !Equals [!Ref ExistingResource, 'Yes']
+
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+
+Resources:
+
+  SumoLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: SumoPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - ec2:Describe*
+                  - ec2:DeleteFlowLogs
+                  - ec2:CreateFlowLogs
+                  - ec2:DescribeFlowLogs
+                  - logs:CreateLogDelivery
+                  - logs:DeleteLogDelivery
+                  - s3:GetBucketPolicy
+                  - s3:PutBucketPolicy
+                  - s3:ListAllMyBuckets
+                  - s3:GetBucketLocation
+                  - s3:PutBucketAcl
+                  - s3:GetBucketAcl
+                  - s3:GetBucketLogging
+                  - s3:PutBucketLogging
+                Resource: '*'
+
+  AwsS3LogsResourcesLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: !Sub
+          - "${S3Bucket}"
+          - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+        S3Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
+      Handler: "awsresource.enable_s3_logs"
+      Runtime: python3.7
+      Role: !GetAtt SumoLambdaRole.Arn
+      Description: "Lambda Function for auto enable s3 logs for Application load balancer."
+      MemorySize: 128
+      Timeout: 600
+      Environment:
+        Variables:
+          BucketName: !Ref BucketName
+          AccountID: !Ref "AWS::AccountId"
+          Filter: !Ref FilterExpression
+          BucketPrefix: !Ref BucketPrefix
+
+  AutoEnableS3LogEventsInvokePermission:
+    Type: AWS::Lambda::Permission
+    Condition: enable_s3_buckets_logging
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref AwsS3LogsResourcesLambda
+      Principal: "events.amazonaws.com"
+      SourceArn: !GetAtt AutoEnableS3LogEventsRuleTrigger.Arn
+
+  AutoEnableS3LogEventsRuleTrigger:
+    Type: 'AWS::Events::Rule'
+    DependsOn: AwsS3LogsResourcesLambda
+    Condition: enable_s3_buckets_logging
+    Properties:
+      Description: Auto-Enable S3 loggging for S3 Buckets with Lambda from events
+      EventPattern:
+        source:
+          - aws.s3
+        detail-type:
+          - AWS API Call via CloudTrail
+        detail:
+          eventSource:
+            - s3.amazonaws.com
+          eventName:
+            - CreateBucket
+      Name: !Sub "QuickStartAutoEnableS3Logs"
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt AwsS3LogsResourcesLambda.Arn
+          Id: Main
+
+  AutoEnableVPCEventsInvokePermission:
+    Type: AWS::Lambda::Permission
+    Condition: enable_vpc_flow_logs_logging
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref AwsS3LogsResourcesLambda
+      Principal: "events.amazonaws.com"
+      SourceArn: !GetAtt AutoEnableVPCEventsRuleTrigger.Arn
+
+  AutoEnableVPCEventsRuleTrigger:
+    Type: 'AWS::Events::Rule'
+    DependsOn: AwsS3LogsResourcesLambda
+    Condition: enable_vpc_flow_logs_logging
+    Properties:
+      Description: Auto-Enable VPC Flow logs for VPCs with Lambda from events
+      EventPattern:
+        source:
+          - aws.ec2
+        detail-type:
+          - AWS API Call via CloudTrail
+        detail:
+          eventSource:
+            - ec2.amazonaws.com
+          eventName:
+            - CreateVpc
+      Name: !Sub "QuickStartAutoEnableVPCLogs"
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt AwsS3LogsResourcesLambda.Arn
+          Id: Main
+
+  SumoLogicHelperFunction:
+    Type: 'AWS::Serverless::Function'
+    DependsOn: SumoLambdaRole
+    Condition: enable_existing_resources
+    Properties:
+      Handler: main.handler
+      Runtime: python3.7
+      CodeUri:
+        Bucket: !Sub
+          - "${S3Bucket}"
+          - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+        Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
+      MemorySize: 128
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+          - SumoLambdaRole
+          - Arn
+
+  EnableS3LogsResources:
+    Type: Custom::EnableS3LogsResources
+    Condition: enable_existing_resources
+    DependsOn: AwsS3LogsResourcesLambda
+    Properties:
+      ServiceToken: !GetAtt SumoLogicHelperFunction.Arn
+      AWSResource: !If [enable_s3_buckets_logging, "s3", "vpc"]
+      BucketName: !Ref BucketName
+      Filter: !Ref FilterExpression
+      BucketPrefix: !Ref BucketPrefix
+      AccountID: !Ref "AWS::AccountId"
+
+Outputs:
+
+  AwsS3LogsResourcesLambda:
+    Description: "AwsS3LogsResourcesLambda Function ARN"
+    Value: !GetAtt AwsS3LogsResourcesLambda.Arn
