@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: "Template to setup the Amazon GuardDuty, Amazon GuardDuty Benchmark app with AWS and Sumo Logic resources for AWS Quick Start Solution."
+Description: "Template to setup the Amazon S3 Audit app with AWS and Sumo Logic resources for AWS Quick Start Solution."
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -11,21 +11,24 @@ Metadata:
           - SumoDeployment
           - SumoAccessID
           - SumoAccessKey
+          - SumoOrganizationId
           - RemoveSumoResourcesOnDeleteStack
 
       - Label:
           default: "App Details - Collector Configuration"
         Parameters:
-          - InstallGuardDutyApp
-          - InstallGuardDutyBenchMarkApp
+          - InstallApp
           - CollectorName
 
       - Label:
-          default: "App Details - HTTP Logs Source Configuration"
+          default: "App Details - S3 Audit Source Configuration"
         Parameters:
-          - CreateHttpLogsSource
-          - HttpLogsSourceName
-          - HttpLogsSourceCategoryName
+          - CreateS3Bucket
+          - LogsS3BucketName
+          - CreateS3AuditSource
+          - S3BucketLogsPathExpression
+          - S3AuditSourceName
+          - S3AuditSourceCategoryName
 
       - Label:
           default: "AWS Quick Start configuration"
@@ -46,22 +49,28 @@ Metadata:
         default: "Sumo Logic Access ID"
       SumoAccessKey:
         default: "Sumo Logic Access Key"
+      SumoOrganizationId:
+        default: "Sumo Logic Organization Id"
       RemoveSumoResourcesOnDeleteStack:
         default: "Delete Sumo Logic Resources when stack is deleted"
 
-      InstallGuardDutyApp:
-        default: "Install Sumo Logic Amazon GuardDuty App"
-      InstallGuardDutyBenchMarkApp:
-        default: "Install Sumo Logic Amazon GuardDuty BenchMark App"
+      InstallApp:
+        default: "Install Sumo Logic App"
       CollectorName:
         default: "Collector Name"
 
-      CreateHttpLogsSource:
-        default: "Create Sumo Logic HTTP Logs Source"
-      HttpLogsSourceName:
-        default: "Sumo Logic HTTP Logs Source Name"
-      HttpLogsSourceCategoryName:
-        default: "Sumo Logic HTTP Logs Source Category Name"
+      CreateS3Bucket:
+        default: "Create AWS S3 Bucket"
+      LogsS3BucketName:
+        default: "AWS S3 Bucket Name"
+      CreateS3AuditSource:
+        default: "Create Sumo Logic Amazon S3 Audit Logs Source"
+      S3BucketLogsPathExpression:
+        default: "Path Expression for the logs"
+      S3AuditSourceName:
+        default: "Sumo Logic Amazon S3 Audit Logs Source Name"
+      S3AuditSourceCategoryName:
+        default: "Sumo Logic Amazon S3 Audit Logs Source Category Name"
 
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
@@ -87,7 +96,6 @@ Parameters:
       - in
       - fed
     Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1."
-    AllowedPattern: ".+"
   SumoAccessID:
     Type: String
     Description: "The Sumo Logic Access ID. Used for Sumo Logic API calls."
@@ -99,26 +107,23 @@ Parameters:
     AllowedPattern: ".+"
     ConstraintDescription: "Sumo Logic Access Key can not be empty."
     NoEcho: true
+  SumoOrganizationId:
+    Description: "The Account Overview page displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources."
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
   RemoveSumoResourcesOnDeleteStack:
     AllowedValues:
       - true
       - false
-    Default: false
-    Description: "To delete collector, sources and app when stack is deleted, set this parameter to true. Default is false.
+    Default: true
+    Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to true. Default is true.
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
 
-  InstallGuardDutyApp:
+  InstallApp:
     Type: String
-    Description: "Yes -> To Install Amazon GuardDuty App in Sumo Logic for AWS Quick Start Solution.
-                  No -> Skip Installation of the app."
-    Default: 'Yes'
-    AllowedValues:
-      - 'Yes'
-      - 'No'
-  InstallGuardDutyBenchMarkApp:
-    Type: String
-    Description: "Yes -> To Install Amazon GuardDuty BenchMark App in Sumo Logic for AWS Quick Start Solution.
+    Description: "Yes -> To Install Sumo Logic App in Sumo Logic for AWS Quick Start Solution.
                   No -> Skip Installation of the app."
     Default: 'Yes'
     AllowedValues:
@@ -127,24 +132,41 @@ Parameters:
   CollectorName:
     Type: String
     Description: Change the collector name to be created else default name will be used.
-    Default: AWS-GuardDuty-Collector
+    Default: AWS-S3-Audit-Collector
 
-  CreateHttpLogsSource:
+  CreateS3Bucket:
     Type: String
-    Description: "Choose Yes to create Sumo Logic HTTP logs source. Choose No if HTTP Logs source already exist."
+    Description: "Yes - Create a new S3 bucket in AWS S3.
+                  No - Use an existing S3 bucket from AWS S3 which has S3 Audit Logs."
     Default: 'Yes'
     AllowedValues:
       - 'Yes'
       - 'No'
-  HttpLogsSourceName:
+  LogsS3BucketName:
     Type: String
-    Description: Change the HTTP Source name to be created else default name will be used.
-    Default: AWS-GuardDuty-Source
-  HttpLogsSourceCategoryName:
+    Description: "Existing Bucket Name - Provide value if the Flag is set to No.
+                  New Bucket Name - Provide a unique Bucket Name if the flag is set to Yes."
+  CreateS3AuditSource:
     Type: String
-    Description: "Existing - Change to an existing Source Category from Sumo Logic if HTTP Source is not created.\n
-                  New - Change the source category else Default will be used if HTTP Source is Created"
-    Default: AWS/GuardDuty/logs
+    Description: "Yes - to create Sumo Logic Amazon S3 Audit Log Source with provided bucket Name.
+                  No - to skip creation of the Sumo Logic Amazon S3 Audit Log Source."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  S3BucketLogsPathExpression:
+    Type: String
+    Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
+    Default: "*"
+  S3AuditSourceName:
+    Type: String
+    Description: Change the Sumo Logic Amazon S3 Audit Source name to be created else default name will be used.
+    Default: AWS-S3-Audit-Source
+  S3AuditSourceCategoryName:
+    Type: String
+    Description: "Existing - Change to an existing Source Category from Sumo Logic if Amazon S3 Source is not created.
+                  New - Default will be used if Amazon S3 Source is Created."
+    Default: AWS/S3/Audit/Logs
 
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
@@ -172,12 +194,15 @@ Conditions:
   do_not_use_parent_stack: !Equals [ !Ref ParentStackName, "ParentStackName"]
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
-  install_guardduty_app: !Equals [!Ref InstallGuardDutyApp, 'Yes']
-  install_guardduty_benchmark_app: !Equals [!Ref InstallGuardDutyBenchMarkApp, 'Yes']
-  install_http_logs_source: !Equals [!Ref CreateHttpLogsSource, 'Yes']
+  install_app: !Equals [!Ref InstallApp, 'Yes']
+  create_target_s3_bucket: !Equals [!Ref CreateS3Bucket, 'Yes']
+  install_s3_audit_source: !Equals [!Ref CreateS3AuditSource, 'Yes']
+
+  create_sns_topic: !And
+    - !Condition do_not_use_parent_stack
+    - !Condition install_s3_audit_source
 
 Resources:
-
   SumoLogicHelperRole:
     Type: AWS::IAM::Role
     Condition: do_not_use_parent_stack
@@ -200,9 +225,12 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                  - config:DescribeDeliveryChannels
-                  - config:PutDeliveryChannel
-                  - config:DeleteDeliveryChannel
+                  - s3:ListAllMyBuckets
+                  - s3:GetBucketLocation
+                  - s3:GetBucketLogging
+                  - s3:PutBucketLogging
+                  - s3:PutBucketAcl
+                  - s3:GetBucketAcl
                 Resource: '*'
 
   SumoLogicHelperFunction:
@@ -216,7 +244,7 @@ Resources:
         Bucket: !Sub
           - "${S3Bucket}"
           - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-        Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
+        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -224,31 +252,99 @@ Resources:
           - SumoLogicHelperRole
           - Arn
 
-  CloudWatchEventFunction:
-    Type: AWS::Serverless::Function
-    Condition: install_http_logs_source
+  SumoRole:
+    Type: AWS::IAM::Role
+    Condition: do_not_use_parent_stack
     Properties:
-      CodeUri:
-        Bucket: !Sub
-          - "${S3Bucket}"
-          - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-        Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/guardduty/cloudwatchevents.zip"
-      Handler: cloudwatchevents.handler
-      Runtime: nodejs10.x
-      Environment:
-        Variables:
-          SUMO_ENDPOINT: !GetAtt SumoHTTPSource.SUMO_ENDPOINT
-      Events:
-        CloudWatchEventTrigger:
-          Type: CloudWatchEvent
-          Properties:
-            Pattern:
-              source:
-                - aws.guardduty
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::926226587429:root
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Sub "${SumoDeployment}:${SumoOrganizationId}"
+      Path: "/"
+      Policies:
+        - PolicyName: SumoPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:ListBucketVersions
+                  - s3:ListBucket
+                Resource:
+                  "*"
+
+  SumoSNSTopic:
+    Condition: create_sns_topic
+    Type: "AWS::SNS::Topic"
+    Properties:
+      TopicName: !Sub "SumoSNSTopic-${AWS::StackName}"
+
+  SumoSNSSubscription:
+    Condition: install_s3_audit_source
+    Type: "AWS::SNS::Subscription"
+    Properties:
+      TopicArn: !If
+        - create_sns_topic
+        - !Ref SumoSNSTopic
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SNSTopicArn'
+      Endpoint: !GetAtt SumoS3AuditSource.SUMO_ENDPOINT
+      Protocol: https
+      DeliveryPolicy:
+        healthyRetryPolicy:
+          numRetries: 40
+          minDelayTarget: 10
+          maxDelayTarget: 300
+          numMinDelayRetries: 3
+          numMaxDelayRetries: 5
+          numNoDelayRetries: 0
+          backoffFunction: exponential
+
+  SumoSNSpolicy:
+    Condition: create_sns_topic
+    Type: "AWS::SNS::TopicPolicy"
+    Properties:
+      PolicyDocument:
+        Id: SumoTopicPolicy
+        Statement:
+          - Action:
+              - sns:Publish
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref "AWS::AccountId"
+              ArnLike:
+                aws:SourceArn: !Sub "arn:aws:s3:::${LogsS3BucketName}"
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Resource:
+              - !Ref SumoSNSTopic
+      Topics:
+        - Ref: SumoSNSTopic
+
+  TargetS3Bucket:
+    Condition: create_target_s3_bucket
+    Type: AWS::S3::Bucket
+    DependsOn:
+      - SumoSNSpolicy
+    Properties:
+      BucketName: !Ref LogsS3BucketName
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Event: s3:ObjectCreated:Put
+            Topic: !Ref SumoSNSTopic
 
   SumoHostedCollector:
     Type: Custom::Collector
-    Condition: install_http_logs_source
+    Condition: install_s3_audit_source
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -265,9 +361,9 @@ Resources:
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
 
-  SumoHTTPSource:
-    Condition: install_http_logs_source
-    Type: Custom::HTTPSource
+  SumoS3AuditSource:
+    Type: Custom::AWSSource
+    Condition: install_s3_audit_source
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -276,20 +372,28 @@ Resources:
           - Arn
         - !ImportValue
           'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      SourceType: AwsS3AuditBucket
       Region: !Ref "AWS::Region"
-      SourceName: !Ref HttpLogsSourceName
+      SourceName: !Ref S3AuditSourceName
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-      SourceCategory: !Ref HttpLogsSourceCategoryName
+      SourceCategory: !Ref S3AuditSourceCategoryName
       CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
-      DateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-      DateLocatorRegex: '.*"updatedAt":"(.*)".*'
+      TargetBucketName: !Ref LogsS3BucketName
+      PathExpression: !Ref S3BucketLogsPathExpression
+      RoleArn: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoRole
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoSourceRoleARN'
 
-  sumoGuardDutyApp:
+  SumoAmazonS3AuditApp:
     Type: Custom::App
-    Condition: install_guardduty_app
+    Condition: install_app
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -299,47 +403,22 @@ Resources:
         - !ImportValue
           'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
-      AppName: "Amazon QuickStart - Amazon GuardDuty"
-      AppId: "5a58719f-0f8a-4aa7-993f-9cc337a286aa"
+      AppName: "Amazon QuickStart - Amazon S3 Audit"
+      AppId: "cf3ba421-d959-4b08-9ae8-5bd4202eea87"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       AppSources:
-        logsrc: !Sub "_sourceCategory=${HttpLogsSourceCategoryName}"
-      SumoAccessID: !Ref SumoAccessID
-      SumoAccessKey: !Ref SumoAccessKey
-      SumoDeployment: !Ref SumoDeployment
-
-  sumoGuardDutyBenchmarkApp:
-    Type: Custom::App
-    Condition: install_guardduty_benchmark_app
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
-      Region: !Ref "AWS::Region"
-      AppName: "Amazon QuickStart - Amazon GuardDuty Benchmark"
-      AppId: "8e7efcb3-040a-4a92-9f8d-922fafb24afb"
-      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-      AppSources:
-        gdbenchmark: !Sub "_sourceCategory=${HttpLogsSourceCategoryName}"
+        paramId123: !Sub "_sourceCategory=${S3AuditSourceCategoryName}"
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
 
 Outputs:
+  SumoRoleArn:
+    Description: ARN of the cretaed Role.
+    Condition: do_not_use_parent_stack
+    Value: !GetAtt SumoRole.Arn
 
-  CloudWatchEventFunction:
-    Description: "CloudWatchEvent Processor Function ARN"
-    Condition: install_http_logs_source
-    Value: !GetAtt CloudWatchEventFunction.Arn
-  GuarddutyBenchmarkAppFolder:
-    Description: "Folder Name"
-    Condition: install_guardduty_benchmark_app
-    Value: !GetAtt sumoGuardDutyBenchmarkApp.APP_FOLDER_NAME
-  GuarddutyAppFolder:
-    Description: "Folder Name"
-    Condition: install_guardduty_app
-    Value: !GetAtt sumoGuardDutyApp.APP_FOLDER_NAME
+  SumoEndpoint:
+    Description: SNS Subscription Endpoint
+    Condition: install_s3_audit_source
+    Value: !GetAtt SumoS3AuditSource.SUMO_ENDPOINT
