@@ -1,12 +1,12 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: 'AWS::Serverless-2016-10-31'
-Description: "Template to setup the AWS Config app with AWS and Sumo Logic resources for AWS Quick Start Solution."
+Transform: AWS::Serverless-2016-10-31
+Description: "Template to setup the Amazon GuardDuty, Amazon GuardDuty Benchmark app with AWS and Sumo Logic resources for AWS Quick Start Solution."
 
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: "Sumo Logic Access Configuration (Required)"
+          default: "Sumo Logic Deployment Configuration"
         Parameters:
           - SumoDeployment
           - SumoAccessID
@@ -16,16 +16,9 @@ Metadata:
       - Label:
           default: "App Details - Collector Configuration"
         Parameters:
-          - InstallApp
+          - InstallGuardDutyApp
+          - InstallGuardDutyBenchMarkApp
           - CollectorName
-
-      - Label:
-          default: "App Details - AWS Config Details"
-        Parameters:
-          - EnableConfig
-          - BucketName
-          - CreateSNSTopic
-          - TopicName
 
       - Label:
           default: "App Details - HTTP Logs Source Configuration"
@@ -56,19 +49,12 @@ Metadata:
       RemoveSumoResourcesOnDeleteStack:
         default: "Delete Sumo Logic Resources when stack is deleted"
 
-      InstallApp:
-        default: "Install Sumo Logic App"
+      InstallGuardDutyApp:
+        default: "Install Sumo Logic Amazon GuardDuty App"
+      InstallGuardDutyBenchMarkApp:
+        default: "Install Sumo Logic Amazon GuardDuty BenchMark App"
       CollectorName:
         default: "Collector Name"
-
-      EnableConfig:
-        default: "Enable AWS Config for the region"
-      BucketName:
-        default: "Bucket Name"
-      CreateSNSTopic:
-        default: "Create SNS Topic for logs delivery"
-      TopicName:
-        default: "Topic Name"
 
       CreateHttpLogsSource:
         default: "Create Sumo Logic HTTP Logs Source"
@@ -122,9 +108,17 @@ Parameters:
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
 
-  InstallApp:
+  InstallGuardDutyApp:
     Type: String
-    Description: "Yes -> To Install App in Sumo Logic for AWS Quick Start Solution.
+    Description: "Yes -> To Install Amazon GuardDuty App in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  InstallGuardDutyBenchMarkApp:
+    Type: String
+    Description: "Yes -> To Install Amazon GuardDuty BenchMark App in Sumo Logic for AWS Quick Start Solution.
                   No -> Skip Installation of the app."
     Default: 'Yes'
     AllowedValues:
@@ -133,32 +127,7 @@ Parameters:
   CollectorName:
     Type: String
     Description: Change the collector name to be created else default name will be used.
-    Default: AWS-Config-Collector
-
-  EnableConfig:
-    Type: String
-    Description: "Choose Yes to enable config for the region.
-                  Choose No if config is already enabled."
-    Default: 'Yes'
-    AllowedValues:
-      - 'Yes'
-      - 'No'
-  BucketName:
-    Type: String
-    Description: "Enable config flag -> Yes. Provide a new bucket name to receive configuration history and configuration snapshot files."
-    Default: ""
-  CreateSNSTopic:
-    Type: String
-    Description: "Choose Yes to create SNS Topic and attach the SNS topic to AWS Config setting to deliver the logs.
-                  Choose No if config logs are already delivered to an existing SNS topic."
-    Default: 'Yes'
-    AllowedValues:
-      - 'Yes'
-      - 'No'
-  TopicName:
-    Type: String
-    Description: Required when flag -> No. Provide exisitng config SNS topic from Config settings to stream configuration changes and notifications.
-    Default: ""
+    Default: AWS-GuardDuty-Collector
 
   CreateHttpLogsSource:
     Type: String
@@ -170,12 +139,12 @@ Parameters:
   HttpLogsSourceName:
     Type: String
     Description: Change the HTTP Source name to be created else default name will be used.
-    Default: AWS-Config-Source
+    Default: AWS-GuardDuty-Source
   HttpLogsSourceCategoryName:
     Type: String
     Description: "Existing - Change to an existing Source Category from Sumo Logic if HTTP Source is not created.\n
                   New - Change the source category else Default will be used if HTTP Source is Created"
-    Default: AWS/config/logs
+    Default: AWS/GuardDuty/logs
 
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
@@ -203,14 +172,9 @@ Conditions:
   do_not_use_parent_stack: !Equals [ !Ref ParentStackName, "ParentStackName"]
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
-  install_app: !Equals [!Ref InstallApp, 'Yes']
-  create_sns_topic: !Equals [!Ref CreateSNSTopic, 'Yes']
-  enable_config: !Equals [!Ref EnableConfig, 'Yes']
+  install_guardduty_app: !Equals [!Ref InstallGuardDutyApp, 'Yes']
+  install_guardduty_benchmark_app: !Equals [!Ref InstallGuardDutyBenchMarkApp, 'Yes']
   install_http_logs_source: !Equals [!Ref CreateHttpLogsSource, 'Yes']
-
-  create_bukcet: !And
-    - !Condition enable_config
-    - !Condition do_not_use_parent_stack
 
 Resources:
 
@@ -252,7 +216,7 @@ Resources:
         Bucket: !Sub
           - "${S3Bucket}"
           - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-        Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
+        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -260,122 +224,27 @@ Resources:
           - SumoLogicHelperRole
           - Arn
 
-  ConfigRecorder:
-    Type: AWS::Config::ConfigurationRecorder
-    Condition: enable_config
-    Properties:
-      Name: default
-      RoleARN: !GetAtt [ConfigRole, Arn]
-
-  ConfigRole:
-    Type: AWS::IAM::Role
-    Condition: enable_config
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: [config.amazonaws.com]
-            Action: ['sts:AssumeRole']
-      ManagedPolicyArns: ['arn:aws:iam::aws:policy/service-role/AWSConfigRole']
-      Policies:
-        - PolicyName: root
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action: s3:GetBucketAcl
-                Resource: !Join ['', ['arn:aws:s3:::', !Ref BucketName]]
-              - Effect: Allow
-                Action: s3:PutObject
-                Resource: !Join ['', ['arn:aws:s3:::', !Ref BucketName, /AWSLogs/,
-                                      !Ref 'AWS::AccountId', /*]]
-                Condition:
-                  StringEquals:
-                    s3:x-amz-acl: bucket-owner-full-control
-              - Effect: Allow
-                Action: config:Put*
-                Resource: '*'
-
-  TargetS3Bucket:
-    Type: AWS::S3::Bucket
-    Condition: create_bukcet
-    Properties:
-      BucketName: !Ref BucketName
-
-  SumoSNSTopic:
-    Type: "AWS::SNS::Topic"
-    Condition: create_sns_topic
-    Properties:
-      TopicName: !Sub "SumoSNSTopic-${AWS::StackName}"
-
-  ConfigTopicPolicy:
-    Type: AWS::SNS::TopicPolicy
-    Condition: create_sns_topic
-    Properties:
-      PolicyDocument:
-        Id: ConfigTopicPolicy
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: config.amazonaws.com
-            Action: SNS:Publish
-            Resource: '*'
-      Topics: [!Ref 'SumoSNSTopic']
-
-  WaitHandle:
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  EnableConfigWaitHandle:
-    Condition: enable_config
-    DependsOn: ConfigRole
-    Type: "AWS::CloudFormation::WaitConditionHandle"
-
-  EnableConfigWaitCondition:
-    Type: "AWS::CloudFormation::WaitCondition"
-    Properties:
-      Handle: !If [enable_config, !Ref EnableConfigWaitHandle, !Ref WaitHandle]
-      Timeout: "10"
-      Count: 0
-
-  DeliveryChannelWhenConfigIsTurnedOn:
-    Type: "Custom::ConfigDeliveryChannel"
-    Condition: create_sns_topic
-    DependsOn: [ConfigTopicPolicy, EnableConfigWaitCondition]
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
-      DeliveryFrequency: Six_Hours
-      S3BucketName: !If [enable_config, !Ref BucketName, ""]
-      SnsTopicARN: !Ref SumoSNSTopic
-      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-
-  SumoSNSSubscription:
-    Type: "AWS::SNS::Subscription"
+  CloudWatchEventFunction:
+    Type: AWS::Serverless::Function
     Condition: install_http_logs_source
     Properties:
-      TopicArn: !If
-        - create_sns_topic
-        - !Ref SumoSNSTopic
-        - !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${TopicName}"
-      Endpoint: !GetAtt SumoHTTPSource.SUMO_ENDPOINT
-      Protocol: https
-      DeliveryPolicy:
-        healthyRetryPolicy:
-          numRetries: 40
-          minDelayTarget: 10
-          maxDelayTarget: 300
-          numMinDelayRetries: 3
-          numMaxDelayRetries: 5
-          numNoDelayRetries: 0
-          backoffFunction: exponential
+      CodeUri:
+        Bucket: !Sub
+          - "${S3Bucket}"
+          - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/guardduty/cloudwatchevents.zip"
+      Handler: cloudwatchevents.handler
+      Runtime: nodejs10.x
+      Environment:
+        Variables:
+          SUMO_ENDPOINT: !GetAtt SumoHTTPSource.SUMO_ENDPOINT
+      Events:
+        CloudWatchEventTrigger:
+          Type: CloudWatchEvent
+          Properties:
+            Pattern:
+              source:
+                - aws.guardduty
 
   SumoHostedCollector:
     Type: Custom::Collector
@@ -415,11 +284,12 @@ Resources:
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
-      MessagePerRequest: true
+      DateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+      DateLocatorRegex: '.*"updatedAt":"(.*)".*'
 
-  sumoApp:
+  sumoGuardDutyApp:
     Type: Custom::App
-    Condition: install_app
+    Condition: install_guardduty_app
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -429,11 +299,47 @@ Resources:
         - !ImportValue
           'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
-      AppName: "Amazon QuickStart - AWS Config"
-      AppId: "61be4a8f-6702-4035-bc55-e56d149b181d"
+      AppName: "Amazon QuickStart - Amazon GuardDuty"
+      AppId: "5a58719f-0f8a-4aa7-993f-9cc337a286aa"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       AppSources:
-        paramId123: !Sub "_sourceCategory=${HttpLogsSourceCategoryName}"
+        logsrc: !Sub "_sourceCategory=${HttpLogsSourceCategoryName}"
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
+
+  sumoGuardDutyBenchmarkApp:
+    Type: Custom::App
+    Condition: install_guardduty_benchmark_app
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      Region: !Ref "AWS::Region"
+      AppName: "Amazon QuickStart - Amazon GuardDuty Benchmark"
+      AppId: "8e7efcb3-040a-4a92-9f8d-922fafb24afb"
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      AppSources:
+        gdbenchmark: !Sub "_sourceCategory=${HttpLogsSourceCategoryName}"
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
+
+Outputs:
+
+  CloudWatchEventFunction:
+    Description: "CloudWatchEvent Processor Function ARN"
+    Condition: install_http_logs_source
+    Value: !GetAtt CloudWatchEventFunction.Arn
+  GuarddutyBenchmarkAppFolder:
+    Description: "Folder Name"
+    Condition: install_guardduty_benchmark_app
+    Value: !GetAtt sumoGuardDutyBenchmarkApp.APP_FOLDER_NAME
+  GuarddutyAppFolder:
+    Description: "Folder Name"
+    Condition: install_guardduty_app
+    Value: !GetAtt sumoGuardDutyApp.APP_FOLDER_NAME

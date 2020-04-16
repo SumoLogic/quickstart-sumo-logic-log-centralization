@@ -14,5 +14,17 @@
   {
     "ParameterKey": "QSS3BucketName",
     "ParameterValue": "$[taskcat_autobucket]"
+  },
+  {
+    "ParameterKey": "Section1bSumoLogicAccessID",
+    "ParameterValue": "Override"
+  },
+  {
+    "ParameterKey": "Section1cSumoLogicAccessKey",
+    "ParameterValue": "Override"
+  },
+  {
+    "ParameterKey": "Section1dSumoLogicOrganizationId",
+    "ParameterValue": "Override"
   }
 ]
