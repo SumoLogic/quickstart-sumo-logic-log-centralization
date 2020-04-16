@@ -17,14 +17,14 @@
   },
   {
     "ParameterKey": "Section1bSumoLogicAccessID",
-    "ParameterValue": "suCpleAcLG8PMS"
+    "ParameterValue": "Override"
   },
   {
     "ParameterKey": "Section1cSumoLogicAccessKey",
-    "ParameterValue": "89984QnhR4fMMZ2PiEDBMt4bUQvkJoxMKACBwMJl1XM88EwRjtUPwqpaLa4KzuZz"
+    "ParameterValue": "Override"
   },
   {
     "ParameterKey": "Section1dSumoLogicOrganizationId",
-    "ParameterValue": "0000000000285A74"
+    "ParameterValue": "Override"
   }
 ]
