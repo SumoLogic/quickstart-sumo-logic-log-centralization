@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: "Template to setup the Amazon VPC Flow Logs, PCI Compliance For Amazon VPC Flow app with AWS and Sumo Logic resources for AWS Quick Start Solution."
+Description: "Template to setup the AWS WAF app with AWS and Sumo Logic resources for AWS Quick Start Solution."
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -17,12 +17,11 @@ Metadata:
       - Label:
           default: "App Details - Collector Configuration"
         Parameters:
-          - InstallVpcApp
-          - InstallPCIVpcApp
+          - InstallApp
           - CollectorName
 
       - Label:
-          default: "App Details - VPC Logs S3 Source Configuration"
+          default: "App Details - S3 Source Configuration"
         Parameters:
           - CreateS3Bucket
           - LogsS3BucketName
@@ -30,8 +29,14 @@ Metadata:
           - S3BucketLogsPathExpression
           - S3SourceName
           - S3SourceCategoryName
-          - ExcludeRuleName
-          - ExcludeRuleRegex
+
+      - Label:
+          default: "Kinesis Firehose Delivery Stream Configuration"
+        Parameters:
+          - CreateDeliveryStream
+          - DeliveryStreamName
+          - CompressionFormat
+          - S3BackupMode
 
       - Label:
           default: "AWS Quick Start configuration"
@@ -57,10 +62,8 @@ Metadata:
       RemoveSumoResourcesOnDeleteStack:
         default: "Delete Sumo Logic Resources when stack is deleted"
 
-      InstallVpcApp:
-        default: "Install Sumo Logic Amazon VPC Flow Logs App"
-      InstallPCIVpcApp:
-        default: "Install Sumo Logic PCI Compliance For Amazon VPC Flow App"
+      InstallApp:
+        default: "Install Sumo Logic App"
       CollectorName:
         default: "Collector Name"
 
@@ -76,10 +79,15 @@ Metadata:
         default: "Sumo Logic Amazon S3 Logs Source Name"
       S3SourceCategoryName:
         default: "Sumo Logic Amazon S3 Logs Source Category Name"
-      ExcludeRuleName:
-        default: "S3 Logs processing rule name"
-      ExcludeRuleRegex:
-        default: "Regex to filter logs"
+
+      CreateDeliveryStream:
+        default: "Create a Delivery Stream for the Bucket"
+      DeliveryStreamName:
+        default: "Amazon Kinesis Data Firehose delivery stream name"
+      CompressionFormat:
+        default: "Compression format"
+      S3BackupMode:
+        default: "Amazon S3 backup mode"
 
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
@@ -130,17 +138,9 @@ Parameters:
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
 
-  InstallVpcApp:
+  InstallApp:
     Type: String
-    Description: "Yes -> To Install Sumo Logic Amazon VPC Flow Logs in Sumo Logic for AWS Quick Start Solution.
-                  No -> Skip Installation of the app."
-    Default: 'Yes'
-    AllowedValues:
-      - 'Yes'
-      - 'No'
-  InstallPCIVpcApp:
-    Type: String
-    Description: "Yes -> To Install PCI Compliance For Amazon VPC Flow App in Sumo Logic for AWS Quick Start Solution.
+    Description: "Yes -> To Install Sumo Logic App in Sumo Logic for AWS Quick Start Solution.
                   No -> Skip Installation of the app."
     Default: 'Yes'
     AllowedValues:
@@ -149,12 +149,12 @@ Parameters:
   CollectorName:
     Type: String
     Description: Change the collector name to be created else default name will be used.
-    Default: AWS-Vpc-Flow-Logs-Collector
+    Default: AWS-Waf-Collector
 
   CreateS3Bucket:
     Type: String
     Description: "Yes - Create a new S3 bucket in AWS S3.
-                  No - Use an existing S3 bucket from AWS S3 which has VPC Logs."
+                  No - Use an existing S3 bucket from AWS S3 which has WAF Logs."
     Default: 'Yes'
     AllowedValues:
       - 'Yes'
@@ -174,24 +174,38 @@ Parameters:
   S3BucketLogsPathExpression:
     Type: String
     Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
-    Default: "*"
+    Default: "WAF_LOGS/*"
   S3SourceName:
     Type: String
     Description: Change the Sumo Logic Amazon S3 Source name to be created else default name will be used.
-    Default: AWS-Vpc-Flow-Logs-Source
+    Default: AWS-Waf-Source
   S3SourceCategoryName:
     Type: String
     Description: "Existing - Change to an existing Source Category from Sumo Logic if Amazon S3 Source is not created.
                   New - Default will be used if Amazon S3 Source is Created."
-    Default: AWS/Vpc/Flow/Logs
-  ExcludeRuleName:
+    Default: AWS/Waf/Logs
+
+  CreateDeliveryStream:
     Type: String
-    Description: "Provide a Processing rule name for Amazon S3 Source."
-    Default: "Exclude VPC File Flow headers"
-  ExcludeRuleRegex:
+    Description: "Yes - to create Kinesis Delivery Stream with provided bucket Name.
+                  No - to skip creation Kinesis Delivery Stream."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  DeliveryStreamName:
     Type: String
-    Description: "Enter a regex to match the log format to filter the logs."
-    Default: version account-id interface-id srcaddr dstaddr srcport dstport protocol packets bytes start end action log-status
+    Description: "Amazon Kinesis Data Firehose (Kinesis Data Firehose) delivery stream Name"
+  CompressionFormat:
+    Type: String
+    Description: "The compression format. If no value is specified, the default is ZIP."
+    Default: "ZIP"
+    AllowedValues: ["UNCOMPRESSED", "GZIP", "ZIP", "Snappy"]
+  S3BackupMode:
+    Type: String
+    Description: "The Amazon S3 backup mode."
+    Default: "Disabled"
+    AllowedValues: ["Disabled","Enabled"]
 
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
@@ -219,16 +233,17 @@ Conditions:
   do_not_use_parent_stack: !Equals [ !Ref ParentStackName, "ParentStackName"]
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
-  install_vpc_app: !Equals [!Ref InstallVpcApp, 'Yes']
-  install_pci_vpc_app: !Equals [!Ref InstallPCIVpcApp, 'Yes']
+  install_app: !Equals [!Ref InstallApp, 'Yes']
   create_target_s3_bucket: !Equals [!Ref CreateS3Bucket, 'Yes']
   install_s3_source: !Equals [!Ref CreateS3Source, 'Yes']
+  create_delivery_stream: !Equals [!Ref CreateDeliveryStream, 'Yes']
 
   create_sns_topic: !And
     - !Condition do_not_use_parent_stack
     - !Condition install_s3_source
 
 Resources:
+
   SumoLogicHelperRole:
     Type: AWS::IAM::Role
     Condition: do_not_use_parent_stack
@@ -251,18 +266,6 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                  - cloudtrail:CreateTrail
-                  - cloudtrail:DeleteTrail
-                  - cloudtrail:UpdateTrail
-                  - cloudtrail:StartLogging
-                  - ec2:Describe*
-                  - ec2:DeleteFlowLogs
-                  - ec2:CreateFlowLogs
-                  - ec2:DescribeFlowLogs
-                  - logs:CreateLogDelivery
-                  - logs:DeleteLogDelivery
-                  - s3:GetBucketPolicy
-                  - s3:PutBucketPolicy
                 Resource: '*'
 
   SumoLogicHelperFunction:
@@ -276,7 +279,7 @@ Resources:
         Bucket: !Sub
           - "${S3Bucket}"
           - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-        Key: !Sub "${QSS3KeyPrefix}submodules/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
+        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
       MemorySize: 128
       Timeout: 900
       Role:
@@ -393,6 +396,78 @@ Resources:
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
 
+  WaitHandle:
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  CreateDeliveryStreamWaitHandle:
+    Condition: create_target_s3_bucket
+    DependsOn: TargetS3Bucket
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  CreateDeliveryStreamWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [create_target_s3_bucket, !Ref CreateDeliveryStreamWaitHandle, !Ref WaitHandle]
+      Timeout: "10"
+      Count: 0
+
+  KinesisS3Role:
+    Condition: create_delivery_stream
+    DependsOn: CreateDeliveryStreamWaitCondition
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Ref AWS::AccountId
+      Path: "/"
+      Policies:
+        - PolicyName: KinesisS3RolePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:ListBucketMultipartUploads
+                  - s3:AbortMultipartUpload
+                  - s3:ListBucket
+                  - s3:GetBucketLocation
+                Resource:
+                  - !Sub
+                    - arn:aws:s3:::${S3bucketName}
+                    - { S3bucketName: !Ref LogsS3BucketName }
+                  - !Sub
+                    - arn:aws:s3:::${S3bucketName}/*
+                    - { S3bucketName: !Ref LogsS3BucketName  }
+
+  KinesisFirehoseDeliveryStream:
+    Condition: create_delivery_stream
+    Type: AWS::KinesisFirehose::DeliveryStream
+    DependsOn: CreateDeliveryStreamWaitCondition
+    Properties:
+      DeliveryStreamName: !Ref DeliveryStreamName
+      DeliveryStreamType: "DirectPut"
+      ExtendedS3DestinationConfiguration:
+        BucketARN: !Sub "arn:aws:s3:::${LogsS3BucketName}"
+        Prefix: "WAF_LOGS/"
+        ErrorOutputPrefix: "WAF_LOGS/"
+        RoleARN: !GetAtt KinesisS3Role.Arn
+        BufferingHints:
+          IntervalInSeconds: 300
+          SizeInMBs: 5
+        CompressionFormat: !Ref CompressionFormat
+        S3BackupMode: !Ref S3BackupMode
+        EncryptionConfiguration:
+          NoEncryptionConfig: "NoEncryption"
+
   SumoS3Source:
     Type: Custom::AWSSource
     Condition: install_s3_source
@@ -415,10 +490,6 @@ Resources:
       SumoDeployment: !Ref SumoDeployment
       TargetBucketName: !Ref LogsS3BucketName
       PathExpression: !Ref S3BucketLogsPathExpression
-      filters:
-        - filterType: "Exclude"
-          name: !Ref ExcludeRuleName
-          regexp: !Ref ExcludeRuleRegex
       RoleArn: !If
         - do_not_use_parent_stack
         - !GetAtt
@@ -426,12 +497,10 @@ Resources:
           - Arn
         - !ImportValue
           'Fn::Sub': '${ParentStackName}-SumoSourceRoleARN'
-      multilineProcessingEnabled: false
-      useAutolineMatching": false
 
-  SumoVPCFlowLogApp:
+  SumoApp:
     Type: Custom::App
-    Condition: install_vpc_app
+    Condition: install_app
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -441,44 +510,11 @@ Resources:
         - !ImportValue
           'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
-      AppName: "Amazon QuickStart - Amazon VPC Flow Logs"
-      AppId: "3546d789-3a45-48df-ac85-6838044d988d"
+      AppName: "Amazon QuickStart - AWS WAF"
+      AppId: "87c2e6ca-a526-4745-af48-0c7225127b22"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       AppSources:
-        vpcFlowLogs: !Sub "_sourceCategory=${S3SourceCategoryName}"
+        awsWAF: !Sub "_sourceCategory=${S3SourceCategoryName}"
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
-
-  SumoPCIVPCFlowLogApp:
-    Type: Custom::App
-    Condition: install_pci_vpc_app
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
-      Region: !Ref "AWS::Region"
-      AppName: "Amazon QuickStart - PCI Compliance For Amazon VPC Flow"
-      AppId: "afc4bae8-59af-41c0-b07d-c972400423e7"
-      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-      AppSources:
-        AppLogSource: !Sub "_sourceCategory=${S3SourceCategoryName}"
-      SumoAccessID: !Ref SumoAccessID
-      SumoAccessKey: !Ref SumoAccessKey
-      SumoDeployment: !Ref SumoDeployment
-
-Outputs:
-  SumoRoleArn:
-    Description: ARN of the cretaed Role.
-    Condition: do_not_use_parent_stack
-    Value: !GetAtt SumoRole.Arn
-
-  SumoEndpoint:
-    Description: SNS Subscription Endpoint
-    Condition: install_s3_source
-    Value: !GetAtt SumoS3Source.SUMO_ENDPOINT
-
