@@ -582,11 +582,15 @@ class App(SumoResource):
         if appname in self.ENTERPRISE_ONLY_APPS and not self.is_enterprise_or_trial_account():
             raise Exception("%s is available to Enterprise or Trial Account Type only." % appname)
 
-        if "Amazon QuickStart" in appname:
-            folder_id = self._create_or_fetch_quickstart_apps_parent_folder("SumoLogic Amazon QuickStart Apps ")
-        else:
-            response = self.sumologic_cli.get_personal_folder()
-            folder_id = response.json()['id']
+        folder_id = None
+
+        while not folder_id:
+            if "Amazon QuickStart" in appname:
+                folder_id = self._create_or_fetch_quickstart_apps_parent_folder("SumoLogic Amazon QuickStart Apps ")
+            else:
+                response = self.sumologic_cli.get_personal_folder()
+                folder_id = response.json()['id']
+
         content = {'name': appname + datetime.now().strftime("_%d-%b-%Y_%H:%M:%S.%f"), 'description': appname,
                    'dataSourceValues': source_params, 'destinationFolderId': folder_id}
 
