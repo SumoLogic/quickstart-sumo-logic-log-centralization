@@ -17,14 +17,14 @@
   },
   {
     "ParameterKey": "Section1bSumoLogicAccessID",
-    "ParameterValue": "Override"
+    "ParameterValue": "override"
   },
   {
     "ParameterKey": "Section1cSumoLogicAccessKey",
-    "ParameterValue": "Override"
+    "ParameterValue": "override"
   },
   {
     "ParameterKey": "Section1dSumoLogicOrganizationId",
-    "ParameterValue": "Override"
+    "ParameterValue": "override"
   }
 ]
