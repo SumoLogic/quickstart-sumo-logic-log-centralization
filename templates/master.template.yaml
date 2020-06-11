@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: "This CloudFormation template sets up AWS and Sumo Logic resources for all of the Sumo Logic security apps."
+Description: "This CloudFormation template sets up AWS and Sumo Logic resources for all of the Sumo Logic security apps. (qs-1qqlknohm)"
 
 Metadata:
   'AWS::CloudFormation::Interface':
