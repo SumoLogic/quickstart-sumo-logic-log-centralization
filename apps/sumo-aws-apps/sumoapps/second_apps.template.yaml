@@ -1,0 +1,164 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Template to setup all the Sumo Logic apps supported by AWS QuickStart."
+
+Parameters:
+  Section1aSumoLogicDeployment:
+    Type: String
+    AllowedValues:
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+      - in
+      - fed
+    Description: "Enter the geographic location of the deployment: au, ca, de, eu, jp, us2, in, fed, or us1. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+  Section1bSumoLogicAccessID:
+    Type: String
+    Description: "Enter the Sumo Logic console access ID, which you received when you created the access key. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic access ID cannot be empty."
+  Section1cSumoLogicAccessKey:
+    Type: String
+    Description: "Enter your Sumo Logic access key. Retrieve this from your Sumo Logic account."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic access key cannot be empty."
+    NoEcho: true
+  Section1dSumoLogicResourceRemoveOnDeleteStack:
+    AllowedValues:
+      - true
+      - false
+    Default: true
+    Description: "If this parameter is set to true, the collector, sources, and Sumo Logic apps are deleted.
+                  If this parameter is set to false, then the collector, sources, and Sumo Logic apps are not deleted."
+    Type: String
+
+  Section2aInstallCloudTrailApps:
+    Type: String
+    Description: "Yes: Install all Sumo Logic AWS CloudTrail Apps (AWS CloudTrail, PCI Compliance for AWS CloudTrail, Global Intelligence for AWS CloudTrail SecOps and CIS AWS Foundations Benchmark).
+                  No: Skip installation of Sumo Logic AWS CloudTrail Apps."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section2bCloudTrailLogsSourceCategoryName:
+    Type: String
+    Description: "Provide an existing source category name from Sumo Logic Source collecting AWS CloudTrail logs. This is used for Threat Intel for AWS app installation also."
+    Default: ""
+
+  Section3aInstallSecurityHubAuditApp:
+    Type: String
+    Description: "Yes: Install Sumo Logic AWS Security Hub app.
+                  No: Skip installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section3bSecurityHubLogsSourceCategoryName:
+    Type: String
+    Description: "Provide an existing source category name from Sumo Logic Source collecting AWS Security Hub Logs."
+    Default: ""
+
+  Section4aInstallS3AuditApp:
+    Type: String
+    Description: "Yes: Install Sumo Logic Amazon S3 Audit app.
+                  No: Skip installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section4bS3AuditLogsSourceCategoryName:
+    Type: String
+    Description: "Provide an existing source category name from Sumo Logic Source collecting Amazon S3 Audit Logs."
+    Default: ""
+
+  Section5aParentStackLambdaARN:
+    Type: String
+    Default: "ParentStackLambdaARN"
+    Description: Parent Stack Lambda ARN. Do Not Edit the value.
+  Section5bAppFolderName:
+    Type: String
+    Default: "Sumo Logic AWS QuickStart Apps "
+    Description: "App folder name where all apps will be installed."
+
+Conditions:
+  install_cloudtrail_apps: !Equals [ !Ref Section2aInstallCloudTrailApps, 'Yes' ]
+  install_security_hub_app: !Equals [ !Ref Section3aInstallSecurityHubAuditApp, 'Yes' ]
+  install_s3_audit_app: !Equals [ !Ref Section4aInstallS3AuditApp, 'Yes' ]
+
+Resources:
+
+  SumoCISFoundationsApp:
+    Type: Custom::App
+    Condition: install_cloudtrail_apps
+    Properties:
+      ServiceToken: !Ref Section5aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      AppName: "CIS AWS Foundations Benchmark"
+      AppId: "9f630fe6-9253-4700-bb7e-36afc97b8cb6"
+      AppSources:
+        paramId123: !Sub "_sourceCategory=${Section2bCloudTrailLogsSourceCategoryName}"
+      Version: "V1.0.0"
+      FolderName: !Ref Section5bAppFolderName
+      RetainOldAppOnUpdate: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      RemoveOnDeleteStack: !Ref Section1dSumoLogicResourceRemoveOnDeleteStack
+
+  SumoGISCloudTrailSecOpsApp:
+    Type: Custom::App
+    Condition: install_cloudtrail_apps
+    DependsOn: SumoCISFoundationsApp
+    Properties:
+      ServiceToken: !Ref Section5aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      AppName: "Global Intelligence for AWS CloudTrail SecOps"
+      AppId: "570bdc0d-f824-4fcb-96b2-3230d4497180"
+      AppSources:
+        source: !Sub "_sourceCategory=${Section2bCloudTrailLogsSourceCategoryName}"
+      Version: "V1.0.0"
+      FolderName: !Ref Section5bAppFolderName
+      RetainOldAppOnUpdate: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      RemoveOnDeleteStack: !Ref Section1dSumoLogicResourceRemoveOnDeleteStack
+
+  SumoSecurityHubApp:
+    Type: Custom::App
+    Condition: install_security_hub_app
+    Properties:
+      ServiceToken: !Ref Section5aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      AppName: "AWS Security Hub"
+      AppId: "246cf87b-99b6-47cb-bde0-3fe1cb76c6b4"
+      AppSources:
+        findingSrc: !Sub "_sourceCategory=${Section3bSecurityHubLogsSourceCategoryName}"
+      Version: "V1.0.0"
+      FolderName: !Ref Section5bAppFolderName
+      RetainOldAppOnUpdate: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      RemoveOnDeleteStack: !Ref Section1dSumoLogicResourceRemoveOnDeleteStack
+
+  SumoAmazonS3AuditApp:
+    Type: Custom::App
+    Condition: install_s3_audit_app
+    Properties:
+      ServiceToken: !Ref Section5aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      AppName: "Amazon S3 Audit"
+      AppId: "cf3ba421-d959-4b08-9ae8-5bd4202eea87"
+      AppSources:
+        paramId123: !Sub "_sourceCategory=${Section4bS3AuditLogsSourceCategoryName}"
+      Version: "V1.0.0"
+      FolderName: !Ref Section5bAppFolderName
+      RetainOldAppOnUpdate: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      RemoveOnDeleteStack: !Ref Section1dSumoLogicResourceRemoveOnDeleteStack

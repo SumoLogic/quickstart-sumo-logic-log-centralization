@@ -340,22 +340,6 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  Section2bInstallPCICloudTrailApp:
-    Type: String
-    Description: "Yes: Install PCI compliance For AWS CloudTrail app.
-                  No: Skip installation of app."
-    Default: 'Yes'
-    AllowedValues:
-      - 'Yes'
-      - 'No'
-  Section2cInstallCISFoundationApp:
-    Type: String
-    Description: "Yes: Install CIS AWS Foundations Benchmark app.
-                  No: Skip installation of app."
-    Default: 'Yes'
-    AllowedValues:
-      - 'Yes'
-      - 'No'
   Section2dCloudTrailCreateBucket:
     Type: String
     Description: "Yes: Create a new CloudTrail S3 bucket.
@@ -389,7 +373,7 @@ Parameters:
   Section3aInstallGuardDutyApps:
     Type: String
     Description: "GuardDuty: Install Amazon GuardDuty app.
-                  GuardDutyBenchmark: Install Amazon GuardDuty Benchmark app.
+                  GuardDutyBenchmark: Install Global Intelligence for Amazon GuardDuty app.
                   Both: Install both apps.
                   Skip: Skip installation of apps."
     Default: 'Both'
@@ -415,7 +399,7 @@ Parameters:
   Section4aInstallVpcApps:
     Type: String
     Description: "VPC: Install Amazon VPC flow logs app in Sumo Logic.
-                  PCI_VPC: Install PCI compliance VPC flow app.
+                  PCI_VPC: Install PCI compliance For Amazon VPC flow app.
                   Both: Install both apps.
                   Skip: Skip installation of apps."
     Default: 'Both'
@@ -1105,7 +1089,7 @@ Resources:
         S3SourceName: !Sub "aws-quickstart-waf-${AWS::Region}"
         S3SourceCategoryName: !If [create_waf_source, "aws/quickstart/waf/logs", !Ref Section8gWafLogsSourceCategoryName]
         CreateDeliveryStream: !If [enable_waf, "Yes", "No"]
-        DeliveryStreamName: !Sub "QuickStartDeliveryStream${AWS::Region}"
+        DeliveryStreamName: !Sub "c{AWS::Region}"
         CompressionFormat: "ZIP"
         S3BackupMode: "Disabled"
         QSS3BucketName: !Ref QSS3BucketName

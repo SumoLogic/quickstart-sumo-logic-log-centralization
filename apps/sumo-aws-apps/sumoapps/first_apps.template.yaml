@@ -1,0 +1,185 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Template to setup all the Sumo Logic apps supported by AWS QuickStart."
+
+Parameters:
+  Section1aSumoLogicDeployment:
+    Type: String
+    AllowedValues:
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+      - in
+      - fed
+    Description: "Enter the geographic location of the deployment: au, ca, de, eu, jp, us2, in, fed, or us1. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+  Section1bSumoLogicAccessID:
+    Type: String
+    Description: "Enter the Sumo Logic console access ID, which you received when you created the access key. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic access ID cannot be empty."
+  Section1cSumoLogicAccessKey:
+    Type: String
+    Description: "Enter your Sumo Logic access key. Retrieve this from your Sumo Logic account."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic access key cannot be empty."
+    NoEcho: true
+  Section1dSumoLogicResourceRemoveOnDeleteStack:
+    AllowedValues:
+      - true
+      - false
+    Default: true
+    Description: "If this parameter is set to true, the collector, sources, and Sumo Logic apps are deleted.
+                  If this parameter is set to false, then the collector, sources, and Sumo Logic apps are not deleted."
+    Type: String
+
+  Section2aInstallCloudTrailApps:
+    Type: String
+    Description: "Yes: Install all Sumo Logic AWS CloudTrail Apps (AWS CloudTrail, PCI Compliance for AWS CloudTrail, Global Intelligence for AWS CloudTrail SecOps and CIS AWS Foundations Benchmark).
+                  No: Skip installation of Sumo Logic AWS CloudTrail Apps."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section2bCloudTrailLogsSourceCategoryName:
+    Type: String
+    Description: "Provide an existing source category name from Sumo Logic Source collecting AWS CloudTrail logs. This is used for Threat Intel for AWS app installation also."
+    Default: ""
+
+  Section3aInstallVpcApps:
+    Type: String
+    Description: "Yes: Install all Sumo Logic Amazon VPC Flow Logs Apps (Amazon VPC flow logs and PCI compliance For Amazon VPC flow).
+                  No: Skip installation of Sumo Logic Amazon VPC Flow Logs Apps."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section3bVpcLogsSourceCategoryName:
+    Type: String
+    Description: "Provide an existing source category name from Sumo Logic Source collecting Amazon VPC Flow logs. This is used for Threat Intel for AWS app installation also."
+    Default: ""
+
+  Section4aInstallThreatIntelApp:
+    Type: String
+    Description: "Yes: Install Sumo Logic Threat Intel for AWS app.
+                  No: Skip installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section4bElasticLoadBalancerSourceCategory:
+    Type: String
+    Description: "Provide an existing source category name from Sumo Logic Source collecting Classic Elastic Load Balancer logs."
+    Default: ""
+
+  Section5aParentStackLambdaARN:
+    Type: String
+    Default: "ParentStackLambdaARN"
+    Description: Parent Stack Lambda ARN. Do Not Edit the value.
+  Section5bAppFolderName:
+    Type: String
+    Default: "Sumo Logic AWS QuickStart Apps "
+    Description: "App folder name where all apps will be installed."
+
+Conditions:
+  install_cloudtrail_apps: !Equals [ !Ref Section2aInstallCloudTrailApps, 'Yes' ]
+  install_vpc_flow_logs_apps: !Equals [ !Ref Section3aInstallVpcApps, 'Yes' ]
+  install_threat_intel_app: !Equals [ !Ref Section4aInstallThreatIntelApp, 'Yes' ]
+
+Resources:
+
+  SumoCloudTrailApp:
+    Type: Custom::App
+    Condition: install_cloudtrail_apps
+    Properties:
+      ServiceToken: !Ref Section5aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      AppName: "AWS CloudTrail"
+      AppId: "ceb7fac5-1137-4a04-a5b8-2e49190be3d4"
+      AppSources:
+        logsrc: !Sub "_sourceCategory=${Section2bCloudTrailLogsSourceCategoryName}"
+      Version: "V1.0.0"
+      FolderName: !Ref Section5bAppFolderName
+      RetainOldAppOnUpdate: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      RemoveOnDeleteStack: !Ref Section1dSumoLogicResourceRemoveOnDeleteStack
+
+  SumoPCICloudTrailApp:
+    Type: Custom::App
+    Condition: install_cloudtrail_apps
+    DependsOn: SumoCloudTrailApp
+    Properties:
+      ServiceToken: !Ref Section5aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      AppName: "PCI Compliance for AWS CloudTrail"
+      AppId: "924d7e2a-a14a-4b11-8c91-133241be2a51"
+      AppSources:
+        CloudtrailLogSrc: !Sub "_sourceCategory=${Section2bCloudTrailLogsSourceCategoryName}"
+      Version: "V1.0.0"
+      FolderName: !Ref Section5bAppFolderName
+      RetainOldAppOnUpdate: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      RemoveOnDeleteStack: !Ref Section1dSumoLogicResourceRemoveOnDeleteStack
+
+  SumoVPCFlowLogApp:
+    Type: Custom::App
+    Condition: install_vpc_flow_logs_apps
+    Properties:
+      ServiceToken: !Ref Section5aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      AppName: "Amazon VPC Flow Logs"
+      AppId: "3546d789-3a45-48df-ac85-6838044d988d"
+      AppSources:
+        vpcFlowLogs: !Sub "_sourceCategory=${Section3bVpcLogsSourceCategoryName}"
+      Version: "V1.0.0"
+      FolderName: !Ref Section5bAppFolderName
+      RetainOldAppOnUpdate: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      RemoveOnDeleteStack: !Ref Section1dSumoLogicResourceRemoveOnDeleteStack
+
+  SumoPCIVPCFlowLogApp:
+    Type: Custom::App
+    Condition: install_vpc_flow_logs_apps
+    DependsOn: SumoVPCFlowLogApp
+    Properties:
+      ServiceToken: !Ref Section5aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      AppName: "PCI Compliance for Amazon VPC Flow"
+      AppId: "afc4bae8-59af-41c0-b07d-c972400423e7"
+      AppSources:
+        AppLogSource: !Sub "_sourceCategory=${Section3bVpcLogsSourceCategoryName}"
+      Version: "V1.0.0"
+      FolderName: !Ref Section5bAppFolderName
+      RetainOldAppOnUpdate: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      RemoveOnDeleteStack: !Ref Section1dSumoLogicResourceRemoveOnDeleteStack
+
+  SumoThreatIntelApp:
+    Type: Custom::App
+    Condition: install_threat_intel_app
+    Properties:
+      ServiceToken: !Ref Section5aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      AppName: "Threat Intel for AWS"
+      AppId: "cff3b4a2-b356-4ee3-beda-d7b5a9184fcf"
+      AppSources:
+        awscloudtrail: !Sub "_sourceCategory=${Section2bCloudTrailLogsSourceCategoryName}"
+        awsvpc: !Sub "_sourceCategory=${Section3bVpcLogsSourceCategoryName}"
+        awselb: !Sub "_sourceCategory=${Section4bElasticLoadBalancerSourceCategory}"
+      Version: "V1.0.0"
+      FolderName: !Ref Section5bAppFolderName
+      RetainOldAppOnUpdate: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      RemoveOnDeleteStack: !Ref Section1dSumoLogicResourceRemoveOnDeleteStack

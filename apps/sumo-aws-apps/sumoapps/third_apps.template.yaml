@@ -1,0 +1,164 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Template to setup all the Sumo Logic apps supported by AWS QuickStart."
+
+Parameters:
+  Section1aSumoLogicDeployment:
+    Type: String
+    AllowedValues:
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+      - in
+      - fed
+    Description: "Enter the geographic location of the deployment: au, ca, de, eu, jp, us2, in, fed, or us1. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+  Section1bSumoLogicAccessID:
+    Type: String
+    Description: "Enter the Sumo Logic console access ID, which you received when you created the access key. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic access ID cannot be empty."
+  Section1cSumoLogicAccessKey:
+    Type: String
+    Description: "Enter your Sumo Logic access key. Retrieve this from your Sumo Logic account."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic access key cannot be empty."
+    NoEcho: true
+  Section1dSumoLogicResourceRemoveOnDeleteStack:
+    AllowedValues:
+      - true
+      - false
+    Default: true
+    Description: "If this parameter is set to true, the collector, sources, and Sumo Logic apps are deleted.
+                  If this parameter is set to false, then the collector, sources, and Sumo Logic apps are not deleted."
+    Type: String
+
+  Section2aInstallGuardDutyApps:
+    Type: String
+    Description: "Yes: Install all Sumo Logic Amazon GuardDuty Apps (Amazon GuardDuty and Global Intelligence for Amazon GuardDuty).
+                  No: Skip installation of Sumo Logic Amazon GuardDuty Apps."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section2bGuardDutyHttpLogsSourceCategoryName:
+    Type: String
+    Description: "Provide an existing source category name from Sumo Logic Source collecting Amazon GuardDuty logs."
+    Default: ""
+
+  Section3aInstallWafApp:
+    Type: String
+    Description: "Yes: Install Sumo Logic AWS WAF app.
+                  No: Skip installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section3bWafLogsSourceCategoryName:
+    Type: String
+    Description: "Provide an existing source category name from Sumo Logic Source collecting AWS WAF Logs."
+    Default: ""
+
+  Section4aInstallConfigApp:
+    Type: String
+    Description: "Yes: Install Sumo Logic AWS Config app.
+                  No: Skip installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section4bConfigHttpLogsSourceCategoryName:
+    Type: String
+    Description: "Provide an existing source category name from Sumo Logic Source collecting AWS Config Logs."
+    Default: ""
+
+  Section5aParentStackLambdaARN:
+    Type: String
+    Default: "ParentStackLambdaARN"
+    Description: Parent Stack Lambda ARN. Do Not Edit the value.
+  Section5bAppFolderName:
+    Type: String
+    Default: "Sumo Logic AWS QuickStart Apps "
+    Description: "App folder name where all apps will be installed."
+
+Conditions:
+  install_guardduty_apps: !Equals [ !Ref Section2aInstallGuardDutyApps, 'Yes' ]
+  install_waf_app: !Equals [ !Ref Section3aInstallWafApp, 'Yes' ]
+  install_config_app: !Equals [ !Ref Section4aInstallConfigApp, 'Yes' ]
+
+Resources:
+
+  SumoGuardDutyApp:
+    Type: Custom::App
+    Condition: install_guardduty_apps
+    Properties:
+      ServiceToken: !Ref Section5aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      AppName: "Amazon GuardDuty"
+      AppId: "5a58719f-0f8a-4aa7-993f-9cc337a286aa"
+      AppSources:
+        logsrc: !Sub "_sourceCategory=${Section2bGuardDutyHttpLogsSourceCategoryName}"
+      Version: "V1.0.0"
+      FolderName: !Ref Section5bAppFolderName
+      RetainOldAppOnUpdate: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      RemoveOnDeleteStack: !Ref Section1dSumoLogicResourceRemoveOnDeleteStack
+
+  SumoGISforGuardDutyApp:
+    Type: Custom::App
+    Condition: install_guardduty_apps
+    DependsOn: SumoGuardDutyApp
+    Properties:
+      ServiceToken: !Ref Section5aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      AppName: "Global Intelligence for Amazon GuardDuty"
+      AppId: "8e7efcb3-040a-4a92-9f8d-922fafb24afb"
+      AppSources:
+        gdbenchmark: !Sub "_sourceCategory=${Section2bGuardDutyHttpLogsSourceCategoryName}"
+      Version: "V1.0.0"
+      FolderName: !Ref Section5bAppFolderName
+      RetainOldAppOnUpdate: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      RemoveOnDeleteStack: !Ref Section1dSumoLogicResourceRemoveOnDeleteStack
+
+  SumoWAFApp:
+    Type: Custom::App
+    Condition: install_waf_app
+    Properties:
+      ServiceToken: !Ref Section5aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      AppName: "AWS WAF"
+      AppId: "87c2e6ca-a526-4745-af48-0c7225127b22"
+      AppSources:
+        awsWAF: !Sub "_sourceCategory=${Section3bWafLogsSourceCategoryName}"
+      Version: "V1.0.0"
+      FolderName: !Ref Section5bAppFolderName
+      RetainOldAppOnUpdate: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      RemoveOnDeleteStack: !Ref Section1dSumoLogicResourceRemoveOnDeleteStack
+
+  SumoConfigApp:
+    Type: Custom::App
+    Condition: install_config_app
+    Properties:
+      ServiceToken: !Ref Section5aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      AppName: "AWS Config"
+      AppId: "61be4a8f-6702-4035-bc55-e56d149b181d"
+      AppSources:
+        paramId123: !Sub "_sourceCategory=${Section4bConfigHttpLogsSourceCategoryName}"
+      Version: "V1.0.0"
+      FolderName: !Ref Section5bAppFolderName
+      RetainOldAppOnUpdate: true
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      RemoveOnDeleteStack: !Ref Section1dSumoLogicResourceRemoveOnDeleteStack

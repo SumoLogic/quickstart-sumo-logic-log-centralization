@@ -214,52 +214,6 @@ Conditions:
 
 Resources:
 
-  SumoLogicHelperRole:
-    Type: AWS::IAM::Role
-    Condition: do_not_use_parent_stack
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      Path: /
-      Policies:
-        - PolicyName: SumoPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                  - config:DescribeDeliveryChannels
-                  - config:PutDeliveryChannel
-                  - config:DeleteDeliveryChannel
-                Resource: '*'
-
-  SumoLogicHelperFunction:
-    Type: 'AWS::Serverless::Function'
-    DependsOn: SumoLogicHelperRole
-    Condition: do_not_use_parent_stack
-    Properties:
-      Handler: main.handler
-      Runtime: python3.7
-      CodeUri:
-        Bucket: !Sub
-          - "${S3Bucket}"
-          - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
-      MemorySize: 128
-      Timeout: 900
-      Role:
-        Fn::GetAtt:
-          - SumoLogicHelperRole
-          - Arn
-
   ConfigRecorder:
     Type: AWS::Config::ConfigurationRecorder
     Condition: enable_config
@@ -297,12 +251,6 @@ Resources:
               - Effect: Allow
                 Action: config:Put*
                 Resource: '*'
-
-  TargetS3Bucket:
-    Type: AWS::S3::Bucket
-    Condition: create_bukcet
-    Properties:
-      BucketName: !Ref BucketName
 
   SumoSNSTopic:
     Type: "AWS::SNS::Topic"
@@ -377,24 +325,6 @@ Resources:
           numNoDelayRetries: 0
           backoffFunction: exponential
 
-  SumoHostedCollector:
-    Type: Custom::Collector
-    Condition: install_http_logs_source
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
-      Region: !Ref "AWS::Region"
-      CollectorType: Hosted
-      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-      CollectorName: !Ref CollectorName
-      SumoAccessID: !Ref SumoAccessID
-      SumoAccessKey: !Ref SumoAccessKey
-      SumoDeployment: !Ref SumoDeployment
 
   SumoHTTPSource:
     Condition: install_http_logs_source
@@ -417,23 +347,3 @@ Resources:
       SumoDeployment: !Ref SumoDeployment
       MessagePerRequest: true
 
-  sumoApp:
-    Type: Custom::App
-    Condition: install_app
-    Properties:
-      ServiceToken: !If
-        - do_not_use_parent_stack
-        - !GetAtt
-          - SumoLogicHelperFunction
-          - Arn
-        - !ImportValue
-          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
-      Region: !Ref "AWS::Region"
-      AppName: "Amazon QuickStart - AWS Config"
-      AppId: "61be4a8f-6702-4035-bc55-e56d149b181d"
-      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
-      AppSources:
-        paramId123: !Sub "_sourceCategory=${HttpLogsSourceCategoryName}"
-      SumoAccessID: !Ref SumoAccessID
-      SumoAccessKey: !Ref SumoAccessKey
-      SumoDeployment: !Ref SumoDeployment

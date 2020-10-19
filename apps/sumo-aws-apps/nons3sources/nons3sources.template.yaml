@@ -1,0 +1,148 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Template to setup all the Sumo Logic sources supported by AWS QuickStart which does not require S3 buckets."
+Transform: 'AWS::Serverless-2016-10-31'
+
+Parameters:
+  Section1aSumoLogicDeployment:
+    Type: String
+    AllowedValues:
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+      - in
+      - fed
+    Description: "Enter the geographic location of the deployment: au, ca, de, eu, jp, us2, in, fed, or us1. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+  Section1bSumoLogicAccessID:
+    Type: String
+    Description: "Enter the Sumo Logic console access ID, which you received when you created the access key. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic access ID cannot be empty."
+  Section1cSumoLogicAccessKey:
+    Type: String
+    Description: "Enter your Sumo Logic access key. Retrieve this from your Sumo Logic account."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic access key cannot be empty."
+    NoEcho: true
+  Section1dSumoLogicResourceRemoveOnDeleteStack:
+    AllowedValues:
+      - true
+      - false
+    Default: true
+    Description: "If this parameter is set to true, the collector, sources, and Sumo Logic apps are deleted.
+                  If this parameter is set to false, then the collector, sources, and Sumo Logic apps are not deleted."
+    Type: String
+
+  # Common Collector Name where we need to install the Sources.
+  Section2aCollectorName:
+    Type: String
+    Description: "Change the collector name to be created else default name will be used."
+    Default: "AWS-QuickStart-Collector"
+
+  # GuardDuty Source Details
+  Section3aCreateGuardDutySource:
+    Type: String
+    Description: "Yes - Create Sumo Logic HTTP logs source to collect GuardDuty Logs.
+                  No - Skips creation of Sumo Logic source assuming you already collect GuardDuty logs in Sumo Logic."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section3bGuardDutySourceName:
+    Type: String
+    Description: "Change the HTTP Source name to be created else default name will be used."
+    Default: "AWS-GuardDuty-Source"
+  Section3cGuardDutySourceCategoryName:
+    Type: String
+    Description: "Provide a Source Category to collect GuardDuty logs. Default will be AWS/GuardDuty/logs"
+    Default: "AWS/GuardDuty/logs"
+
+  Section4aParentStackLambdaARN:
+    Type: String
+    Default: "ParentStackLambdaARN"
+    Description: Parent Stack Lambda ARN. Do Not Edit the value.
+
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: "aws-quickstart"
+    Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Type: "String"
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: "quickstart-sumo-logic-log-centralization/"
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: "String"
+
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+
+  install_guardduty_source: !Equals [!Ref Section3aCreateGuardDutySource, 'Yes']
+
+Resources:
+
+  SumoHostedCollector:
+    Type: Custom::Collector
+    Condition: install_guardduty_source
+    Properties:
+      ServiceToken: !Ref Section4aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      CollectorType: Hosted
+      CollectorName: !Ref Section2aCollectorName
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      RemoveOnDeleteStack: !Ref Section1dSumoLogicResourceRemoveOnDeleteStack
+
+  GuardDutySource:
+    Type: Custom::HTTPSource
+    Condition: install_guardduty_source
+    Properties:
+      ServiceToken: !Ref Section4aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      SourceName: !Ref Section3bGuardDutySourceName
+      SourceCategory: !Ref Section3cGuardDutySourceCategoryName
+      CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
+      DateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+      DateLocatorRegex: '.*"updatedAt":"(.*)".*'
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      RemoveOnDeleteStack: !Ref Section1dSumoLogicResourceRemoveOnDeleteStack
+
+  GuardDutyFunction:
+    Type: AWS::Serverless::Function
+    Condition: install_guardduty_source
+    Properties:
+      CodeUri:
+        Bucket: !Sub
+          - "${S3Bucket}"
+          - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/nons3sources/guardduty/cloudwatchevents.zip"
+      Handler: cloudwatchevents.handler
+      Runtime: nodejs10.x
+      Environment:
+        Variables:
+          SUMO_ENDPOINT: !GetAtt GuardDutySource.SUMO_ENDPOINT
+      Events:
+        CloudWatchEventTrigger:
+          Type: CloudWatchEvent
+          Properties:
+            Pattern:
+              source:
+                - aws.guardduty
+
+Outputs:
+
+  GuardDutyCloudWatchEventFunction:
+    Description: "GuardDuty CloudWatchEvent Processor Function ARN"
+    Condition: install_guardduty_source
+    Value: !GetAtt GuardDutyFunction.Arn
+  SumoGuardDutySourceEndpoint:
+    Description: "Sumo Logic GuardDuty Subscription Endpoint"
+    Condition: install_guardduty_source
+    Value: !GetAtt GuardDutySource.SUMO_ENDPOINT

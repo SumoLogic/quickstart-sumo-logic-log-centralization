@@ -227,133 +227,6 @@ Resources:
           - SumoLogicHelperRole
           - Arn
 
-  SumoSourceRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: arn:aws:iam::926226587429:root
-            Action: sts:AssumeRole
-            Condition:
-              StringEquals:
-                sts:ExternalId: !Sub "${SumoDeployment}:${SumoOrganizationId}"
-      Path: "/"
-      Policies:
-        - PolicyName: SumoPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:GetObject
-                  - s3:GetObjectVersion
-                  - s3:ListBucketVersions
-                  - s3:ListBucket
-                Resource:
-                  "*"
-
-  SumoHostedCollector:
-    Type: Custom::Collector
-    Condition: install_collector
-    Properties:
-      ServiceToken: !GetAtt SumoLogicLambdaHelper.Arn
-      Region: !Ref "AWS::Region"
-      CollectorType: Hosted
-      RemoveOnDeleteStack: false
-      CollectorName: !Ref CollectorName
-      SumoAccessID: !Ref SumoAccessID
-      SumoAccessKey: !Ref SumoAccessKey
-      SumoDeployment: !Ref SumoDeployment
-
-  SumoSNSTopic:
-    Condition: create_sns_topic
-    Type: "AWS::SNS::Topic"
-    Properties:
-      TopicName: !Sub "SumoSNSTopic-${AWS::StackName}"
-
-  SumoSNSpolicy:
-    Condition: create_sns_topic
-    Type: "AWS::SNS::TopicPolicy"
-    Properties:
-      PolicyDocument:
-        Id: SumoTopicPolicy
-        Statement:
-          - Action:
-              - sns:Publish
-            Condition:
-              StringEquals:
-                aws:SourceAccount: !Ref "AWS::AccountId"
-              ArnLike:
-                aws:SourceArn: !Sub "arn:aws:s3:*:*:*"
-            Effect: Allow
-            Principal:
-              AWS: "*"
-            Resource:
-              - !Ref SumoSNSTopic
-      Topics:
-        - Ref: SumoSNSTopic
-
-  TargetS3Bucket:
-    Condition: create_target_s3_bucket
-    Type: AWS::S3::Bucket
-    DependsOn:
-      - SumoSNSpolicy
-    Properties:
-      BucketName: !Ref BucketName
-      NotificationConfiguration:
-        TopicConfigurations:
-          - Event: s3:ObjectCreated:Put
-            Topic: !Ref SumoSNSTopic
-
-  SumoCloudTrailExportPolicy:
-    Condition: create_cloudtrail
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref BucketName
-      PolicyDocument:
-        Statement:
-          - Sid: AWSCloudTrailAclCheck
-            Effect: Allow
-            Principal:
-              Service: cloudtrail.amazonaws.com
-            Action: s3:GetBucketAcl
-            Resource:
-              - !Sub "arn:aws:s3:::${BucketName}"
-          - Sid: AWSCloudTrailWrite
-            Effect: Allow
-            Principal:
-              Service: cloudtrail.amazonaws.com
-            Action: s3:PutObject
-            Resource:
-              - !Sub "arn:aws:s3:::${BucketName}/*"
-            Condition:
-              StringEquals:
-                s3:x-amz-acl: bucket-owner-full-control
-          - Sid: AWSBucketExistenceCheck
-            Effect: Allow
-            Principal:
-              Service: cloudtrail.amazonaws.com
-            Action: s3:ListBucket
-            Resource:
-              - !Sub "arn:aws:s3:::${BucketName}"
-    DependsOn:
-      - TargetS3Bucket
-
-  SumoCloudTrail:
-    Condition: create_cloudtrail
-    Type: Custom::AWSTrail
-    DependsOn:
-      - SumoCloudTrailExportPolicy
-    Properties:
-      ServiceToken: !GetAtt SumoLogicLambdaHelper.Arn
-      IsLogging: true
-      IsMultiRegionTrail: false
-      S3BucketName: !Ref BucketName
-      TrailName: !Sub "SumoCloudTrail-${AWS::StackName}"
-
 Outputs:
   StackName:
     Description: "Stack Name"
@@ -363,11 +236,7 @@ Outputs:
     Value: !GetAtt SumoLogicLambdaHelper.Arn
     Export:
       Name: !Sub "${AWS::StackName}-SumoLogicHelperFunctionARN"
-  SumoSourceRoleARN:
-    Description: "Sumo Logic Source Role ARN"
-    Value: !GetAtt SumoSourceRole.Arn
-    Export:
-      Name: !Sub "${AWS::StackName}-SumoSourceRoleARN"
+
   SumoCollectorID:
     Description: "Sumo Logic Collector ID"
     Condition: install_collector
@@ -380,6 +249,3 @@ Outputs:
     Value: !Ref SumoSNSTopic
     Export:
       Name: !Sub "${AWS::StackName}-SNSTopicArn"
-  BucketName:
-    Description: "BucketName"
-    Value: !Ref BucketName

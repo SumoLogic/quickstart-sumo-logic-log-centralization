@@ -1,0 +1,144 @@
+---
+Global:
+  TemplatePath: "../third_apps.template.yaml"
+  TestProjectName: SecondAppsProject
+  ParallelTestsRun: 7
+  GlobalParameters:
+    Section1aSumoLogicDeployment: us1
+    Section1bSumoLogicAccessID: '${ENTERPRISE_US1_ACCESS_ID}'
+    Section1cSumoLogicAccessKey: '${ENTERPRISE_US1_ACCESS_KEY}'
+    Section1dSumoLogicResourceRemoveOnDeleteStack: 'true'
+    Section5aParentStackLambdaARN: 'arn:aws:lambda:ap-south-1:668508221233:function:asdasdasd-SumoLogicLambdaHelper-XF6O7N1TX2SO'
+Tests:
+  - TestName: installallThirdApps
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        Section2aInstallGuardDutyApps: 'Yes'
+        Section2bGuardDutyHttpLogsSourceCategoryName: 'Labs/AWS/GuardDuty_V7'
+        Section3aInstallWafApp: 'Yes'
+        Section3bWafLogsSourceCategoryName: 'Labs/AWS/WAF'
+        Section4aInstallConfigApp: 'Yes'
+        Section4bConfigHttpLogsSourceCategoryName: 'Labs/AWS/Config'
+        Section5bAppFolderName: "Install All Third Apps"
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - SumoGuardDutyApp
+            - SumoGISforGuardDutyApp
+            - SumoWAFApp
+            - SumoConfigApp
+  - TestName: installnothingThirdApps
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        Section2aInstallGuardDutyApps: 'No'
+        Section2bGuardDutyHttpLogsSourceCategoryName: 'Labs/AWS/GuardDuty_V7'
+        Section3aInstallWafApp: 'No'
+        Section3bWafLogsSourceCategoryName: 'Labs/AWS/WAF'
+        Section4aInstallConfigApp: 'No'
+        Section4bConfigHttpLogsSourceCategoryName: 'Labs/AWS/Config'
+        #Section5bAppFolderName: "Install Nothing Third Apps"
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+  - TestName: installGuardDutyThirdApps
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        Section2aInstallGuardDutyApps: 'Yes'
+        Section2bGuardDutyHttpLogsSourceCategoryName: 'Labs/AWS/GuardDuty_V7'
+        Section3aInstallWafApp: 'No'
+        Section3bWafLogsSourceCategoryName: 'Labs/AWS/WAF'
+        Section4aInstallConfigApp: 'No'
+        Section4bConfigHttpLogsSourceCategoryName: 'Labs/AWS/Config'
+        #Section5bAppFolderName: "Install GuardDuty Third Apps"
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - SumoGuardDutyApp
+            - SumoGISforGuardDutyApp
+  - TestName: installWafThirdApps
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        Section2aInstallGuardDutyApps: 'No'
+        Section2bGuardDutyHttpLogsSourceCategoryName: 'Labs/AWS/GuardDuty_V7'
+        Section3aInstallWafApp: 'Yes'
+        Section3bWafLogsSourceCategoryName: 'Labs/AWS/WAF'
+        Section4aInstallConfigApp: 'No'
+        Section4bConfigHttpLogsSourceCategoryName: 'Labs/AWS/Config'
+        #Section5bAppFolderName: "Install WAF Third Apps"
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - SumoWAFApp
+  - TestName: installConfigThirdApps
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        Section2aInstallGuardDutyApps: 'No'
+        Section2bGuardDutyHttpLogsSourceCategoryName: 'Labs/AWS/GuardDuty_V7'
+        Section3aInstallWafApp: 'No'
+        Section3bWafLogsSourceCategoryName: 'Labs/AWS/WAF'
+        Section4aInstallConfigApp: 'Yes'
+        Section4bConfigHttpLogsSourceCategoryName: 'Labs/AWS/Config'
+        #Section5bAppFolderName: "Install Config Third Apps"
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - SumoConfigApp
+  - TestName: installConfigandWafThirdApps
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        Section2aInstallGuardDutyApps: 'No'
+        Section2bGuardDutyHttpLogsSourceCategoryName: 'Labs/AWS/GuardDuty_V7'
+        Section3aInstallWafApp: 'Yes'
+        Section3bWafLogsSourceCategoryName: 'Labs/AWS/WAF'
+        Section4aInstallConfigApp: 'Yes'
+        Section4bConfigHttpLogsSourceCategoryName: 'Labs/AWS/Config'
+        Section5bAppFolderName: "Install Config and WAF Third Apps"
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - SumoWAFApp
+            - SumoConfigApp
+  - TestName: installConfigAndGuarddutyThirdApps
+    Regions:
+      - ap-south-1
+    Parameters:
+      Values:
+        Section2aInstallGuardDutyApps: 'Yes'
+        Section2bGuardDutyHttpLogsSourceCategoryName: 'Labs/AWS/GuardDuty_V7'
+        Section3aInstallWafApp: 'No'
+        Section3bWafLogsSourceCategoryName: 'Labs/AWS/WAF'
+        Section4aInstallConfigApp: 'Yes'
+        Section4bConfigHttpLogsSourceCategoryName: 'Labs/AWS/Config'
+        Section5bAppFolderName: "Install Config and GuardDuty Third Apps"
+    Skip: false
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - SumoGuardDutyApp
+            - SumoGISforGuardDutyApp
+            - SumoConfigApp

@@ -1,0 +1,888 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Template to setup all the Sumo Logic sources supported by AWS QuickStart which require S3 buckets."
+Transform: 'AWS::Serverless-2016-10-31'
+
+Parameters:
+  Section1aSumoLogicDeployment:
+    Type: String
+    AllowedValues:
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+      - in
+      - fed
+    Description: "Enter the geographic location of the deployment: au, ca, de, eu, jp, us2, in, fed, or us1. Visit https://help.sumologic.com/APIs/General-API-Information/Sumo-Logic-Endpoints-and-Firewall-Security"
+  Section1bSumoLogicAccessID:
+    Type: String
+    Description: "Enter the Sumo Logic console access ID, which you received when you created the access key. Visit https://help.sumologic.com/Manage/Security/Access-Keys#Create_an_access_key"
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic access ID cannot be empty."
+  Section1cSumoLogicAccessKey:
+    Type: String
+    Description: "Enter your Sumo Logic access key. Retrieve this from your Sumo Logic account."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic access key cannot be empty."
+    NoEcho: true
+  Section1dSumoLogicOrganizationId:
+    Description: "Appears on the Account Overview page that displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources. Visit https://help.sumologic.com/01Start-Here/05Customize-Your-Sumo-Logic-Experience/Preferences-Page"
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
+  Section1eSumoLogicResourceRemoveOnDeleteStack:
+    AllowedValues:
+      - true
+      - false
+    Default: true
+    Description: "If this parameter is set to true, the collector, sources, and Sumo Logic apps are deleted.
+                  If this parameter is set to false, then the collector, sources, and Sumo Logic apps are not deleted."
+    Type: String
+
+  Section2aCollectorName:
+    Type: String
+    Description: "Provide a Collector Name else default will be used."
+    Default: "AWS-QuickStart-Collector"
+
+  Section3aCreateCloudTrailLogSource:
+    Type: String
+    Description: "Choose Yes to create Sumo Logic Cloud Trail Log Source with provided bucket Name."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section3bCloudTrailLogsSourceName:
+    Type: String
+    Description: "Provide a CloudTrail Source Name else default will be used."
+    Default: "AWS-CloudTrail-Source"
+  Section3cCloudTrailLogsBucketName:
+    Type: String
+    Description: "Provide a name of existing S3 bucket name which has CloudTrail logs. If this is empty, a new bucket will be created in the region."
+    Default: ""
+  Section3dCloudTrailBucketPathExpression:
+    Type: String
+    Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
+    Default: "*"
+  Section3eCloudTrailLogsSourceCategoryName:
+    Type: String
+    Description: "Provide a CloudTrail Source Name else default will be used."
+    Default: "AWS/CloudTrail/logs"
+
+  Section4aCreateVPCFlowLogSource:
+    Type: String
+    Description: "Choose Yes to create Sumo Logic VPC Flow Logs Source with provided bucket Name."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section4bVPCFlowLogsSourceName:
+    Type: String
+    Description: "Provide a VPC Flow Logs Source Name else default will be used."
+    Default: "AWS-Vpc-Flow-Source"
+  Section4cVPCFlowLogsBucketName:
+    Type: String
+    Description: "Provide a name of existing S3 bucket name which has VPC Flow logs. If this is empty, a new bucket will be created in the region."
+    Default: ""
+  Section4dVPCFlowLogsBucketPathExpression:
+    Type: String
+    Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
+    Default: "*"
+  Section4eCloudTrailLogsSourceCategoryName:
+    Type: String
+    Description: "Provide a VPC Flow Logs Source Name else default will be used."
+    Default: "AWS/VPC/Flow/logs"
+
+  Section5aCreateS3AuditSource:
+    Type: String
+    Description: "Choose Yes to create Sumo Logic S3 Audit Source with provided bucket Name."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section5bS3AuditSourceName:
+    Type: String
+    Description: "Provide a S3 Audit Source Name else default will be used."
+    Default: "AWS-S3-Audit-Source"
+  Section5cS3AuditBucketName:
+    Type: String
+    Description: "Provide a name of existing S3 bucket name which has S3 Audit logs. If this is empty, a new bucket will be created in the region."
+    Default: ""
+  Section5dS3AuditBucketPathExpression:
+    Type: String
+    Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
+    Default: "*"
+  Section5eS3AuditSourceCategoryName:
+    Type: String
+    Description: "Provide a S3 Audit Source Name else default will be used."
+    Default: "AWS/S3/Audit/logs"
+
+  Section6aEnableSecurityHub:
+    Type: String
+    Description: "Select Yes if Security Hub must be enabled for the Region."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section6bCreateSecurityHubSource:
+    Type: String
+    Description: "Choose Yes to create Sumo Logic Security Hub Source with provided bucket Name."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section6cSecurityHubSourceName:
+    Type: String
+    Description: "Provide a Security Hub Source Name else default will be used."
+    Default: "AWS-Security-Hub-Source"
+  Section6dSecurityHubBucketName:
+    Type: String
+    Description: "Provide a name of existing S3 bucket name which has Security Hub logs. If this is empty, a new bucket will be created in the region."
+    Default: ""
+  Section6eSecurityHubBucketPathExpression:
+    Type: String
+    Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
+    Default: "*"
+  Section6fSecurityHubSourceCategoryName:
+    Type: String
+    Description: "Provide a Security Hub Source Name else default will be used."
+    Default: "AWS/Security/Hub/logs"
+
+  Section7aCreateDeliveryStream:
+    Type: String
+    Description: "Yes: Create a Kinesis delivery stream using provided bucket name.
+                  No: Skip creation of a Kinesis delivery stream."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section7bCreateWafSource:
+    Type: String
+    Description: "Choose Yes to create Sumo Logic AWS WAF Source with provided bucket Name."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section7cWafSourceName:
+    Type: String
+    Description: "Provide a AWS WAF Source Name else default will be used."
+    Default: "AWS-WAF-Source"
+  Section7dWafBucketName:
+    Type: String
+    Description: "Provide a name of existing S3 bucket name which has AWS WAF logs. If this is empty, a new bucket will be created in the region."
+    Default: ""
+  Section7eWafBucketPathExpression:
+    Type: String
+    Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
+    Default: "*"
+  Section7fWafSourceCategoryName:
+    Type: String
+    Description: "Provide a AWS WAF Source Name else default will be used."
+    Default: "AWS/WAF/logs"
+
+  Section4aParentStackLambdaARN:
+    Type: String
+    Default: "ParentStackLambdaARN"
+    Description: Parent Stack Lambda ARN. Do Not Edit the value.
+
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: "aws-quickstart"
+    Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Type: "String"
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: "quickstart-sumo-logic-log-centralization/"
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: "String"
+
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+  enable_security_hub: !Equals [ !Ref Section6aEnableSecurityHub, 'Yes' ]
+  create_delivery_stream: !Equals [ !Ref Section7aCreateDeliveryStream, 'Yes' ]
+
+  # AWS S3 Bucket Conditions
+  create_cloudtrail_bucket: !And
+    - !Equals [ !Ref Section3aCreateCloudTrailLogSource, 'Yes' ]
+    - !Equals [ !Ref Section3cCloudTrailLogsBucketName, '' ]
+  create_vpc_logs_bucket: !And
+    - !Equals [ !Ref Section4aCreateVPCFlowLogSource, 'Yes' ]
+    - !Equals [ !Ref Section4cVPCFlowLogsBucketName, '' ]
+  create_s3_audit_bucket: !And
+    - !Equals [ !Ref Section5aCreateS3AuditSource, 'Yes' ]
+    - !Equals [ !Ref Section5cS3AuditBucketName, '' ]
+  create_security_hub_bucket: !And
+    - !Equals [ !Ref Section6bCreateSecurityHubSource, 'Yes' ]
+    - !Equals [ !Ref Section6dSecurityHubBucketName, '' ]
+  create_waf_bucket: !And
+    - !Equals [ !Ref Section7bCreateWafSource, 'Yes' ]
+    - !Equals [ !Ref Section7dWafBucketName, '' ]
+  create_common_s3_bucket: !Or
+    - !Condition create_cloudtrail_bucket
+    - !Condition create_vpc_logs_bucket
+    - !Condition create_s3_audit_bucket
+    - !Condition create_security_hub_bucket
+    - !Condition create_waf_bucket
+
+  # Sources Conditions
+  install_cloudtrail_source: !Equals [!Ref Section3aCreateCloudTrailLogSource, 'Yes']
+  install_vpc_source: !Equals [!Ref Section4aCreateVPCFlowLogSource, 'Yes']
+  install_s3_audit_source: !Equals [!Ref Section5aCreateS3AuditSource, 'Yes']
+  install_security_hub_source: !Equals [!Ref Section6bCreateSecurityHubSource, 'Yes']
+  install_waf_source: !Equals [!Ref Section7bCreateWafSource, 'Yes']
+
+  # SNS
+  create_cloudtrail_sns_topic: !And
+    - !Not [!Condition create_cloudtrail_bucket]
+    - !Condition install_cloudtrail_source
+  create_vpc_sns_topic: !And
+    - !Not [!Condition create_vpc_logs_bucket]
+    - !Condition install_vpc_source
+  create_s3audit_sns_topic: !And
+    - !Not [!Condition create_s3_audit_bucket]
+    - !Condition install_s3_audit_source
+  create_security_hub_sns_topic: !And
+    - !Not [!Condition create_security_hub_bucket]
+    - !Condition install_security_hub_source
+  create_waf_sns_topic: !And
+    - !Not [!Condition create_waf_bucket]
+    - !Condition install_waf_source
+
+  # Common Conditions
+  create_sumo_source_role: !Or
+    - !Condition install_cloudtrail_source
+    - !Condition install_vpc_source
+    - !Condition install_s3_audit_source
+    - !Condition install_security_hub_source
+    - !Condition install_waf_source
+  install_collector: !Or
+    - !Condition install_cloudtrail_source
+    - !Condition install_vpc_source
+    - !Condition install_s3_audit_source
+    - !Condition install_security_hub_source
+    - !Condition install_waf_source
+
+Resources:
+
+  ############# START - RESOURCES FOR COMMON BUCKET #################
+  CommonS3BucketSNSTopic:
+    Type: "AWS::SNS::Topic"
+    Condition: create_common_s3_bucket
+    Properties:
+      TopicName: !Join
+        - ""
+        - - "sumo-quickstart-sns-topic-"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split ["/", !Ref "AWS::StackId"]
+
+  CommonS3BucketSNSpolicy:
+    Type: "AWS::SNS::TopicPolicy"
+    Condition: create_common_s3_bucket
+    Properties:
+      PolicyDocument:
+        Id: SumoTopicPolicy
+        Statement:
+          - Action:
+              - sns:Publish
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref "AWS::AccountId"
+              ArnLike:
+                aws:SourceArn: !Join
+                  - ""
+                  - - "arn:aws:s3:::aws-security-quickstart-logs-"
+                    - !Select
+                      - 0
+                      - !Split
+                        - "-"
+                        - !Select
+                          - 2
+                          - !Split ["/", !Ref "AWS::StackId"]
+            Effect: Allow
+            Principal:
+              AWS: "s3.amazonaws.com"
+            Resource:
+              - !Ref CommonS3BucketSNSTopic
+      Topics:
+        - Ref: CommonS3BucketSNSTopic
+
+  CommonS3Bucket:
+    Type: AWS::S3::Bucket
+    Condition: create_common_s3_bucket
+    DependsOn: CommonS3BucketSNSpolicy
+    Properties:
+      BucketName: !Join
+        - ""
+        - - "arn:aws:s3:::sumologic-quickstart-logs-"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split ["/", !Ref "AWS::StackId"]
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Event: s3:ObjectCreated:Put
+            Topic: !Ref CommonS3BucketSNSTopic
+
+  CommonS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Condition: create_common_s3_bucket
+    Properties:
+      Bucket: !Ref CommonS3Bucket
+      PolicyDocument:
+        Statement:
+          - Sid: AWSCloudTrailAclCheck
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: s3:GetBucketAcl
+            Resource:
+              - !Sub "arn:aws:s3:::${CommonS3Bucket}"
+          - Sid: AWSCloudTrailWrite
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: s3:PutObject
+            Resource:
+              - !Sub "arn:aws:s3:::${CommonS3Bucket}/*"
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+          - Sid: AWSBucketExistenceCheck
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: s3:ListBucket
+            Resource:
+              - !Sub "arn:aws:s3:::${CommonS3Bucket}"
+
+  CommonCloudTrail:
+    Type: AWS::CloudTrail::Trail
+    Condition: create_cloudtrail_bucket
+    DependsOn: CommonS3BucketPolicy
+    Properties:
+      IsLogging: true
+      IsMultiRegionTrail: false
+      S3BucketName: !Ref CommonS3Bucket
+      TrailName: !Sub "SumoLogic-QuickStart-${AWS::StackName}"
+
+  ############# START - RESOURCES FOR COLLECTOR #################
+  SumoSourceRole:
+    Type: AWS::IAM::Role
+    Condition: create_sumo_source_role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::926226587429:root
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Sub "${Section1aSumoLogicDeployment}:${Section1dSumoLogicOrganizationId}"
+      Path: "/"
+      Policies:
+        - PolicyName: SumoPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:ListBucketVersions
+                  - s3:ListBucket
+                Resource:
+                  "*"
+
+  SumoHostedCollector:
+    Type: Custom::Collector
+    Condition: install_collector
+    Properties:
+      ServiceToken: !Ref Section4aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      CollectorType: Hosted
+      CollectorName: !Ref Section2aCollectorName
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      RemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+
+  ############# START - RESOURCES FOR CLOUD TRAIL SOURCE #################
+  CloudTrailSource:
+    Condition: install_cloudtrail_source
+    Type: Custom::AWSSource
+    Properties:
+      SourceType: AwsCloudTrailBucket
+      ServiceToken: !Ref Section4aParentStackLambdaARN
+      Region: !Ref "AWS::Region"
+      SourceName: !Ref Section3bCloudTrailLogsSourceName
+      TargetBucketName: !If [create_cloudtrail_bucket, !Ref CommonS3Bucket, !Ref Section3cCloudTrailLogsBucketName]
+      PathExpression: !Ref Section3dCloudTrailBucketPathExpression
+      SourceCategory: !Ref Section3eCloudTrailLogsSourceCategoryName
+      RoleArn: !GetAtt SumoSourceRole.Arn
+      CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      RemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+
+  CloudTrailSNSTopic:
+    Type: 'AWS::SNS::Topic'
+    Condition: create_cloudtrail_sns_topic
+    Properties:
+      TopicName: !Join
+        - ""
+        - - "sumo-quickstart-cloudtrail-sns-topic-"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split ["/", !Ref "AWS::StackId"]
+
+  CloudTrailSNSSubscription:
+    Condition: install_cloudtrail_source
+    Type: "AWS::SNS::Subscription"
+    Properties:
+      TopicArn: !If [create_cloudtrail_bucket, !Ref CommonS3BucketSNSTopic, !Ref CloudTrailSNSTopic]
+      Endpoint: !GetAtt CloudTrailSource.SUMO_ENDPOINT
+      Protocol: https
+      DeliveryPolicy:
+        healthyRetryPolicy:
+          numRetries: 40
+          minDelayTarget: 10
+          maxDelayTarget: 300
+          numMinDelayRetries: 3
+          numMaxDelayRetries: 5
+          numNoDelayRetries: 0
+          backoffFunction: exponential
+
+  CloudTrailSNSpolicy:
+    Condition: create_cloudtrail_sns_topic
+    Type: "AWS::SNS::TopicPolicy"
+    Properties:
+      PolicyDocument:
+        Id: CloudTrailSNSpolicy
+        Statement:
+          - Action:
+              - sns:Publish
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref "AWS::AccountId"
+              ArnLike:
+                aws:SourceArn: !Sub "arn:aws:s3:::${Section3cCloudTrailLogsBucketName}"
+            Effect: Allow
+            Principal:
+              "Service": "s3.amazonaws.com"
+            Resource:
+              - !Ref CloudTrailSNSTopic
+      Topics:
+        - Ref: CloudTrailSNSTopic
+
+  ############# START - RESOURCES FOR VPC FLOW LOGS SOURCE #################
+  VPCFlowLogsSource:
+    Type: Custom::AWSSource
+    Condition: install_vpc_source
+    Properties:
+      ServiceToken: !Ref Section4aParentStackLambdaARN
+      SourceType: AwsS3Bucket
+      Region: !Ref "AWS::Region"
+      SourceName: !Ref Section4bVPCFlowLogsSourceName
+      SourceCategory: !Ref Section4eCloudTrailLogsSourceCategoryName
+      TargetBucketName: !If [create_vpc_logs_bucket, !Ref CommonS3Bucket, !Ref Section4cVPCFlowLogsBucketName]
+      PathExpression: !Ref Section4dVPCFlowLogsBucketPathExpression
+      filters:
+        - filterType: "Exclude"
+          name: "Exclude VPC File Flow headers"
+          regexp: "version account-id interface-id srcaddr dstaddr srcport dstport protocol packets bytes start end action log-status"
+      RoleArn: !GetAtt SumoSourceRole.Arn
+      CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
+      multilineProcessingEnabled: false
+      useAutolineMatching: false
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      RemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+
+  VPCFlowLogsSNSTopic:
+    Type: 'AWS::SNS::Topic'
+    Condition: create_vpc_sns_topic
+    Properties:
+      TopicName: !Join
+        - ""
+        - - "sumo-quickstart-vpc-flow-sns-topic-"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split ["/", !Ref "AWS::StackId"]
+
+  VPCFlowLogsSNSSubscription:
+    Condition: install_vpc_source
+    Type: "AWS::SNS::Subscription"
+    Properties:
+      TopicArn: !If [create_vpc_logs_bucket, !Ref CommonS3BucketSNSTopic, !Ref VPCFlowLogsSNSTopic]
+      Endpoint: !GetAtt VPCFlowLogsSource.SUMO_ENDPOINT
+      Protocol: https
+      DeliveryPolicy:
+        healthyRetryPolicy:
+          numRetries: 40
+          minDelayTarget: 10
+          maxDelayTarget: 300
+          numMinDelayRetries: 3
+          numMaxDelayRetries: 5
+          numNoDelayRetries: 0
+          backoffFunction: exponential
+
+  VPCFlowLogsSNSpolicy:
+    Condition: create_vpc_sns_topic
+    Type: "AWS::SNS::TopicPolicy"
+    Properties:
+      PolicyDocument:
+        Id: VpcSNSpolicy
+        Statement:
+          - Action:
+              - sns:Publish
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref "AWS::AccountId"
+              ArnLike:
+                aws:SourceArn: !Sub "arn:aws:s3:::${Section4cVPCFlowLogsBucketName}"
+            Effect: Allow
+            Principal:
+              "Service": "s3.amazonaws.com"
+            Resource:
+              - !Ref VPCFlowLogsSNSTopic
+      Topics:
+        - Ref: VPCFlowLogsSNSTopic
+
+  ############# START - RESOURCES FOR S3 AUDIT SOURCE #################
+  S3AuditSource:
+    Type: Custom::AWSSource
+    Condition: install_s3_audit_source
+    Properties:
+      ServiceToken: !Ref Section4aParentStackLambdaARN
+      SourceType: AwsS3AuditBucket
+      Region: !Ref "AWS::Region"
+      SourceName: !Ref Section5bS3AuditSourceName
+      SourceCategory: !Ref Section5eS3AuditSourceCategoryName
+      TargetBucketName: !If [create_s3_audit_bucket, !Ref CommonS3Bucket, !Ref Section5cS3AuditBucketName]
+      PathExpression: !Ref Section5dS3AuditBucketPathExpression
+      RoleArn: !GetAtt SumoSourceRole.Arn
+      CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      RemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+
+  S3AuditSNSTopic:
+    Type: 'AWS::SNS::Topic'
+    Condition: create_s3audit_sns_topic
+    Properties:
+      TopicName: !Join
+        - ""
+        - - "sumo-quickstart-s3-audit-sns-topic-"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split ["/", !Ref "AWS::StackId"]
+
+  S3AuditSNSSubscription:
+    Condition: install_s3_audit_source
+    Type: "AWS::SNS::Subscription"
+    Properties:
+      TopicArn: !If [create_s3_audit_bucket, !Ref CommonS3BucketSNSTopic, !Ref S3AuditSNSTopic]
+      Endpoint: !GetAtt S3AuditSource.SUMO_ENDPOINT
+      Protocol: https
+      DeliveryPolicy:
+        healthyRetryPolicy:
+          numRetries: 40
+          minDelayTarget: 10
+          maxDelayTarget: 300
+          numMinDelayRetries: 3
+          numMaxDelayRetries: 5
+          numNoDelayRetries: 0
+          backoffFunction: exponential
+
+  S3AuditSNSpolicy:
+    Condition: create_s3audit_sns_topic
+    Type: "AWS::SNS::TopicPolicy"
+    Properties:
+      PolicyDocument:
+        Id: S3AuditSNSpolicy
+        Statement:
+          - Action:
+              - sns:Publish
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref "AWS::AccountId"
+              ArnLike:
+                aws:SourceArn: !Sub "arn:aws:s3:::${Section5cS3AuditBucketName}"
+            Effect: Allow
+            Principal:
+              "Service": "s3.amazonaws.com"
+            Resource:
+              - !Ref S3AuditSNSTopic
+      Topics:
+        - Ref: S3AuditSNSTopic
+
+  ############# START - RESOURCES FOR SECURITY HUB SOURCE #################
+  SecurityHubConfiguration:
+    Type: AWS::SecurityHub::Hub
+    Condition: enable_security_hub
+
+  SecurityHubSource:
+    Type: Custom::AWSSource
+    Condition: install_security_hub_source
+    Properties:
+      ServiceToken: !Ref Section4aParentStackLambdaARN
+      SourceType: AwsS3Bucket
+      Region: !Ref "AWS::Region"
+      SourceName: !Ref Section6cSecurityHubSourceName
+      SourceCategory: !Ref Section6fSecurityHubSourceCategoryName
+      TargetBucketName: !If [create_security_hub_bucket, !Ref CommonS3Bucket, !Ref Section6dSecurityHubBucketName]
+      PathExpression: !Ref Section6eSecurityHubBucketPathExpression
+      DateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+      DateLocatorRegex: '.*"updatedAt":"(.*)".*'
+      RoleArn: !GetAtt SumoSourceRole.Arn
+      CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      RemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+
+  SecurityHubCollector:
+    Type: 'AWS::Serverless::Application'
+    Condition: install_security_hub_source
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-securityhub-collector
+        SemanticVersion: 1.0.8
+      Parameters:
+        S3SourceBucketName: !If [create_security_hub_bucket, !Ref CommonS3Bucket, !Ref Section6dSecurityHubBucketName]
+
+  SecurityHubSNSTopic:
+    Type: 'AWS::SNS::Topic'
+    Condition: create_security_hub_sns_topic
+    Properties:
+      TopicName: !Join
+        - ""
+        - - "sumo-quickstart-security-hub-sns-topic-"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split ["/", !Ref "AWS::StackId"]
+
+  SecurityHubSNSSubscription:
+    Condition: install_security_hub_source
+    Type: "AWS::SNS::Subscription"
+    Properties:
+      TopicArn: !If [create_security_hub_bucket, !Ref CommonS3BucketSNSTopic, !Ref SecurityHubSNSTopic]
+      Endpoint: !GetAtt SecurityHubSource.SUMO_ENDPOINT
+      Protocol: https
+      DeliveryPolicy:
+        healthyRetryPolicy:
+          numRetries: 40
+          minDelayTarget: 10
+          maxDelayTarget: 300
+          numMinDelayRetries: 3
+          numMaxDelayRetries: 5
+          numNoDelayRetries: 0
+          backoffFunction: exponential
+
+  SecurityHubSNSpolicy:
+    Condition: create_security_hub_sns_topic
+    Type: "AWS::SNS::TopicPolicy"
+    Properties:
+      PolicyDocument:
+        Id: SecurityHubSNSpolicy
+        Statement:
+          - Action:
+              - sns:Publish
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref "AWS::AccountId"
+              ArnLike:
+                aws:SourceArn: !Sub "arn:aws:s3:::${Section6dSecurityHubBucketName}"
+            Effect: Allow
+            Principal:
+              "Service": "s3.amazonaws.com"
+            Resource:
+              - !Ref SecurityHubSNSTopic
+      Topics:
+        - Ref: SecurityHubSNSTopic
+
+  ############# START - RESOURCES FOR WAF SOURCE #################
+  WafKinesisS3Role:
+    Type: AWS::IAM::Role
+    Condition: create_delivery_stream
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Ref AWS::AccountId
+      Path: "/"
+      Policies:
+        - PolicyName: KinesisS3RolePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:ListBucketMultipartUploads
+                  - s3:AbortMultipartUpload
+                  - s3:ListBucket
+                  - s3:GetBucketLocation
+                Resource:
+                  - !Sub
+                    - arn:aws:s3:::${S3bucketName}
+                    - { S3bucketName: !If [create_waf_bucket, !Ref CommonS3Bucket, !Ref Section7dWafBucketName] }
+                  - !Sub
+                    - arn:aws:s3:::${S3bucketName}/*
+                    - { S3bucketName: !If [create_waf_bucket, !Ref CommonS3Bucket, !Ref Section7dWafBucketName] }
+
+  WafKinesisFirehoseDeliveryStream:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Condition: create_delivery_stream
+    Properties:
+      DeliveryStreamName: !Join
+        - ""
+        - - "SumoLogicQuickStartDeliveryStream"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split ["/", !Ref "AWS::StackId"]
+      DeliveryStreamType: "DirectPut"
+      ExtendedS3DestinationConfiguration:
+        BucketARN: !Sub
+          - arn:aws:s3:::${S3bucketName}
+          - { S3bucketName: !If [create_waf_bucket, !Ref CommonS3Bucket, !Ref Section7dWafBucketName] }
+        Prefix: "WAF_LOGS/"
+        ErrorOutputPrefix: "WAF_LOGS/"
+        RoleARN: !GetAtt WafKinesisS3Role.Arn
+        BufferingHints:
+          IntervalInSeconds: 300
+          SizeInMBs: 5
+        CompressionFormat: "ZIP"
+        S3BackupMode: "Disabled"
+        EncryptionConfiguration:
+          NoEncryptionConfig: "NoEncryption"
+
+  WafSource:
+    Type: Custom::AWSSource
+    Condition: install_waf_source
+    Properties:
+      ServiceToken: !Ref Section4aParentStackLambdaARN
+      SourceType: AwsS3Bucket
+      Region: !Ref "AWS::Region"
+      SourceName: !Ref Section7cWafSourceName
+      SourceCategory: !Ref Section7fWafSourceCategoryName
+      TargetBucketName: !If [create_waf_bucket, !Ref CommonS3Bucket, !Ref Section7dWafBucketName]
+      PathExpression: !Ref Section7eWafBucketPathExpression
+      RoleArn: !GetAtt SumoSourceRole.Arn
+      CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
+      SumoDeployment: !Ref Section1aSumoLogicDeployment
+      SumoAccessID: !Ref Section1bSumoLogicAccessID
+      SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+      RemoveOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+
+  WafHubSNSTopic:
+    Type: 'AWS::SNS::Topic'
+    Condition: create_waf_sns_topic
+    Properties:
+      TopicName: !Join
+        - ""
+        - - "sumo-quickstart-waf-sns-topic-"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split ["/", !Ref "AWS::StackId"]
+
+  WafSNSSubscription:
+    Condition: install_waf_source
+    Type: "AWS::SNS::Subscription"
+    Properties:
+      TopicArn: !If [create_waf_bucket, !Ref CommonS3BucketSNSTopic, !Ref WafHubSNSTopic]
+      Endpoint: !GetAtt WafSource.SUMO_ENDPOINT
+      Protocol: https
+      DeliveryPolicy:
+        healthyRetryPolicy:
+          numRetries: 40
+          minDelayTarget: 10
+          maxDelayTarget: 300
+          numMinDelayRetries: 3
+          numMaxDelayRetries: 5
+          numNoDelayRetries: 0
+          backoffFunction: exponential
+
+  WafSNSpolicy:
+    Condition: create_waf_sns_topic
+    Type: "AWS::SNS::TopicPolicy"
+    Properties:
+      PolicyDocument:
+        Id: WafSNSpolicy
+        Statement:
+          - Action:
+              - sns:Publish
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref "AWS::AccountId"
+              ArnLike:
+                aws:SourceArn: !Sub "arn:aws:s3:::${Section7dWafBucketName}"
+            Effect: Allow
+            Principal:
+              "Service": "s3.amazonaws.com"
+            Resource:
+              - !Ref WafHubSNSTopic
+      Topics:
+        - Ref: WafHubSNSTopic
+
+  ############# START - RESOURCES FOR CONFIG SOURCE #################
+
+Outputs:
+  BucketName:
+    Description: "BucketName"
+    Condition: create_common_s3_bucket
+    Value: !Ref CommonS3Bucket
+  SumoSourceRoleARN:
+    Description: "Sumo Logic Source Role ARN"
+    Condition: create_sumo_source_role
+    Value: !GetAtt SumoSourceRole.Arn
+  SecurityHubArn:
+    Condition: enable_security_hub
+    Value: !Ref SecurityHubConfiguration
