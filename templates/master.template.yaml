@@ -828,7 +828,7 @@ Resources:
         SumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
         RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         CreateCollector: !If [create_common_collector, 'Yes', 'No']
-        CollectorName: !Sub "aws-quickstart-collector"
+        CollectorName: !Sub "aws-quickstart-collector-${AWS::AccountId}"
         CreateBucket: !If [create_common_s3_bucket, 'Yes', 'No']
         BucketName: !Join
           - ""
@@ -863,7 +863,7 @@ Resources:
         InstallCloudTrailApp: !Ref Section2aInstallCloudTrailApp
         InstallPCICloudTrailApp: !Ref Section2bInstallPCICloudTrailApp
         InstallCISFoundationApp: !Ref Section2cInstallCISFoundationApp
-        CollectorName: !Sub "aws-quickstart-collector"
+        CollectorName: !Sub "aws-quickstart-collector-${AWS::AccountId}"
         CreateCloudTrailBucket: "No"
         CloudTrailLogsBucketName: !If [create_cloudtrail_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section2eCloudTrailLogsBucketName]
         CreateCloudTrailLogSource: !If [create_cloudtrail_source, "Yes", "No"]
@@ -903,7 +903,7 @@ Resources:
         RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         InstallGuardDutyApp: !If [install_guardduty_app, "Yes", "No"]
         InstallGuardDutyBenchMarkApp: !If [install_guardduty_benchmark_app, "Yes", "No"]
-        CollectorName: !Sub "aws-quickstart-collector"
+        CollectorName: !Sub "aws-quickstart-collector-${AWS::AccountId}"
         CreateHttpLogsSource: !If [create_guardduty_source, "Yes", "No"]
         HttpLogsSourceName: !Sub "aws-quickstart-guardduty-${AWS::Region}"
         HttpLogsSourceCategoryName: !If [create_guardduty_source, "aws/quickstart/guardduty/logs", !Ref Section3cGuardDutyHttpLogsSourceCategoryName]
@@ -941,7 +941,7 @@ Resources:
         RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         InstallVpcApp: !If [install_vpc_app, "Yes", "No"]
         InstallPCIVpcApp: !If [install_pci_vpc_app, "Yes", "No"]
-        CollectorName: !Sub "aws-quickstart-collector"
+        CollectorName: !Sub "aws-quickstart-collector-${AWS::AccountId}"
         CreateS3Bucket: "No"
         LogsS3BucketName: !If [create_vpc_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section4cVpcLogsBucketName]
         CreateS3Source: !If [create_vpc_source, "Yes", "No"]
@@ -1015,7 +1015,7 @@ Resources:
         SumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
         RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         InstallApp: !Ref Section6aInstallS3AuditApp
-        CollectorName: !Sub "aws-quickstart-collector"
+        CollectorName: !Sub "aws-quickstart-collector-${AWS::AccountId}"
         CreateS3Bucket: "No"
         LogsS3BucketName: !If [create_s3_audit_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section6cS3AuditLogsBucketName]
         CreateS3AuditSource: !If [create_s3_audit_source, "Yes", "No"]
@@ -1055,7 +1055,7 @@ Resources:
         SumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
         RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         InstallApp: !Ref Section7aInstallSecurityHubAuditApp
-        CollectorName: !Sub "aws-quickstart-collector"
+        CollectorName: !Sub "aws-quickstart-collector-${AWS::AccountId}"
         CreateS3Bucket: "No"
         LogsS3BucketName: !If [create_security_hub_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section7dSecurityHubLogsBucketName]
         CreateS3Source: !If [create_security_hub_source, "Yes", "No"]
@@ -1097,7 +1097,7 @@ Resources:
         SumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
         RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         InstallApp: !Ref Section8aInstallWafApp
-        CollectorName: !Sub "aws-quickstart-collector"
+        CollectorName: !Sub "aws-quickstart-collector-${AWS::AccountId}"
         CreateS3Bucket: "No"
         LogsS3BucketName: !If [create_waf_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section8dWafLogsBucketName]
         CreateS3Source: !If [create_waf_source, "Yes", "No"]
@@ -1140,7 +1140,7 @@ Resources:
         SumoAccessKey: !Ref Section1cSumoLogicAccessKey
         RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         InstallApp: !Ref Section9aInstallConfigApp
-        CollectorName: !Sub "aws-quickstart-collector"
+        CollectorName: !Sub "aws-quickstart-collector-${AWS::AccountId}"
         EnableConfig: !If [enable_config, "Yes", "No"]
         BucketName: !GetAtt CreateCommonResources.Outputs.BucketName
         CreateSNSTopic: !If [create_sns_topic, "Yes", "No"]
