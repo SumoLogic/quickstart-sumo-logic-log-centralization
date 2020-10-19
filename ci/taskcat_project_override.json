@@ -1,7 +1,7 @@
 [
   {
     "ParameterKey": "Section1aSumoLogicDeployment",
-    "ParameterValue": "${Section1aSumoLogicDeployment}"
+    "ParameterValue": "au"
   },
   {
     "ParameterKey": "Section1eSumoLogicResourceRemoveOnDeleteStack",
@@ -17,14 +17,14 @@
   },
   {
     "ParameterKey": "Section1bSumoLogicAccessID",
-    "ParameterValue": "${Section1bSumoLogicAccessID}"
+    "ParameterValue": "sunwaqV8g33ztm"
   },
   {
     "ParameterKey": "Section1cSumoLogicAccessKey",
-    "ParameterValue": "${Section1cSumoLogicAccessKey}"
+    "ParameterValue": "pacWt50OvC2dqml8xXrzua9oHRMGlYiUcrChwn3rB7caaSRtIIAVuJ0maFqYaUBr"
   },
   {
     "ParameterKey": "Section1dSumoLogicOrganizationId",
-    "ParameterValue": "${Section1dSumoLogicOrganizationId}"
+    "ParameterValue": "000000000057CDCE"
   }
 ]
