@@ -1,7 +1,7 @@
 [
   {
     "ParameterKey": "Section1aSumoLogicDeployment",
-    "ParameterValue": "us1"
+    "ParameterValue": "${Section1aSumoLogicDeployment}"
   },
   {
     "ParameterKey": "Section1eSumoLogicResourceRemoveOnDeleteStack",
@@ -17,14 +17,14 @@
   },
   {
     "ParameterKey": "Section1bSumoLogicAccessID",
-    "ParameterValue": "override"
+    "ParameterValue": "${Section1bSumoLogicAccessID}"
   },
   {
     "ParameterKey": "Section1cSumoLogicAccessKey",
-    "ParameterValue": "override"
+    "ParameterValue": "${Section1cSumoLogicAccessKey}"
   },
   {
     "ParameterKey": "Section1dSumoLogicOrganizationId",
-    "ParameterValue": "override"
+    "ParameterValue": "${Section1dSumoLogicOrganizationId}"
   }
 ]
