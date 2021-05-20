@@ -1,0 +1,9 @@
+:quickstart-project-name: quickstart-sumo-logic-log-centralization
+:partner-product-name: Sumo Logic Security Integrations on AWS
+:partner-company-name: Sumo Logic
+:doc-month: May
+:doc-year: 2021
+:partner-contributors: Tim McDonald, Director, Partner Architect
+:quickstart-contributors: Dilip Rajan - AWS Global Partner SA, AWS & Vinay Maddi - Sr Solutions Architect, AWS
+:deployment_time: 30 minutes / 1 hour
+:default_deployment_region: us-east-1
