@@ -445,6 +445,7 @@ Resources:
         TopicConfigurations:
           - Event: s3:ObjectCreated:Put
             Topic: !Ref SumoSNSTopic
+    DeletionPolicy: Retain
 
   SumoCloudTrailExportPolicy:
     Condition: create_target_s3_bucket
