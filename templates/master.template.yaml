@@ -418,7 +418,7 @@ Parameters:
                   PCI_VPC: Install PCI compliance VPC flow app.
                   Both: Install both apps.
                   Skip: Skip installation of apps."
-    Default: 'Both'
+    Default: 'Skip'
     AllowedValues:
       - 'VPC'
       - 'PCI_VPC'
@@ -428,7 +428,7 @@ Parameters:
     Type: String
     Description: "Yes: Create a new S3 bucket.
                   No: Use an existing S3 bucket that has VPC logs."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -440,7 +440,7 @@ Parameters:
     Type: String
     Description: "Yes: Create Sumo Logic S3 logs source with provided bucket name.
                   No: Skip creation of the Sumo Logic S3 log source."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -458,7 +458,7 @@ Parameters:
     Type: String
     Description: "Yes: Install Sumo Logic Threat Intel app.
                   No: Skip installation of the app."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -472,7 +472,7 @@ Parameters:
     Type: String
     Description: "Yes: Install Sumo Logic S3 audit app.
                   No: Skip installation of the app."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -480,7 +480,7 @@ Parameters:
     Type: String
     Description: "Yes: Create a new S3 bucket.
                   No: Use an existing S3 bucket that has S3 audit logs."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -492,7 +492,7 @@ Parameters:
     Type: String
     Description: "Yes: Create Sumo Logic S3 audit log source with provided bucket name.
                   No: Skip creation of the Sumo Logic S3 audit log source."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -510,7 +510,7 @@ Parameters:
     Type: String
     Description: "Yes: Install Sumo Logic AWS Security Hub app.
                   No: Skip installation of app."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -523,7 +523,7 @@ Parameters:
     Type: String
     Description: "Yes: Create a new S3 bucket.
                   No: Use an existing S3 bucket that has Security Hub logs."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -535,7 +535,7 @@ Parameters:
     Type: String
     Description: "Yes: Create Sumo Logic S3 logs source using your provided bucket name.
                   No: Skip creation of the Sumo Logic S3 logs source."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -553,7 +553,7 @@ Parameters:
     Type: String
     Description: "Yes: Install Sumo Logic AWS WAF app.
                   No: Skip installation of the app."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -561,7 +561,7 @@ Parameters:
     Type: String
     Description: "Yes: Create a Kinesis delivery stream using provided bucket name.
                   No: Skip creation of a Kinesis delivery stream."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -569,7 +569,7 @@ Parameters:
     Type: String
     Description: "Yes: Create a new S3 bucket.
                   No: Use an existing S3 bucket that has AWS WAF logs."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -581,7 +581,7 @@ Parameters:
     Type: String
     Description: "Yes: Create Sumo Logic S3 log source with provided bucket name.
                   No: Skip creation of the Sumo Logic S3 log source."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -599,7 +599,7 @@ Parameters:
     Type: String
     Description: "Yes: Install Sumo Logic AWS Config app.
                   No: Skip installation of app."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -607,7 +607,7 @@ Parameters:
     Type: String
     Description: "Choose Yes to enable Config for the Region.
                   Choose No if Config is already enabled."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -615,7 +615,7 @@ Parameters:
     Type: String
     Description: "Choose Yes to create SNS Topic and attach the SNS topic to AWS Config setting to deliver the logs.
                   Choose No if Config logs are already delivered to an existing SNS topic."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -627,7 +627,7 @@ Parameters:
     Type: String
     Description: "Yes: Create Sumo Logic HTTP log source to collect Config logs.
                   No: Skip creation of the Sumo Logic HTTP log source."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -643,7 +643,7 @@ Parameters:
                   VPC: Enable VPC flow logs for new VPC, subnets, and network interfaces.
                   S3_VPC: Enable logging for both."
     AllowedPattern: ".+"
-    Default: 'S3_VPC'
+    Default: 'Skip'
     AllowedValues:
       - 'S3'
       - 'VPC'
@@ -653,7 +653,7 @@ Parameters:
     Type: String
     Description: "Yes: Enable Logging for existing resources.
                   No: Skip existing resources."
-    Default: "Yes"
+    Default: "No"
     AllowedValues:
       - 'Yes'
       - 'No'
