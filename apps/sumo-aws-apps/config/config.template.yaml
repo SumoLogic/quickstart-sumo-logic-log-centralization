@@ -303,6 +303,7 @@ Resources:
     Condition: create_bukcet
     Properties:
       BucketName: !Ref BucketName
+    DeletionPolicy: Retain
 
   SumoSNSTopic:
     Type: "AWS::SNS::Topic"
