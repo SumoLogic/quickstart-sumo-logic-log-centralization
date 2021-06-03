@@ -376,6 +376,7 @@ Resources:
         TopicConfigurations:
           - Event: s3:ObjectCreated:Put
             Topic: !Ref SumoSNSTopic
+    DeletionPolicy: Retain
 
   SumoHostedCollector:
     Type: Custom::Collector
