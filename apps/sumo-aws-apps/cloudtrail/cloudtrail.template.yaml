@@ -479,6 +479,7 @@ Resources:
               - !Sub "arn:aws:s3:::${CloudTrailLogsBucketName}"
     DependsOn:
       - TargetS3Bucket
+    DeletionPolicy: Retain
 
   SumoCloudTrail:
     Condition: create_target_s3_bucket
