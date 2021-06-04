@@ -839,13 +839,30 @@ p.footer-text a{color:#d7d8d8}
 </li>
 <li><a href="#_deployment_steps">Deployment steps</a>
 <ul class="sectlevel2">
-<li><a href="#_step_1_prepare_your_sumo_logic_account">Step 1. Prepare your Sumo Logic account</a></li>
-<li><a href="#_step_2_launch_the_quick_start">Step 2. Launch the Quick Start</a></li>
-<li><a href="#_step_3_test_the_deployment">Step 3. Test the deployment</a></li>
-<li><a href="#_step_4_post_deployment_steps">Step 4. Post-deployment steps</a></li>
-<li><a href="#_step_5_view_the_sumo_logic_dashboards">Step 5. View the Sumo Logic dashboards</a></li>
+<li><a href="#_prepare_your_sumo_logic_account_2">Prepare your Sumo Logic account</a></li>
+<li><a href="#_launch_the_quick_start">Launch the Quick Start</a></li>
+</ul>
+</li>
+<li><a href="#_test_the_deployment">Test the deployment</a>
+<ul class="sectlevel2">
+<li><a href="#_aws_account_2">AWS Account</a></li>
+<li><a href="#_sumo_logic_account">Sumo Logic Account</a></li>
+</ul>
+</li>
+<li><a href="#_post_deployment_steps">Post-deployment steps</a>
+<ul class="sectlevel2">
+<li><a href="#_using_existing_s3_bucket">Using Existing S3 Bucket</a></li>
+<li><a href="#_aws_waf_logs_for_amazon_kinesis_data_firehose_delivery_stream">AWS WAF logs for Amazon Kinesis Data Firehose Delivery Stream</a></li>
+<li><a href="#_view_the_sumo_logic_dashboards">View the Sumo Logic dashboards</a></li>
+</ul>
+</li>
 <li><a href="#_best_practices_for_using_sumo_logic_security_integrations">Best practices for using Sumo Logic Security Integrations</a></li>
-<li><a href="#_other_useful_information">Other useful information</a></li>
+<li><a href="#_additional_resources">Additional resources</a>
+<ul class="sectlevel2">
+<li><a href="#_aws_resources">AWS resources</a></li>
+<li><a href="#_aws_services_used_by_the_deployment">AWS services used by the deployment</a></li>
+<li><a href="#_sumo_logic_documentation">Sumo Logic documentation</a></li>
+<li><a href="#_other_quick_start_reference_deployments">Other Quick Start reference deployments</a></li>
 </ul>
 </li>
 <li><a href="#_faq">FAQ</a></li>
@@ -1096,21 +1113,19 @@ apps in Sumo Logic. We recommend you get familiar with them.</p>
 <col style="width: 50%;">
 <col style="width: 50%;">
 </colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">AWS security service or feature</th>
-<th class="tableblock halign-left valign-top">Sumo Logic apps for the following AWS services or features</th>
-</tr>
-</thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/cloudtrail/" target="_blank" rel="noopener">AWS CloudTrail</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AWS security service or feature</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sumo Logic apps for the following AWS services or features</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/cloudtrail" target="_blank" rel="noopener">AWS CloudTrail</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_CloudTrail" target="_blank" rel="noopener">AWS CloudTrail</a></p>
 <p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for_AWS_CloudTrail_App" target="_blank" rel="noopener">PCI DSS compliance for AWS CloudTrail</a></p>
 <p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/CIS_AWS_Foundations_Benchmark_App" target="_blank" rel="noopener">CIS AWS Foundations Benchmark</a></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/guardduty/" target="_blank" rel="noopener">Amazon GuardDuty</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/guardduty" target="_blank" rel="noopener">Amazon GuardDuty</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_GuardDuty" target="_blank" rel="noopener">Amazon GuardDuty</a></p>
 <p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Global_Intelligence_for_Amazon_GuardDuty" target="_blank" rel="noopener">Global Intelligence for Amazon GuardDuty</a></p></td>
 </tr>
@@ -1129,11 +1144,11 @@ apps in Sumo Logic. We recommend you get familiar with them.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_Security_Hub" target="_blank" rel="noopener">AWS Security Hub</a></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/waf/" target="_blank" rel="noopener">AWS WAF</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/waf" target="_blank" rel="noopener">AWS WAF</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_WAF" target="_blank" rel="noopener">AWS WAF</a></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/config/" target="_blank" rel="noopener">AWS Config</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/config" target="_blank" rel="noopener">AWS Config</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_Config" target="_blank" rel="noopener">AWS Config</a></p></td>
 </tr>
 </tbody>
@@ -1318,7 +1333,7 @@ necessary resources to your AWS account. During the deployment, you can choose w
 applications to install.</p>
 </div>
 <div class="sect2">
-<h3 id="_step_1_prepare_your_sumo_logic_account">Step 1. Prepare your Sumo Logic account</h3>
+<h3 id="_prepare_your_sumo_logic_account_2">Prepare your Sumo Logic account</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -1348,7 +1363,7 @@ the relevant Sumo Logic source category for your data.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_step_2_launch_the_quick_start">Step 2. Launch the Quick Start</h3>
+<h3 id="_launch_the_quick_start">Launch the Quick Start</h3>
 <div class="paragraph">
 <p>Deploy Sumo Logic Security Integrations. Each deployment takes about 10 minutes to complete.</p>
 </div>
@@ -1384,21 +1399,21 @@ the relevant Sumo Logic source category for your data.
 <p>When you finish reviewing and customizing the parameters, choose <strong>Next</strong>.</p>
 </div>
 <div class="paragraph">
-<p>+</p>
-</div>
-<div class="paragraph">
 <p>+
-. On the <strong>Configure stack options</strong> page, you can <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-resource-tags.html" target="_blank" rel="noopener">specify tags</a> (key-value pairs) for resources in your stack and <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-console-add-tags.html" target="_blank" rel="noopener">set advanced options</a>. When you’re finished, choose <strong>Next</strong>.
++. On the <strong>Configure stack options</strong> page, you can <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-resource-tags.html" target="_blank" rel="noopener">specify tags</a> (key-value pairs) for resources in your stack and <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-console-add-tags.html" target="_blank" rel="noopener">set advanced options</a>. When you’re finished, choose <strong>Next</strong>.
 . On the <strong>Review</strong> page, review and confirm the template settings. Under <strong>Capabilities</strong>, select the two check boxes to acknowledge that the template creates IAM resources and might require the ability to automatically expand macros.
 . Choose <strong>Create stack</strong> to deploy the stack.
 . Monitor the status of the stack. When the status is <strong>CREATE_COMPLETE</strong>, the Sumo Logic deployment is ready.
 . To view the created resources, see the values displayed in the <strong>Outputs</strong> tab for the stack.</p>
 </div>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_test_the_deployment">Test the deployment</h2>
+<div class="sectionbody">
 <div class="sect2">
-<h3 id="_step_3_test_the_deployment">Step 3. Test the deployment</h3>
-<div class="sect3">
-<h4 id="_aws_account_2">AWS Account</h4>
+<h3 id="_aws_account_2">AWS Account</h3>
 <div class="paragraph">
 <p>After the deployment completes, you will see the main stack, <code>QuickStartApps</code> in addition to multiple nested stacks.</p>
 </div>
@@ -1409,8 +1424,8 @@ the relevant Sumo Logic source category for your data.
 <div class="title">Figure 2. Example output of created resources</div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_sumo_logic_account">Sumo Logic Account</h4>
+<div class="sect2">
+<h3 id="_sumo_logic_account">Sumo Logic Account</h3>
 <div class="paragraph">
 <p>Confirm that the AWS CloudFormation template installed the collectors and sources for your Sumo Logic apps.</p>
 </div>
@@ -1422,23 +1437,24 @@ the relevant Sumo Logic source category for your data.
 </div>
 </div>
 </div>
+</div>
+<div class="sect1">
+<h2 id="_post_deployment_steps">Post-deployment steps</h2>
+<div class="sectionbody">
 <div class="sect2">
-<h3 id="_step_4_post_deployment_steps">Step 4. Post-deployment steps</h3>
-<div class="sect3">
-<h4 id="_using_existing_s3_bucket">Using Existing S3 Bucket</h4>
+<h3 id="_using_existing_s3_bucket">Using Existing S3 Bucket</h3>
 <div class="paragraph">
 <p>If you use an existing S3 bucket with logs, create an SNS topic (<code>SumoSNSTopic-{StackName}</code>) that subscribes to the Sumo Logic sources. Once the deployment completes, add that SNS topic to the S3 bucket events. For more information, see <a href="https://docs.aws.amazon.com/AmazonS3/latest/user-guide/enable-event-notifications.html" target="_blank" rel="noopener">How do I enable and configure event notifications for an S3 bucket?</a></p>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_aws_waf_logs_for_amazon_kinesis_data_firehose_delivery_stream">AWS WAF logs for Amazon Kinesis Data Firehose Delivery Stream</h4>
+<div class="sect2">
+<h3 id="_aws_waf_logs_for_amazon_kinesis_data_firehose_delivery_stream">AWS WAF logs for Amazon Kinesis Data Firehose Delivery Stream</h3>
 <div class="paragraph">
 <p>If you install AWS WAF, AWS CloudFormation creates a delivery stream (<code>QuickStartDeliveryStream{Region}</code>) in your Kinesis configuration. You must configure Web ACL in AWS WAF to send logs to the delivery stream. For more information, see <a href="https://docs.aws.amazon.com/waf/latest/developerguide/logging.html" target="_blank" rel="noopener">Logging Web ACL traffic information</a>.</p>
 </div>
 </div>
-</div>
 <div class="sect2">
-<h3 id="_step_5_view_the_sumo_logic_dashboards">Step 5. View the Sumo Logic dashboards</h3>
+<h3 id="_view_the_sumo_logic_dashboards">View the Sumo Logic dashboards</h3>
 <div class="paragraph">
 <p>After the deployment completes, the Sumo Logic apps are added to your Sumo Logic personal-account library in a folder named <code>SumoLogic Amazon QuickStart Apps &lt;date&gt;</code>.</p>
 </div>
@@ -1467,8 +1483,11 @@ the relevant Sumo Logic source category for your data.
 <div class="title">Figure 6. Amazon GuardDuty dashboard</div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_best_practices_for_using_sumo_logic_security_integrations">Best practices for using Sumo Logic Security Integrations</h3>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_best_practices_for_using_sumo_logic_security_integrations">Best practices for using Sumo Logic Security Integrations</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>If you want to use this Quick Start across multiple AWS accounts and Regions, rename the top-level parent folder of your Sumo Logic account (under your personal folder) to reflect the correct account and Region.</p>
 </div>
@@ -1492,10 +1511,78 @@ the relevant Sumo Logic source category for your data.
 </ul>
 </div>
 </div>
+</div>
+<div class="sect1">
+<h2 id="_additional_resources">Additional resources</h2>
+<div class="sectionbody">
 <div class="sect2">
-<h3 id="_other_useful_information">Other useful information</h3>
-<div class="paragraph">
-<p><em>Add any other details that will help the customer use the software on AWS.</em></p>
+<h3 id="_aws_resources">AWS resources</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://aws.amazon.com/getting-started/" target="_blank" rel="noopener">Getting Started with AWS</a></p>
+</li>
+<li>
+<p><a href="https://docs.aws.amazon.com/general/latest/gr/" target="_blank" rel="noopener">AWS General Reference</a></p>
+</li>
+<li>
+<p><a href="https://docs.aws.amazon.com/general/latest/gr/glos-chap.html" target="_blank" rel="noopener">AWS Glossary</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_aws_services_used_by_the_deployment">AWS services used by the deployment</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://docs.aws.amazon.com/cloudformation/" target="_blank" rel="noopener">AWS CloudFormation</a></p>
+</li>
+<li>
+<p><a href="https://aws.amazon.com/cloudwatch/" target="_blank" rel="noopener">Amazon CloudWatch</a></p>
+</li>
+<li>
+<p><a href="https://docs.aws.amazon.com/iam/" target="_blank" rel="noopener">AWS IAM</a></p>
+</li>
+<li>
+<p><a href="https://aws.amazon.com/sns/" target="_blank" rel="noopener">Amazon SNS</a></p>
+</li>
+<li>
+<p><a href="https://aws.amazon.com/lambda/" target="_blank" rel="noopener">AWS Lambda</a></p>
+</li>
+<li>
+<p><a href="https://aws.amazon.com/kinesis/data-firehose/" target="_blank" rel="noopener">Amazon Kinesis Data Firehose</a></p>
+</li>
+<li>
+<p><a href="https://aws.amazon.com/s3/" target="_blank" rel="noopener">Amazon S3</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_sumo_logic_documentation">Sumo Logic documentation</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS" target="_blank" rel="noopener">Sumo Logic and AWS apps</a></p>
+</li>
+<li>
+<p><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS" target="_blank" rel="noopener">Sumo Logic Doc Hub</a></p>
+</li>
+<li>
+<p><a href="https://www.sumologic.com/solutions/security-intelligence/" target="_blank" rel="noopener">Sumo Logic Cloud SIEM</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_other_quick_start_reference_deployments">Other Quick Start reference deployments</h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://aws.amazon.com/quickstart/" target="_blank" rel="noopener">AWS Quick Start home page</a></p>
+</li>
+</ul>
 </div>
 </div>
 </div>
@@ -1507,11 +1594,22 @@ the relevant Sumo Logic source category for your data.
 <p><strong>Q.</strong> I encountered a <strong>CREATE_FAILED</strong> error when I launched the Quick Start.</p>
 </div>
 <div class="paragraph">
-<p><strong>A.</strong> If AWS CloudFormation fails to create the stack, relaunch the template with <strong>Rollback on failure</strong> set to <strong>Disabled</strong>. This setting is under <strong>Advanced</strong> in the AWS CloudFormation console on the <strong>Configure stack options</strong> page. With this setting, the stack’s state is retained, and the instance keeps running so that you can troubleshoot the issue. (For Windows, look at the log files in <code>%ProgramFiles%\Amazon\EC2ConfigService</code> and <code>C:\cfn\log</code>.)
-WARNING: When you set <strong>Rollback on failure</strong> to <strong>Disabled</strong>, you continue to incur AWS charges for this stack. Delete the stack when you finish troubleshooting.</p>
+<p><strong>A.</strong> If AWS CloudFormation fails to create the stack, relaunch the template with <strong>Rollback on failure</strong> set to <strong>Disabled</strong>. This setting is under <strong>Advanced</strong> in the AWS CloudFormation console on the <strong>Configure stack options</strong> page. With this setting, the stack’s state is retained, and the instance keeps running so that you can troubleshoot the issue. (For Windows, look at the log files in <code>%ProgramFiles%\Amazon\EC2ConfigService</code> and <code>C:\cfn\log</code>.)</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+When you set <strong>Rollback on failure</strong> to <strong>Disabled</strong>, you continue to incur AWS charges for this stack. Delete the stack when you finish troubleshooting.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
-<p>For more information, see <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html" target="_blank" rel="noopener">Troubleshooting AWS CloudFormation</a>.</p>
+<p>For additional information, see <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html" target="_blank" rel="noopener">Troubleshooting AWS CloudFormation</a>.</p>
 </div>
 <div class="paragraph">
 <p><strong>Q.</strong> I encountered a size-limitation error when I deployed the AWS CloudFormation templates.</p>
