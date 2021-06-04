@@ -5,21 +5,22 @@ applications to install.
 
 === Step 1. Prepare your Sumo Logic account 
 
-. If you don’t already have a Sumo Logic enterprise account, create one at https://sumologic.com by following the on-screen instructions. 
+. If you don’t already have a Sumo Logic enterprise account, create one at https://sumologic.com[^] by following the on-screen instructions. 
 
-. Create the access key and access ID from your Sumo Logic account. These are passed as parameters when you launch the Quick Start template. 
+. Create the https://help.sumologic.com/Manage/Security/Access-Keys%23manage-your-access-keys-on-preferences-page[access key and access ID^] from your Sumo Logic account. These are passed as parameters when you launch the Quick Start template. 
 
 . You must pass the organization ID, which you can get from your Sumo Logic account in the Administration section under the Account tab. 
 
++
 NOTE: If you want to use the Threat Intel app but have not configured data 
-collection, see Threat Intel for AWS. If you already configured data collection, note 
+collection, see https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Threat_Intel_for_AWS[Threat Intel for AWS^]. If you already configured data collection, note 
 the relevant Sumo Logic source category for your data. 
 
 === Step 2. Launch the Quick Start 
 
 Deploy Sumo Logic Security Integrations. Each deployment takes about 10 minutes to complete. 
 
-. Sign in to your AWS account at https://aws.amazon.com with an IAM user role that has the necessary permissions. For details, see Planning the deployment, earlier in this guide. 
+. Sign in to your AWS account at https://aws.amazon.com[^] with an IAM user role that has the necessary permissions. For details, see Planning the deployment, earlier in this guide. 
 . Check the Region displayed in the upper-right corner of the navigation bar, and change it as necessary. This is where the infrastructure for the Sumo Logic app resources is built. 
 . On the *Create stack* page, keep the default setting for the template URL, then choose 
 . On the *Specify stack details* page, change the stack name if needed. Review the parameters for the template. Provide values for the parameters that require input. For all other parameters, review the default settings and customize them as necessary. 

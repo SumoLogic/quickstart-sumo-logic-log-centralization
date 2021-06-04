@@ -8,10 +8,10 @@ that you can customize. Some of these settings, such as instance type, affect th
 deployment. For cost estimates, see the pricing pages for each AWS service you use. Prices 
 are subject to change. 
 
-Tip: After you deploy the Quick Start, we recommend that you enable the AWS Cost 
+TIP: After you deploy the Quick Start, we recommend that you enable the AWS Cost 
 and Usage Report. This report delivers billing metrics to an Amazon Simple Storage 
 Service (Amazon S3) bucket in your account. It provides cost estimates based on 
 usage throughout each month and finalizes the data at the end of the month. For 
 more information about the report, see the AWS documentation. 
 
-For pricing information, visit the Sumo Logic website. 
+For https://sumologic.com/pricing/[pricing information^], visit the Sumo Logic website. 

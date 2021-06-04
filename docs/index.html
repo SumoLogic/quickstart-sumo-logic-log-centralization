@@ -832,6 +832,7 @@ p.footer-text a{color:#d7d8d8}
 <li><a href="#_planning_the_deployment">Planning the deployment</a>
 <ul class="sectlevel2">
 <li><a href="#_specialized_knowledge">Specialized knowledge</a></li>
+<li><a href="#_scenarios_supported_by_this_quick_start">Scenarios supported by this Quick Start</a></li>
 <li><a href="#_aws_account">AWS account</a></li>
 <li><a href="#_technical_requirements">Technical requirements</a></li>
 </ul>
@@ -850,7 +851,6 @@ p.footer-text a{color:#d7d8d8}
 <li><a href="#_security">Security</a></li>
 <li><a href="#_other_useful_information">Other useful information</a></li>
 <li><a href="#_faq">FAQ</a></li>
-<li><a href="#_troubleshooting">Troubleshooting</a></li>
 <li><a href="#_parameter_reference">Parameter reference</a></li>
 <li><a href="#_send_us_feedback">Send us feedback</a></li>
 <li><a href="#_quick_start_reference_deployments">Quick Start reference deployments</a></li>
@@ -870,7 +870,7 @@ p.footer-text a{color:#d7d8d8}
 </div>
 </div>
 <div class="paragraph text-center">
-<p><strong>May 2021</strong><br>
+<p><strong>June 2021</strong><br>
 <em>Dilip Rajan, Sr Partner Solutions Architect</em><br>
 <em>Shivansh Singh and Suresh Veeragoni, AWS Quick Start team</em></p>
 </div>
@@ -991,15 +991,24 @@ that you can customize. Some of these settings, such as instance type, affect th
 deployment. For cost estimates, see the pricing pages for each AWS service you use. Prices
 are subject to change.</p>
 </div>
-<div class="paragraph">
-<p>Tip: After you deploy the Quick Start, we recommend that you enable the AWS Cost
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+After you deploy the Quick Start, we recommend that you enable the AWS Cost
 and Usage Report. This report delivers billing metrics to an Amazon Simple Storage
 Service (Amazon S3) bucket in your account. It provides cost estimates based on
 usage throughout each month and finalizes the data at the end of the month. For
-more information about the report, see the AWS documentation.</p>
+more information about the report, see the AWS documentation.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
-<p>For pricing information, visit the Sumo Logic website.</p>
+<p>For <a href="https://sumologic.com/pricing/" target="_blank" rel="noopener">pricing information</a>, visit the Sumo Logic website.</p>
 </div>
 </div>
 </div>
@@ -1012,7 +1021,7 @@ a specific account and Region in the AWS Cloud.</p>
 </div>
 <div id="architecture1" class="imageblock">
 <div class="content">
-<img src="images/Image91.1443x996.bmp" alt="Architecture">
+<a class="image" href="images/Image91.1443x996.bmp"><img src="images/Image91.1443x996.bmp" alt="Architecture"></a>
 </div>
 <div class="title">Figure 1. Quick Start architecture for Sumo Logic on AWS</div>
 </div>
@@ -1022,57 +1031,29 @@ a specific account and Region in the AWS Cloud.</p>
 <div class="ulist">
 <ul>
 <li>
-<p>Amazon GuardDuty to detect malicious activity and behavior to protect AWS</p>
+<p>Amazon GuardDuty to detect malicious activity and behavior to protect AWS accounts and workloads.</p>
 </li>
-</ul>
-</div>
-<div class="paragraph">
-<p>accounts and workloads.</p>
-</div>
-<div class="ulist">
-<ul>
 <li>
-<p>Amazon VPC Flow Logs to capture information about IP traffic going to and from</p>
+<p>Amazon VPC Flow Logs to capture information about IP traffic going to and from network interfaces in your VPC.</p>
 </li>
-</ul>
-</div>
-<div class="paragraph">
-<p>network interfaces in your VPC.</p>
-</div>
-<div class="ulist">
-<ul>
 <li>
 <p>AWS Security Hub to assess security alerts and security posture across AWS</p>
 </li>
 <li>
 <p>AWS WAF to protect your web applications from common web exploits.</p>
 </li>
-</ul>
-</div>
-<div class="paragraph">
+<li>
 <p>AWS Config to record and evaluate configurations of your AWS resources.</p>
-</div>
-<div class="ulist">
-<ul>
+</li>
 <li>
 <p>AWS CloudTrail to track user activity and API usage.</p>
 </li>
 <li>
-<p>Multiple CloudFormation stacks are deployed in your environment to set up
-forwarding of data to Sumo Logic. Each stack consists of more than one AWS
-resource, including Amazon S3 buckets, AWS Lambda functions, and Amazon
-Kinesis Data Firehose delivery streams.</p>
+<p>Multiple CloudFormation stacks are deployed in your environment to set up forwarding of data to Sumo Logic. Each stack consists of more than one AWS resource, including Amazon S3 buckets, AWS Lambda functions, and Amazon Kinesis Data Firehose delivery streams.</p>
 </li>
 <li>
-<p>AWS Lambda functions to create a collector and multiple sources, and to install</p>
+<p>AWS Lambda functions to create a collector and multiple sources, and to install apps on your Sumo Logic account.</p>
 </li>
-</ul>
-</div>
-<div class="paragraph">
-<p>apps on your Sumo Logic account.</p>
-</div>
-<div class="ulist">
-<ul>
 <li>
 <p>Amazon S3 buckets capture logs from the various AWS services.</p>
 </li>
@@ -1080,15 +1061,8 @@ Kinesis Data Firehose delivery streams.</p>
 <p>The Sumo Logic collector and sources to receive logs from the S3 buckets.</p>
 </li>
 <li>
-<p>Amazon Kinesis Data Firehose delivery streams to transfer logs from AWS WAF to</p>
+<p>Amazon Kinesis Data Firehose delivery streams to transfer logs from AWS WAF to S3 buckets.</p>
 </li>
-</ul>
-</div>
-<div class="paragraph">
-<p>S3 buckets.</p>
-</div>
-<div class="ulist">
-<ul>
 <li>
 <p>S3 Event Notifications, which triggers an Amazon Simple Notification Service</p>
 </li>
@@ -1109,56 +1083,84 @@ deploy, and operate your infrastructure and applications on the AWS Cloud.</p>
 </div>
 <div class="paragraph">
 <p>Before you deploy this Quick Start, we recommend that you become familiar with Sumo
-Logic in addition to the following AWS services. If you are new to AWS, see Getting Started
-with AWS. If you are new to Sumo Logic, see Getting Started with Sumo Logic.</p>
+Logic in addition to the following AWS services. If you are new to AWS, see <a href="https://aws.amazon.com/getting-started/" target="_blank" rel="noopener">Getting Started with AWS</a>. If you are new to Sumo Logic, see <a href="https://help.sumologic.com/01Start-Here/04Getting-Started" target="_blank" rel="noopener">Getting Started with Sumo Logic</a>.</p>
 </div>
 <div class="paragraph">
 <p>The following table shows how various AWS security services map to the corresponding
 apps in Sumo Logic. We recommend you get familiar with them.</p>
 </div>
-<div class="paragraph">
-<p>AWS security service or feature</p>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">AWS security service or feature</th>
+<th class="tableblock halign-left valign-top">Sumo Logic apps for the following AWS services or features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/cloudtrail/" target="_blank" rel="noopener">AWS CloudTrail</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_CloudTrail" target="_blank" rel="noopener">AWS CloudTrail</a>
+<a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for_AWS_CloudTrail_App" target="_blank" rel="noopener">PCI DSS compliance for AWS CloudTrail</a>
+<a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/CIS_AWS_Foundations_Benchmark_App" target="_blank" rel="noopener">CIS AWS Foundations Benchmark</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/guardduty/" target="_blank" rel="noopener">Amazon GuardDuty</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_GuardDuty" target="_blank" rel="noopener">Amazon GuardDuty</a>, <a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Global_Intelligence_for_Amazon_GuardDuty" target="_blank" rel="noopener">Global Intelligence for Amazon GuardDuty</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html" target="_blank" rel="noopener">Amazon VPC Flow Logs</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_VPC_Flow_Logs" target="_blank" rel="noopener">Amazon VPC Flow Logs</a>, <a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for_Amazon_VPC_Flow_Logs" target="_blank" rel="noopener">PCI DSS compliance for Amazon VPC Flow Logs</a>, <a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Threat_Intel_for_AWS" target="_blank" rel="noopener">Threat Intel for AWS</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerLogs.html" target="_blank" rel="noopener">Amazon S3 server access logging</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_S3_Audit" target="_blank" rel="noopener">Amazon S3 Audit</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/security-hub/?aws-security-hub-blogs.sort-by=item.additionalFields.createdDate&amp;aws-security-hub-blogs.sort-order=desc" target="_blank" rel="noopener">AWS Security Hub</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_Security_Hub" target="_blank" rel="noopener">AWS Security Hub</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/waf/" target="_blank" rel="noopener">AWS WAF</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_WAF" target="_blank" rel="noopener">AWS WAF</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/config/" target="_blank" rel="noopener">AWS Config</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_Config" target="_blank" rel="noopener">AWS Config</a></p></td>
+</tr>
+</tbody>
+</table>
 </div>
+<div class="sect2">
+<h3 id="_scenarios_supported_by_this_quick_start">Scenarios supported by this Quick Start</h3>
 <div class="paragraph">
-<p>Sumo Logic apps for the following AWS services or features</p>
+<p>This Quick Start supports the following scenarios:</p>
 </div>
-<div class="paragraph">
-<p>AWS CloudTrail</p>
-</div>
-<div class="paragraph">
-<p>AWS CloudTrail, PCI DSS compliance for AWS CloudTrail, CIS AWS
-Foundations Benchmark</p>
-</div>
-<div class="paragraph">
-<p>Amazon GuardDuty</p>
-</div>
-<div class="paragraph">
-<p>Amazon GuardDuty, Global Intelligence for Amazon GuardDuty</p>
-</div>
-<div class="paragraph">
-<p>Amazon VPC Flow Logs</p>
-</div>
-<div class="paragraph">
-<p>Amazon VPC Flow Logs, PCI DSS compliance for Amazon VPC Flow
-Logs, Threat Intel for AWS</p>
-</div>
-<div class="paragraph">
-<p>Amazon S3 server access logging</p>
-</div>
-<div class="paragraph">
-<p>Amazon S3 Audit</p>
-</div>
-<div class="paragraph">
-<p>AWS Security Hub</p>
-</div>
-<div class="paragraph">
-<p>AWS Security Hub</p>
-</div>
-<div class="paragraph">
-<p>AWS WAF</p>
-</div>
-<div class="paragraph">
-<p>AWS WAF</p>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Scenario 1: You do not use AWS security services or Sumo Logic.</strong> You did not
+configure AWS to use one or more security services listed under Specialized knowledge,
+but you want to collect and analyze data using Sumo Logic apps. For this scenario, use
+this Quick Start to set up AWS security services and configure Sumo Logic.</p>
+</li>
+<li>
+<p><strong>Scenario 2: You use AWS security services but not Sumo Logic.</strong> You use the AWS security services listed under Specialized knowledge but have not configured Sumo
+Logic to collect data from AWS or installed the corresponding Sumo Logic apps. For this
+scenario, configure the auxiliary AWS services and resources to send data to Sumo
+Logic. This scenario also installs the corresponding Sumo Logic apps.</p>
+</li>
+<li>
+<p><strong>Scenario 3: You use AWS security services and Sumo Logic.</strong> You use the AWS
+security services listed under Specialized knowledge and you collect and analyze data
+from one or more of them in Sumo Logic. For this scenario, configure the auxiliary AWS
+services and resources to send data to Sumo Logic. This scenario is intended only for
+non-configured AWS security services and their corresponding Sumo Logic apps.</p>
+</li>
+</ul>
 </div>
 </div>
 <div class="sect2">
@@ -1315,16 +1317,13 @@ applications to install.</p>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>If you don’t already have a Sumo Logic enterprise account, create one at <a href="https://sumologic.com" class="bare">https://sumologic.com</a> by following the on-screen instructions.</p>
+<p>If you don’t already have a Sumo Logic enterprise account, create one at <a href="https://sumologic.com" class="bare" target="_blank" rel="noopener">https://sumologic.com</a> by following the on-screen instructions.</p>
 </li>
 <li>
-<p>Create the access key and access ID from your Sumo Logic account. These are passed as parameters when you launch the Quick Start template.</p>
+<p>Create the <a href="https://help.sumologic.com/Manage/Security/Access-Keys%23manage-your-access-keys-on-preferences-page" target="_blank" rel="noopener">access key and access ID</a> from your Sumo Logic account. These are passed as parameters when you launch the Quick Start template.</p>
 </li>
 <li>
 <p>You must pass the organization ID, which you can get from your Sumo Logic account in the Administration section under the Account tab.</p>
-</li>
-</ol>
-</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -1333,11 +1332,14 @@ applications to install.</p>
 </td>
 <td class="content">
 If you want to use the Threat Intel app but have not configured data
-collection, see Threat Intel for AWS. If you already configured data collection, note
+collection, see <a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Threat_Intel_for_AWS" target="_blank" rel="noopener">Threat Intel for AWS</a>. If you already configured data collection, note
 the relevant Sumo Logic source category for your data.
 </td>
 </tr>
 </table>
+</div>
+</li>
+</ol>
 </div>
 </div>
 <div class="sect2">
@@ -1348,13 +1350,13 @@ the relevant Sumo Logic source category for your data.
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Sign in to your AWS account at <a href="https://aws.amazon.com" class="bare">https://aws.amazon.com</a> with an IAM user role that has the necessary permissions. For details, see Planning the deployment, earlier in this guide.</p>
+<p>Sign in to your AWS account at <a href="https://aws.amazon.com" class="bare" target="_blank" rel="noopener">https://aws.amazon.com</a> with an IAM user role that has the necessary permissions. For details, see Planning the deployment, earlier in this guide.</p>
 </li>
 <li>
 <p>Check the Region displayed in the upper-right corner of the navigation bar, and change it as necessary. This is where the infrastructure for the Sumo Logic app resources is built.</p>
 </li>
 <li>
-<p>On the Create stack page, keep the default setting for the template URL, then choose</p>
+<p>On the <strong>Create stack</strong> page, keep the default setting for the template URL, then choose</p>
 </li>
 <li>
 <p>On the <strong>Specify stack details</strong> page, change the stack name if needed. Review the parameters for the template. Provide values for the parameters that require input. For all other parameters, review the default settings and customize them as necessary.</p>
@@ -1362,7 +1364,7 @@ the relevant Sumo Logic source category for your data.
 </ol>
 </div>
 <div class="paragraph">
-<p>When you finish reviewing and customizing the parameters, choose Next.</p>
+<p>When you finish reviewing and customizing the parameters, choose <strong>Next</strong>.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1510,14 +1512,6 @@ When you set <strong>Rollback on failure</strong> to <strong>Disabled</strong>, 
 </div>
 <div class="paragraph">
 <p><strong>A.</strong> Launch the Quick Start templates from the links in this guide or from another S3 bucket. If you deploy the templates from a local copy on your computer or from a location other than an S3 bucket, you might encounter template-size limitations. For more information, see <a href="http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html" target="_blank" rel="noopener">AWS CloudFormation quotas</a>.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_troubleshooting">Troubleshooting</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>&lt;Steps for troubleshooting the deployment.&gt;</p>
 </div>
 </div>
 </div>
