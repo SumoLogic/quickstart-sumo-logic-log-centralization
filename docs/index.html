@@ -839,7 +839,7 @@ p.footer-text a{color:#d7d8d8}
 </li>
 <li><a href="#_deployment_steps">Deployment steps</a>
 <ul class="sectlevel2">
-<li><a href="#_prepare_your_sumo_logic_account_2">Prepare your Sumo Logic account</a></li>
+<li><a href="#_prepare_your_sumo_logic_account">Prepare your Sumo Logic account</a></li>
 <li><a href="#_launch_the_quick_start">Launch the Quick Start</a></li>
 </ul>
 </li>
@@ -1113,11 +1113,13 @@ apps in Sumo Logic. We recommend you get familiar with them.</p>
 <col style="width: 50%;">
 <col style="width: 50%;">
 </colgroup>
-<tbody>
+<thead>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">AWS security service or feature</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Sumo Logic apps for the following AWS services or features</p></td>
+<th class="tableblock halign-left valign-top">AWS security service or feature</th>
+<th class="tableblock halign-left valign-top">Sumo Logic apps for the following AWS services or features</th>
 </tr>
+</thead>
+<tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/cloudtrail" target="_blank" rel="noopener">AWS CloudTrail</a></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_CloudTrail" target="_blank" rel="noopener">AWS CloudTrail</a></p>
@@ -1262,12 +1264,14 @@ If you did not previously configure these services, this Quick Start automatical
 <col style="width: 33.3333%;">
 <col style="width: 33.3334%;">
 </colgroup>
-<tbody>
+<thead>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Sumo Logic apps</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">If you have done the following</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Make a note of:</p></td>
+<th class="tableblock halign-left valign-top">Sumo Logic apps</th>
+<th class="tableblock halign-left valign-top">If you have done the following</th>
+<th class="tableblock halign-left valign-top">Make a note of:</th>
 </tr>
+</thead>
+<tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">CloudTrail, PCI DSS compliance for AWS CloudTrail, CIS AWS foundations</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Configured AWS CloudTrail to send its logs to an S3 bucket.</p></td>
@@ -1300,129 +1304,6 @@ If you did not previously configure these services, this Quick Start automatical
 </tr>
 </tbody>
 </table>
-<div class="sect3">
-<h4 id="_resource_quotas">Resource quotas</h4>
-<div class="paragraph">
-<p>If necessary, request <a href="https://console.aws.amazon.com/servicequotas/home?region=us-east-2#!/" target="_blank" rel="noopener">service quota increases</a> for the following resources. You might need to request increases if your existing deployment currently uses these resources and if this Quick Start deployment could result in exceeding the default quotas. The <a href="https://console.aws.amazon.com/servicequotas/home?region=us-east-2#!/" target="_blank" rel="noopener">Service Quotas console</a> displays your usage and quotas for some aspects of some services. For more information, see <a href="https://docs.aws.amazon.com/servicequotas/latest/userguide/intro.html" target="_blank" rel="noopener">What is Service Quotas?</a> and <a href="https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html" target="_blank" rel="noopener">AWS service quotas</a>.</p>
-</div>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Resource</th>
-<th class="tableblock halign-left valign-top">This deployment uses</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">VPCs</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;n&gt;</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Elastic IP addresses</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;n&gt;</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Security groups</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;n&gt;</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">AWS Identity and Access Management (IAM) roles</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;n&gt;</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Auto Scaling groups</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;n&gt;</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Application Load Balancers</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;n&gt;</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Network Load Balancers</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;n&gt;</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;type&gt; instances</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;n&gt;</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect3">
-<h4 id="_supported_regions">Supported Regions</h4>
-<div class="paragraph">
-<p>This Quick Start supports the following Regions:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>us-east-1, US East (N. Virginia) (EXAMPLE)</p>
-</li>
-<li>
-<p>us-east-2, US East (Ohio) (EXAMPLE)</p>
-</li>
-</ul>
-</div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
-</td>
-<td class="content">
-Certain Regions are available on an opt-in basis. For more information, see <a href="https://docs.aws.amazon.com/general/latest/gr/rande-manage.html" target="_blank" rel="noopener">Managing AWS Regions</a>.
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_iam_permissions">IAM permissions</h4>
-<div class="paragraph">
-<p>Before launching the Quick Start, you must sign in to the AWS Management Console with IAM permissions for the resources that the templates deploy. The <em>AdministratorAccess</em> managed policy within IAM provides sufficient permissions, although your organization may choose to use a custom policy with more restrictions. For more information, see <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_job-functions.html" target="_blank" rel="noopener">AWS managed policies for job functions</a>.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_prepare_your_aws_account">Prepare your AWS account</h4>
-<div class="paragraph">
-<p><em>Describe any setup required in the AWS account prior to template launch</em></p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_prepare_your_sumo_logic_account">Prepare your Sumo Logic account</h4>
-<div class="paragraph">
-<p><em>Describe any setup required in the partner portal/account prior to template launch</em></p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_prepare_for_the_deployment">Prepare for the deployment</h4>
-<div class="paragraph">
-<p><em>Describe any preparation required to complete the product build, such as obtaining licenses or placing files in S3</em></p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_deployment_options">Deployment options</h4>
-<div class="paragraph">
-<p>This Quick Start provides two deployment options:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><strong>Deploy Sumo Logic into a new VPC</strong>. This option builds a new AWS environment consisting of the VPC, subnets, NAT gateways, security groups, bastion hosts, and other infrastructure components. It then deploys Sumo Logic into this new VPC.</p>
-</li>
-<li>
-<p><strong>Deploy Sumo Logic into an existing VPC</strong>. This option provisions Sumo Logic in your existing AWS infrastructure.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>The Quick Start provides separate templates for these options. It also lets you configure Classless Inter-Domain Routing (CIDR) blocks, instance types, and Sumo Logic settings, as discussed later in this guide.</p>
-</div>
-</div>
 </div>
 </div>
 </div>
@@ -1436,7 +1317,7 @@ necessary resources to your AWS account. During the deployment, you can choose w
 applications to install.</p>
 </div>
 <div class="sect2">
-<h3 id="_prepare_your_sumo_logic_account_2">Prepare your Sumo Logic account</h3>
+<h3 id="_prepare_your_sumo_logic_account">Prepare your Sumo Logic account</h3>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -1502,12 +1383,7 @@ the relevant Sumo Logic source category for your data.
 <p>When you finish reviewing and customizing the parameters, choose <strong>Next</strong>.</p>
 </div>
 <div class="paragraph">
-<p>+
-+. On the <strong>Configure stack options</strong> page, you can <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-resource-tags.html" target="_blank" rel="noopener">specify tags</a> (key-value pairs) for resources in your stack and <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-console-add-tags.html" target="_blank" rel="noopener">set advanced options</a>. When you’re finished, choose <strong>Next</strong>.
-. On the <strong>Review</strong> page, review and confirm the template settings. Under <strong>Capabilities</strong>, select the two check boxes to acknowledge that the template creates IAM resources and might require the ability to automatically expand macros.
-. Choose <strong>Create stack</strong> to deploy the stack.
-. Monitor the status of the stack. When the status is <strong>CREATE_COMPLETE</strong>, the Sumo Logic deployment is ready.
-. To view the created resources, see the values displayed in the <strong>Outputs</strong> tab for the stack.</p>
+<p>+</p>
 </div>
 </div>
 </div>

@@ -33,4 +33,4 @@ Deploy Sumo Logic Security Integrations. Each deployment takes about {deployment
 . On the *Create stack* page, keep the default setting for the template URL, then choose 
 . On the *Specify stack details* page, change the stack name if needed. Review the parameters for the template. Provide values for the parameters that require input. For all other parameters, review the default settings and customize them as necessary. 
 
-When you finish reviewing and customizing the parameters, choose *Next*. 
+When you finish reviewing and customizing the parameters, choose *Next*.

@@ -10,8 +10,7 @@ The following table shows how various AWS security services map to the correspon
 apps in Sumo Logic. We recommend you get familiar with them. 
 
 |===
-|AWS security service or feature |
-Sumo Logic apps for the following AWS services or features 
+|AWS security service or feature |Sumo Logic apps for the following AWS services or features 
 
 |
 https://aws.amazon.com/cloudtrail[AWS CloudTrail^] |

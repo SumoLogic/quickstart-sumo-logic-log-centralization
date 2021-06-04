@@ -24,6 +24,7 @@ NOTE: If you did not previously configure these services, this Quick Start autom
 
 |=== 
 |Sumo Logic apps|If you have done the following | Make a note of: 
+
 |CloudTrail, PCI DSS compliance for AWS CloudTrail, CIS AWS foundations|Configured AWS CloudTrail to send its logs to an S3 bucket.| The S3 bucket name.
 |VPC Flow Logs, PCI DSS compliance for Amazon VPC Flow Logs|Configured VPC Flow Logs to send to an S3 bucket.|The S3 bucket name.
 |Amazon S3 Audit|Configured the access logging of S3 buckets.|The S3 bucket name.
