@@ -4,8 +4,8 @@ Description: "This CloudFormation template sets up AWS and Sumo Logic resources 
 
 Metadata:
   QuickStartDocumentation:
-  EntrypointName: "Parameters for deploying Sumo Logic"
-  'AWS::CloudFormation::Interface':
+    EntrypointName: "Parameters for deploying Sumo Logic"
+  AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
           default: "1.1 Sumo Logic access configuration (required)"
@@ -296,7 +296,7 @@ Metadata:
 
 Parameters:
   Section1aSumoLogicDeployment:
-  Type: String
+    Type: String
     AllowedValues:
       - au
       - ca
