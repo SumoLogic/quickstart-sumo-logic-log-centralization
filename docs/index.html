@@ -841,15 +841,13 @@ p.footer-text a{color:#d7d8d8}
 <ul class="sectlevel2">
 <li><a href="#_step_1_prepare_your_sumo_logic_account">Step 1. Prepare your Sumo Logic account</a></li>
 <li><a href="#_step_2_launch_the_quick_start">Step 2. Launch the Quick Start</a></li>
-<li><a href="#_confirm_your_aws_account_configuration">Confirm your AWS account configuration</a></li>
-<li><a href="#_launch_the_quick_start">Launch the Quick Start</a></li>
+<li><a href="#_step_3_test_the_deployment">Step 3. Test the deployment</a></li>
+<li><a href="#_step_4_post_deployment_steps">Step 4. Post-deployment steps</a></li>
+<li><a href="#_step_5_view_the_sumo_logic_dashboards">Step 5. View the Sumo Logic dashboards</a></li>
+<li><a href="#_best_practices_for_using_sumo_logic_security_integrations">Best practices for using Sumo Logic Security Integrations</a></li>
+<li><a href="#_other_useful_information">Other useful information</a></li>
 </ul>
 </li>
-<li><a href="#_test_the_deployment">Test the deployment</a></li>
-<li><a href="#_post_deployment_steps">Post-deployment steps</a></li>
-<li><a href="#_best_practices_for_using_sumo_logic_on_aws">Best practices for using Sumo Logic on AWS</a></li>
-<li><a href="#_security">Security</a></li>
-<li><a href="#_other_useful_information">Other useful information</a></li>
 <li><a href="#_faq">FAQ</a></li>
 <li><a href="#_parameter_reference">Parameter reference</a>
 <ul class="sectlevel2">
@@ -876,7 +874,7 @@ p.footer-text a{color:#d7d8d8}
 <div class="paragraph text-center">
 <p><strong>June 2021</strong><br>
 <em>Dilip Rajan, Sr Partner Solutions Architect</em><br>
-<em>Shivansh Singh and Suresh Veeragoni, AWS Quick Start team</em></p>
+<em>Shivansh Singh and Suresh Veeragoni, AWS Integration &amp; Automation team</em></p>
 </div>
 <div class="admonitionblock tip text-left">
 <table>
@@ -1107,17 +1105,20 @@ apps in Sumo Logic. We recommend you get familiar with them.</p>
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/cloudtrail/" target="_blank" rel="noopener">AWS CloudTrail</a></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_CloudTrail" target="_blank" rel="noopener">AWS CloudTrail</a>
-<a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for_AWS_CloudTrail_App" target="_blank" rel="noopener">PCI DSS compliance for AWS CloudTrail</a>
-<a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/CIS_AWS_Foundations_Benchmark_App" target="_blank" rel="noopener">CIS AWS Foundations Benchmark</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_CloudTrail" target="_blank" rel="noopener">AWS CloudTrail</a></p>
+<p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for_AWS_CloudTrail_App" target="_blank" rel="noopener">PCI DSS compliance for AWS CloudTrail</a></p>
+<p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/CIS_AWS_Foundations_Benchmark_App" target="_blank" rel="noopener">CIS AWS Foundations Benchmark</a></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/guardduty/" target="_blank" rel="noopener">Amazon GuardDuty</a></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_GuardDuty" target="_blank" rel="noopener">Amazon GuardDuty</a>, <a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Global_Intelligence_for_Amazon_GuardDuty" target="_blank" rel="noopener">Global Intelligence for Amazon GuardDuty</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_GuardDuty" target="_blank" rel="noopener">Amazon GuardDuty</a></p>
+<p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Global_Intelligence_for_Amazon_GuardDuty" target="_blank" rel="noopener">Global Intelligence for Amazon GuardDuty</a></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html" target="_blank" rel="noopener">Amazon VPC Flow Logs</a></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_VPC_Flow_Logs" target="_blank" rel="noopener">Amazon VPC Flow Logs</a>, <a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for_Amazon_VPC_Flow_Logs" target="_blank" rel="noopener">PCI DSS compliance for Amazon VPC Flow Logs</a>, <a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Threat_Intel_for_AWS" target="_blank" rel="noopener">Threat Intel for AWS</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_VPC_Flow_Logs" target="_blank" rel="noopener">Amazon VPC Flow Logs</a></p>
+<p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for_Amazon_VPC_Flow_Logs" target="_blank" rel="noopener">PCI DSS compliance for Amazon VPC Flow Logs</a></p>
+<p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Threat_Intel_for_AWS" target="_blank" rel="noopener">Threat Intel for AWS</a></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerLogs.html" target="_blank" rel="noopener">Amazon S3 server access logging</a></p></td>
@@ -1354,7 +1355,19 @@ the relevant Sumo Logic source category for your data.
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Sign in to your AWS account at <a href="https://aws.amazon.com" class="bare" target="_blank" rel="noopener">https://aws.amazon.com</a> with an IAM user role that has the necessary permissions. For details, see Planning the deployment, earlier in this guide.</p>
+<p>Sign in to your AWS account at <a href="https://aws.amazon.com" class="bare" target="_blank" rel="noopener">https://aws.amazon.com</a> with an IAM user role that has the necessary permissions. For details, see <a href="#_planning_the_deployment">Planning the deployment</a>, earlier in this guide.</p>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 75%;">
+<col style="width: 25%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://fwd.aws/Nm69g" target="_blank" rel="noopener">Deploy Sumo Logic Security Integrations</a></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="https://fwd.aws/MG4nr" target="_blank" rel="noopener">View template</a></p></td>
+</tr>
+</tbody>
+</table>
 </li>
 <li>
 <p>Check the Region displayed in the upper-right corner of the navigation bar, and change it as necessary. This is where the infrastructure for the Sumo Logic app resources is built.</p>
@@ -1370,120 +1383,120 @@ the relevant Sumo Logic source category for your data.
 <div class="paragraph">
 <p>When you finish reviewing and customizing the parameters, choose <strong>Next</strong>.</p>
 </div>
+<div class="paragraph">
+<p>+</p>
 </div>
-<div class="sect2">
-<h3 id="_confirm_your_aws_account_configuration">Confirm your AWS account configuration</h3>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Sign in to your AWS account at <a href="https://aws.amazon.com" class="bare">https://aws.amazon.com</a> with an IAM user role that has the necessary permissions. For details, see <a href="#_planning_the_deployment">Planning the deployment</a> earlier in this guide.</p>
-</li>
-<li>
-<p>Make sure that your AWS account is configured correctly, as discussed in the <a href="#_technical_requirements">Technical requirements</a> section.</p>
-</li>
-</ol>
+<div class="paragraph">
+<p>+
+. On the <strong>Configure stack options</strong> page, you can <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-resource-tags.html" target="_blank" rel="noopener">specify tags</a> (key-value pairs) for resources in your stack and <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-console-add-tags.html" target="_blank" rel="noopener">set advanced options</a>. When you’re finished, choose <strong>Next</strong>.
+. On the <strong>Review</strong> page, review and confirm the template settings. Under <strong>Capabilities</strong>, select the two check boxes to acknowledge that the template creates IAM resources and might require the ability to automatically expand macros.
+. Choose <strong>Create stack</strong> to deploy the stack.
+. Monitor the status of the stack. When the status is <strong>CREATE_COMPLETE</strong>, the Sumo Logic deployment is ready.
+. To view the created resources, see the values displayed in the <strong>Outputs</strong> tab for the stack.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_launch_the_quick_start">Launch the Quick Start</h3>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-If you’re deploying Sumo Logic into an existing VPC, make sure that your VPC has two private subnets in different Availability Zones for the workload instances and that the subnets aren’t shared. This Quick Start doesn’t support <a href="https://docs.aws.amazon.com/vpc/latest/userguide/vpc-sharing.html" target="_blank" rel="noopener">shared subnets</a>. These subnets require <a href="https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html" target="_blank" rel="noopener">NAT gateways</a> in their route tables to allow the instances to download packages and software without exposing them to the internet. Also make sure that the domain name option in the DHCP options is configured as explained in <a href="http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/VPC_DHCP_Options.html" target="_blank" rel="noopener">DHCP options sets</a>. You provide your VPC settings when you launch the Quick Start.
-</td>
-</tr>
-</table>
+<h3 id="_step_3_test_the_deployment">Step 3. Test the deployment</h3>
+<div class="sect3">
+<h4 id="_aws_account_2">AWS Account</h4>
+<div class="paragraph">
+<p>After the deployment completes, you will see the main stack, <code>QuickStartApps</code> in addition to multiple nested stacks.</p>
+</div>
+<div id="output1" class="imageblock">
+<div class="content">
+<a class="image" href="images/output1.bmp"><img src="images/output1.bmp" alt="output1^"></a>
+</div>
+<div class="title">Figure 2. Example output of created resources</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_sumo_logic_account">Sumo Logic Account</h4>
+<div class="paragraph">
+<p>Confirm that the AWS CloudFormation template installed the collectors and sources for your Sumo Logic apps.</p>
+</div>
+<div id="output2" class="imageblock">
+<div class="content">
+<a class="image" href="images/output1.bmp"><img src="images/output2.bmp" alt="output2^"></a>
+</div>
+<div class="title">Figure 3. Example output of collectors and sources</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_step_4_post_deployment_steps">Step 4. Post-deployment steps</h3>
+<div class="sect3">
+<h4 id="_using_existing_s3_bucket">Using Existing S3 Bucket</h4>
+<div class="paragraph">
+<p>If you use an existing S3 bucket with logs, create an SNS topic (<code>SumoSNSTopic-{StackName}</code>) that subscribes to the Sumo Logic sources. Once the deployment completes, add that SNS topic to the S3 bucket events. For more information, see <a href="https://docs.aws.amazon.com/AmazonS3/latest/user-guide/enable-event-notifications.html" target="_blank" rel="noopener">How do I enable and configure event notifications for an S3 bucket?</a></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_aws_waf_logs_for_amazon_kinesis_data_firehose_delivery_stream">AWS WAF logs for Amazon Kinesis Data Firehose Delivery Stream</h4>
+<div class="paragraph">
+<p>If you install AWS WAF, AWS CloudFormation creates a delivery stream (<code>QuickStartDeliveryStream{Region}</code>) in your Kinesis configuration. You must configure Web ACL in AWS WAF to send logs to the delivery stream. For more information, see <a href="https://docs.aws.amazon.com/waf/latest/developerguide/logging.html" target="_blank" rel="noopener">Logging Web ACL traffic information</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_step_5_view_the_sumo_logic_dashboards">Step 5. View the Sumo Logic dashboards</h3>
+<div class="paragraph">
+<p>After the deployment completes, the Sumo Logic apps are added to your Sumo Logic personal-account library in a folder named <code>SumoLogic Amazon QuickStart Apps &lt;date&gt;</code>.</p>
+</div>
+<div id="qsappfolder" class="imageblock">
+<div class="content">
+<a class="image" href="images/qsappfolder.bmp"><img src="images/qsappfolder.bmp" alt="qsappfolder^"></a>
+</div>
+<div class="title">Figure 4. Top-level Quick Start apps folder</div>
 </div>
 <div class="paragraph">
-<p>Each deployment takes about 15 minutes / 60 minutes / 1.5 hours to complete.</p>
+<p>Under the <code>SumoLogic Amazon QuickStart Apps &lt;date&gt;</code> folder, there are subfolders that represent each app, along with the date and timestamp.</p>
 </div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Sign in to your AWS account, and choose one of the following options to launch the AWS CloudFormation template. For help with choosing an option, see <a href="#_deployment_options">Deployment options</a> earlier in this guide.</p>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 75%;">
-<col style="width: 25%;">
-</colgroup>
-<tbody>
-<tr>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="http://qs_launch_permalink" target="_blank" rel="noopener">Deploy Sumo Logic into a new VPC on AWS</a></p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="http://qs_template_permalink" target="_blank" rel="noopener">View template</a></p></td>
-</tr>
-<tr>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="http://qs_launch_permalink" target="_blank" rel="noopener">Deploy Sumo Logic into an existing VPC on AWS</a></p></td>
-<td class="tableblock halign-center valign-top"><p class="tableblock"><a href="http://qs_template_permalink" target="_blank" rel="noopener">View template</a></p></td>
-</tr>
-</tbody>
-</table>
-</li>
-<li>
-<p>Check the AWS Region that’s displayed in the upper-right corner of the navigation bar, and change it if necessary. This Region is where you build the network infrastructure. The template is launched in the us-east-1 Region by default. For other choices, see <a href="#_supported_regions">Supported Regions</a> earlier in this guide.</p>
-</li>
-<li>
-<p>On the <strong>Create stack</strong> page, keep the default setting for the template URL, and then choose <strong>Next</strong>.</p>
-</li>
-<li>
-<p>On the <strong>Specify stack details</strong> page, change the stack name if needed. Review the parameters for the template. Provide values for the parameters that require input. For all other parameters, review the default settings and customize them as necessary. For details on each parameter, see the <a href="#_parameter_reference">Parameter reference</a> section of this guide. When you finish reviewing and customizing the parameters, choose <strong>Next</strong>.</p>
-</li>
-<li>
-<p>On the <strong>Configure stack options</strong> page, you can <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-resource-tags.html" target="_blank" rel="noopener">specify tags</a> (key-value pairs) for resources in your stack and <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-console-add-tags.html" target="_blank" rel="noopener">set advanced options</a>. When you’re finished, choose <strong>Next</strong>.</p>
-</li>
-<li>
-<p>On the <strong>Review</strong> page, review and confirm the template settings. Under <strong>Capabilities</strong>, select the two check boxes to acknowledge that the template creates IAM resources and might require the ability to automatically expand macros.</p>
-</li>
-<li>
-<p>Choose <strong>Create stack</strong> to deploy the stack.</p>
-</li>
-<li>
-<p>Monitor the status of the stack. When the status is <strong>CREATE_COMPLETE</strong>, the Sumo Logic deployment is ready.</p>
-</li>
-<li>
-<p>To view the created resources, see the values displayed in the <strong>Outputs</strong> tab for the stack.</p>
-</li>
-</ol>
+<div id="servicefolder" class="imageblock">
+<div class="content">
+<a class="image" href="images/servicefolder.bmp"><img src="images/servicefolder.bmp" alt="servicefolder^"></a>
 </div>
+<div class="title">Figure 5. Individual service folders</div>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_test_the_deployment">Test the deployment</h2>
-<div class="sectionbody">
-
-</div>
-</div>
-<div class="sect1">
-<h2 id="_post_deployment_steps">Post-deployment steps</h2>
-<div class="sectionbody">
-
-</div>
-</div>
-<div class="sect1">
-<h2 id="_best_practices_for_using_sumo_logic_on_aws">Best practices for using Sumo Logic on AWS</h2>
-<div class="sectionbody">
 <div class="paragraph">
-<p><em>Add any best practices for using the software.</em></p>
+<p>To open the services dashboard, choose its folder in the Sumo Logic console. For instance, under the <strong>Amazon GuardDuty</strong> folder, open the <strong>Amazon GuardDuty – Overview</strong> dashboard to see detected threats.</p>
+</div>
+<div id="dashboard" class="imageblock">
+<div class="content">
+<a class="image" href="images/dashboard.jpg"><img src="images/dashboard.jpg" alt="dashboard^"></a>
+</div>
+<div class="title">Figure 6. Amazon GuardDuty dashboard</div>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_security">Security</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_best_practices_for_using_sumo_logic_security_integrations">Best practices for using Sumo Logic Security Integrations</h3>
 <div class="paragraph">
-<p><em>Add any security-related information.</em></p>
+<p>If you want to use this Quick Start across multiple AWS accounts and Regions, rename the top-level parent folder of your Sumo Logic account (under your personal folder) to reflect the correct account and Region.</p>
+</div>
+<div class="paragraph">
+<p>For each S3 bucket, follow the <a href="https://aws.amazon.com/premiumsupport/knowledge-center/secure-s3-resources/" target="_blank" rel="noopener">AWS documentation</a> best practices to secure all of your S3 objects. Sumo Logic Security Integrations can monitor the following security and compliance aspects of your AWS environment:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Threat monitoring and other security findings</p>
+</li>
+<li>
+<p>Configuration and S3 Audit</p>
+</li>
+<li>
+<p>PCI DSS compliance</p>
+</li>
+<li>
+<p>CIS AWS compliance</p>
+</li>
+</ul>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_other_useful_information">Other useful information</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_other_useful_information">Other useful information</h3>
 <div class="paragraph">
 <p><em>Add any other details that will help the customer use the software on AWS.</em></p>
+</div>
 </div>
 </div>
 </div>
