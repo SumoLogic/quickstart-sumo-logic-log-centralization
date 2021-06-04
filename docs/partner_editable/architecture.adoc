@@ -8,8 +8,8 @@ a specific account and Region in the AWS Cloud.
 :xrefstyle: short
 [#architecture1]
 .Quick Start architecture for {partner-product-short-name} on AWS
-[link=images/Image91.1443x996.bmp]
-image::../images/Image91.1443x996.bmp[Architecture]
+[link=images/architecture.bmp]
+image::../images/architecture.bmp[architecture1]
 
 As shown in <<architecture1>>, the Quick Start sets up the following:
 

@@ -1040,7 +1040,7 @@ a specific account and Region in the AWS Cloud.</p>
 </div>
 <div id="architecture1" class="imageblock">
 <div class="content">
-<a class="image" href="images/Image91.1443x996.bmp"><img src="images/Image91.1443x996.bmp" alt="Architecture"></a>
+<a class="image" href="images/architecture.bmp"><img src="images/architecture.bmp" alt="architecture1"></a>
 </div>
 <div class="title">Figure 1. Quick Start architecture for Sumo Logic on AWS</div>
 </div>
@@ -1195,8 +1195,111 @@ non-configured AWS security services and their corresponding Sumo Logic apps.</p
 <div class="sect2">
 <h3 id="_technical_requirements">Technical requirements</h3>
 <div class="paragraph">
-<p>Before you launch the Quick Start, review the following information and ensure that your account is properly configured. Otherwise, deployment might fail.</p>
+<p>Before you launch the Quick Start, review the following information and ensure that your account is properly configured. Otherwise, deployment might fail.
+The following are technical requirements for this Quick Start.</p>
 </div>
+<div class="ulist">
+<ul>
+<li>
+<p>A Sumo Logic account. If you don’t already have a Sumo Logic enterprise account, create one at <a href="https://www.sumologic.com/" class="bare" target="_blank" rel="noopener">https://www.sumologic.com/</a> by following the on-screen instructions.</p>
+</li>
+<li>
+<p>An AWS account. If you don’t already have an AWS account, create one at <a href="https://aws.amazon.com" class="bare" target="_blank" rel="noopener">https://aws.amazon.com</a> by following the on-screen instructions.</p>
+</li>
+<li>
+<p>The ability to launch AWS CloudFormation templates that create AWS Identity and Access Management (IAM) roles.</p>
+</li>
+<li>
+<p>An understanding of how Sumo Logic resources are created.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>For data collection, scenario 1, a new Sumo Logic <a href="https://help.sumologic.com/03Send-Data/Hosted-Collectors" target="_blank" rel="noopener">Hosted Collector</a> called <code>aws-quickstart-collector</code> is created, and sources for each app are installed under it.</p>
+</li>
+<li>
+<p>For data collection scenarios 2 and 3, all existing sources can be reused. All new sources are installed under a new Sumo Logic–hosted collector called <code>aws-quickstart-collector</code>.</p>
+</li>
+<li>
+<p>All Sumo Logic apps are installed in a personal folder called <code>SumoLogic Amazon QuickStart Apps</code>, followed by the date.</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The Threat Intel app can report Elastic Load Balancing (ELB) data if you are
+already sending that data to Sumo Logic.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If you already configured AWS security services to send logs to S3 buckets or SNS topics,
+collect the following information before you launch the Quick Start.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If you did not previously configure these services, this Quick Start automatically configures these AWS services and resources when you install the Sumo Logic apps.
+</td>
+</tr>
+</table>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Sumo Logic apps</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">If you have done the following</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Make a note of:</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CloudTrail, PCI DSS compliance for AWS CloudTrail, CIS AWS foundations</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Configured AWS CloudTrail to send its logs to an S3 bucket.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The S3 bucket name.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">VPC Flow Logs, PCI DSS compliance for Amazon VPC Flow Logs</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Configured VPC Flow Logs to send to an S3 bucket.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The S3 bucket name.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Amazon S3 Audit</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Configured the access logging of S3 buckets.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The S3 bucket name.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AWS WAF</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Configured AWS WAF to send a Kinesis Data Firehose delivery stream to an S3 bucket.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The S3 bucket name.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AWS Config</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Configured AWS Config to deliver notifications to an SNS topic.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The SNS topic.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Threat Intel</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Configured ELB logs to send data to Sumo Logic</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The ELB source category in Sumo Logic</p></td>
+</tr>
+</tbody>
+</table>
 <div class="sect3">
 <h4 id="_resource_quotas">Resource quotas</h4>
 <div class="paragraph">

@@ -21,23 +21,29 @@ https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for
 
 https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/CIS_AWS_Foundations_Benchmark_App[CIS AWS Foundations Benchmark^]
 
-|https://aws.amazon.com/guardduty[Amazon GuardDuty^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_GuardDuty[Amazon GuardDuty^]
+|
+https://aws.amazon.com/guardduty[Amazon GuardDuty^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_GuardDuty[Amazon GuardDuty^]
 
 https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Global_Intelligence_for_Amazon_GuardDuty[Global Intelligence for Amazon GuardDuty^] 
 
-|https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html[Amazon VPC Flow Logs^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_VPC_Flow_Logs[Amazon VPC Flow Logs^]
+|
+https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html[Amazon VPC Flow Logs^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_VPC_Flow_Logs[Amazon VPC Flow Logs^]
 
 https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for_Amazon_VPC_Flow_Logs[PCI DSS compliance for Amazon VPC Flow Logs^]
 
 https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Threat_Intel_for_AWS[Threat Intel for AWS^] 
 
-|https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerLogs.html[Amazon S3 server access logging^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_S3_Audit[Amazon S3 Audit^] 
+|
+https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerLogs.html[Amazon S3 server access logging^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_S3_Audit[Amazon S3 Audit^] 
 
-|https://aws.amazon.com/security-hub/?aws-security-hub-blogs.sort-by=item.additionalFields.createdDate&aws-security-hub-blogs.sort-order=desc[AWS Security Hub^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_Security_Hub[AWS Security Hub^] 
+|
+https://aws.amazon.com/security-hub/?aws-security-hub-blogs.sort-by=item.additionalFields.createdDate&aws-security-hub-blogs.sort-order=desc[AWS Security Hub^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_Security_Hub[AWS Security Hub^] 
 
-|https://aws.amazon.com/waf[AWS WAF^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_WAF[AWS WAF^]
+|
+https://aws.amazon.com/waf[AWS WAF^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_WAF[AWS WAF^]
 
-|https://aws.amazon.com/config[AWS Config^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_Config[AWS Config^]
+|
+https://aws.amazon.com/config[AWS Config^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_Config[AWS Config^]
 |===
 
 === Scenarios supported by this Quick Start
