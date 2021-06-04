@@ -11,7 +11,8 @@
 //:partner-contributors: Shuai Ye, Michael McConnell, and John Smith, {partner-company-name}
 //:other-contributors: Akua Mansa, Trek10
 //:aws-contributors: Janine Singh, AWS IoT Partner team
-:aws-contributors: Dilip Rajan, Sr Partner Solutions Architect 
+:partner-contributors: Timothy MacDonald, Director-Partner Architect, Sumo Logic
+:aws-contributors: Dilip Rajan and Vinay Maddi, Sr Partner Solutions Architects 
 :quickstart-contributors: Shivansh Singh and Suresh Veeragoni, AWS Integration & Automation team
 // For deployment_time, use minutes if deployment takes an hour or less, 
 // for example, 30 minutes or 60 minutes. 

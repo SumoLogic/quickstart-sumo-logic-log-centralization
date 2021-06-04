@@ -5,7 +5,7 @@
 Sumo Logic has apps for each AWS security service (for example, for AWS CloudTrail) that 
 it supports in addition to apps that support multiple AWS services (for example, Threat 
 Intel for AWS). This Quick Start deployment is for those who want to set up and configure 
-the Sumo Logic console for 12 AWS services that provide security analytics. 
+the Sumo Logic console for 12 AWS services that provide security analytics. With the default settings, CloudTrail and GuardDuty apps will be deployed from this Quick Start.
 
 Sumo Logic customers can track user activity, monitor threats, and understand how their 
 security posture compares with global benchmarks. This deployment uses Virtual Private 
