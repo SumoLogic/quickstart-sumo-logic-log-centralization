@@ -294,7 +294,7 @@ Metadata:
 
 Parameters:
   Section1aSumoLogicDeployment:
-    Type: String
+  Type: String
     AllowedValues:
       - au
       - ca

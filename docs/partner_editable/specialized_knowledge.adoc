@@ -3,4 +3,39 @@
 // Include links if helpful. 
 // You don't need to list AWS services or point to general info about AWS; the boilerplate already covers this.
 
-This Quick Start also assumes familiarity with <knowledge expectations specific to this Quick Start>.
+Before you deploy this Quick Start, we recommend that you become familiar with Sumo 
+Logic in addition to the following AWS services. If you are new to AWS, see Getting Started 
+with AWS. If you are new to Sumo Logic, see Getting Started with Sumo Logic. 
+
+The following table shows how various AWS security services map to the corresponding 
+apps in Sumo Logic. We recommend you get familiar with them. 
+
+AWS security service or feature 
+
+Sumo Logic apps for the following AWS services or features 
+
+AWS CloudTrail 
+
+AWS CloudTrail, PCI DSS compliance for AWS CloudTrail, CIS AWS 
+Foundations Benchmark 
+
+Amazon GuardDuty 
+
+Amazon GuardDuty, Global Intelligence for Amazon GuardDuty 
+
+Amazon VPC Flow Logs 
+
+Amazon VPC Flow Logs, PCI DSS compliance for Amazon VPC Flow 
+Logs, Threat Intel for AWS 
+
+Amazon S3 server access logging 
+
+Amazon S3 Audit 
+
+AWS Security Hub 
+
+AWS Security Hub 
+
+AWS WAF 
+
+AWS WAF 

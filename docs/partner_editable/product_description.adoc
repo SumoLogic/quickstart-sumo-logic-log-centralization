@@ -2,4 +2,17 @@
 // Briefly describe the software. Use consistent and clear branding. 
 // Include the benefits of using the software on AWS, and provide details on usage scenarios.
 
-<Describe how the software works on AWS.>
+Sumo Logic has apps for each AWS security service (for example, for AWS CloudTrail) that 
+it supports in addition to apps that support multiple AWS services (for example, Threat 
+Intel for AWS). This Quick Start deployment is for those who want to set up and configure 
+the Sumo Logic console for 12 AWS services that provide security analytics. 
+
+Sumo Logic customers can track user activity, monitor threats, and understand how their 
+security posture compares with global benchmarks. This deployment uses Virtual Private 
+Cloud Flow Logs (VPC Flow Logs) and a web application firewall (AWS WAF) to monitor 
+traffic patterns. Sumo Logic also uses apps to audit and maintain compliance of the 
+Payment Card Industry (PCI) Data Security Standard (DSS) and Center for Internet 
+Security (CIS). 
+
+The included template automatically creates resources that use various AWS services to 
+collect logs, which are sent to your preregistered Sumo Logic account. 
