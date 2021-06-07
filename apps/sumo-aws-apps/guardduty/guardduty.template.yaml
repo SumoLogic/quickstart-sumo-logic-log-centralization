@@ -234,7 +234,7 @@ Resources:
           - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
         Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/guardduty/cloudwatchevents.zip"
       Handler: cloudwatchevents.handler
-      Runtime: nodejs10.x
+      Runtime: nodejs14.x
       Environment:
         Variables:
           SUMO_ENDPOINT: !GetAtt SumoHTTPSource.SUMO_ENDPOINT
