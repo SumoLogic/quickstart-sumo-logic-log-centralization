@@ -1,0 +1,3 @@
+
+=== Parameters for deploying Sumo Logic
+include::master.template.adoc[]
