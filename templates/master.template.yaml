@@ -3,7 +3,9 @@ Transform: AWS::Serverless-2016-10-31
 Description: "This CloudFormation template sets up AWS and Sumo Logic resources for all of the Sumo Logic security apps. (qs-1qqlknohm)"
 
 Metadata:
-  'AWS::CloudFormation::Interface':
+  QuickStartDocumentation:
+    EntrypointName: "Parameters for deploying Sumo Logic"
+  AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
           default: "1.1 Sumo Logic access configuration (required)"
