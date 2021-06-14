@@ -445,6 +445,7 @@ Resources:
         TopicConfigurations:
           - Event: s3:ObjectCreated:Put
             Topic: !Ref SumoSNSTopic
+    DeletionPolicy: Retain
 
   SumoCloudTrailExportPolicy:
     Condition: create_target_s3_bucket
@@ -479,6 +480,7 @@ Resources:
               - !Sub "arn:aws:s3:::${CloudTrailLogsBucketName}"
     DependsOn:
       - TargetS3Bucket
+    DeletionPolicy: Retain
 
   SumoCloudTrail:
     Condition: create_target_s3_bucket
