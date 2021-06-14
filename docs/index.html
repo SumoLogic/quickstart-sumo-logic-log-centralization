@@ -1171,9 +1171,41 @@ deploy, and operate your infrastructure and applications on the AWS Cloud.</p>
 <p>Before you deploy this Quick Start, we recommend that you become familiar with Sumo
 Logic in addition to the following AWS services. If you are new to AWS, see <a href="https://aws.amazon.com/getting-started/" target="_blank" rel="noopener">Getting Started with AWS</a>. If you are new to Sumo Logic, see <a href="https://help.sumologic.com/01Start-Here/04Getting-Started" target="_blank" rel="noopener">Getting Started with Sumo Logic</a>.</p>
 </div>
+<div class="sect2">
+<h3 id="_scenarios_supported_by_this_quick_start">Scenarios supported by this Quick Start</h3>
+<div class="paragraph">
+<p>This Quick Start supports the following scenarios:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Scenario 1: You do not use AWS security services or Sumo Logic.</strong> You did not
+configure AWS to use one or more security services listed under Specialized knowledge,
+but you want to collect and analyze data using Sumo Logic apps. For this scenario, use
+this Quick Start to set up AWS security services and configure Sumo Logic.</p>
+</li>
+<li>
+<p><strong>Scenario 2: You use AWS security services but not Sumo Logic.</strong> You use the AWS security services listed under Specialized knowledge but have not configured Sumo
+Logic to collect data from AWS or installed the corresponding Sumo Logic apps. For this
+scenario, configure the auxiliary AWS services and resources to send data to Sumo
+Logic. This scenario also installs the corresponding Sumo Logic apps.</p>
+</li>
+<li>
+<p><strong>Scenario 3: You use AWS security services and Sumo Logic.</strong> You use the AWS
+security services listed under Specialized knowledge and you collect and analyze data
+from one or more of them in Sumo Logic. For this scenario, configure the auxiliary AWS
+services and resources to send data to Sumo Logic. This scenario is intended only for
+non-configured AWS security services and their corresponding Sumo Logic apps.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_aws_services_to_sumo_logic_apps_mapping">AWS services to Sumo Logic apps mapping</h3>
 <div class="paragraph">
 <p>The following table shows how various AWS security services map to the corresponding
 apps in Sumo Logic. We recommend you get familiar with them.</p>
+</div>
 </div></div></td>
 </tr>
 <tr>
@@ -1189,9 +1221,9 @@ apps in Sumo Logic. We recommend you get familiar with them.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/cloudtrail" target="_blank" rel="noopener">AWS CloudTrail</a></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_CloudTrail" target="_blank" rel="noopener">AWS CloudTrail</a></p>
-<p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for_AWS_CloudTrail_App" target="_blank" rel="noopener">PCI DSS compliance for AWS CloudTrail</a></p>
-<p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/CIS_AWS_Foundations_Benchmark_App" target="_blank" rel="noopener">CIS AWS Foundations Benchmark</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_CloudTrail" target="_blank" rel="noopener">AWS CloudTrail</a>
+<a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for_AWS_CloudTrail_App" target="_blank" rel="noopener">PCI DSS compliance for AWS CloudTrail</a>
+<a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/CIS_AWS_Foundations_Benchmark_App" target="_blank" rel="noopener">CIS AWS Foundations Benchmark</a></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://aws.amazon.com/guardduty" target="_blank" rel="noopener">Amazon GuardDuty</a></p></td>
@@ -1205,8 +1237,8 @@ apps in Sumo Logic. We recommend you get familiar with them.</p>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_VPC_Flow_Logs" target="_blank" rel="noopener">Amazon VPC Flow Logs</a></p>
-<p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for_Amazon_VPC_Flow_Logs" target="_blank" rel="noopener">PCI DSS compliance for Amazon VPC Flow Logs</a></p>
-<p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Threat_Intel_for_AWS" target="_blank" rel="noopener">Threat Intel for AWS</a></p></td>
+<p class="tableblock"><a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for_Amazon_VPC_Flow_Logs" target="_blank" rel="noopener">PCI DSS compliance for Amazon VPC Flow Logs</a>
+<a href="https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Threat_Intel_for_AWS" target="_blank" rel="noopener">Threat Intel for AWS</a></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerLogs.html" target="_blank" rel="noopener">Amazon S3 server access logging</a></p></td>
@@ -1950,7 +1982,7 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Install Sumo Logic VPC flow logs app
 (<code>Section4aInstallVpcApps</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Both</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Skip</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">VPC: Install Amazon VPC flow logs app in Sumo Logic. PCI_VPC: Install PCI compliance VPC flow app. Both: Install both apps. Skip: Skip installation of apps.</p></td>
 </tr>
 </tbody>
@@ -1973,7 +2005,7 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Create S3 bucket
 (<code>Section4bVpcCreateBucket</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Yes: Create a new S3 bucket. No: Use an existing S3 bucket that has VPC logs.</p></td>
 </tr>
 <tr>
@@ -2002,7 +2034,7 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Create Sumo Logic S3 logs source
 (<code>Section4dVpcCreateS3Source</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Yes: Create Sumo Logic S3 logs source with provided bucket name. No: Skip creation of the Sumo Logic S3 log source.</p></td>
 </tr>
 <tr>
@@ -2037,7 +2069,7 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Install Sumo Logic Threat Intel app
 (<code>Section5aInstallThreatIntelApp</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Yes: Install Sumo Logic Threat Intel app. No: Skip installation of the app.</p></td>
 </tr>
 <tr>
@@ -2066,7 +2098,7 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Install Sumo Logic S3 audit app
 (<code>Section6aInstallS3AuditApp</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Yes: Install Sumo Logic S3 audit app. No: Skip installation of the app.</p></td>
 </tr>
 </tbody>
@@ -2089,7 +2121,7 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Create S3 bucket
 (<code>Section6bS3AuditCreateBucket</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Yes: Create a new S3 bucket. No: Use an existing S3 bucket that has S3 audit logs.</p></td>
 </tr>
 <tr>
@@ -2118,7 +2150,7 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Create Sumo Logic S3 audit logs source
 (<code>Section6dS3AuditCreateS3Source</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Yes: Create Sumo Logic S3 audit log source with provided bucket name. No: Skip creation of the Sumo Logic S3 audit log source.</p></td>
 </tr>
 <tr>
@@ -2153,7 +2185,7 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Install Sumo Logic AWS Security Hub app
 (<code>Section7aInstallSecurityHubAuditApp</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Yes: Install Sumo Logic AWS Security Hub app. No: Skip installation of app.</p></td>
 </tr>
 <tr>
@@ -2182,7 +2214,7 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Create S3 bucket
 (<code>Section7cSecurityHubCreateBucket</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Yes: Create a new S3 bucket. No: Use an existing S3 bucket that has Security Hub logs.</p></td>
 </tr>
 <tr>
@@ -2211,7 +2243,7 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Create Sumo Logic S3 logs source
 (<code>Section7eSecurityHubCreateS3Source</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Yes: Create Sumo Logic S3 logs source using your provided bucket name. No: Skip creation of the Sumo Logic S3 logs source.</p></td>
 </tr>
 <tr>
@@ -2246,13 +2278,13 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Install Sumo Logic AWS WAF app
 (<code>Section8aInstallWafApp</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Yes: Install Sumo Logic AWS WAF app. No: Skip installation of the app.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Create a delivery stream for bucket
 (<code>Section8bCreateDeliveryStream</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Yes: Create a Kinesis delivery stream using provided bucket name. No: Skip creation of a Kinesis delivery stream.</p></td>
 </tr>
 </tbody>
@@ -2275,7 +2307,7 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Create S3 bucket
 (<code>Section8cWafCreateBucket</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Yes: Create a new S3 bucket. No: Use an existing S3 bucket that has AWS WAF logs.</p></td>
 </tr>
 <tr>
@@ -2304,7 +2336,7 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Create Sumo Logic S3 logs source
 (<code>Section8eWafCreateS3Source</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Yes: Create Sumo Logic S3 log source with provided bucket name. No: Skip creation of the Sumo Logic S3 log source.</p></td>
 </tr>
 <tr>
@@ -2339,7 +2371,7 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Install Sumo Logic AWS Config app
 (<code>Section9aInstallConfigApp</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Yes: Install Sumo Logic AWS Config app. No: Skip installation of app.</p></td>
 </tr>
 </tbody>
@@ -2362,13 +2394,13 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Enable AWS Config for the Region
 (<code>Section9bConfigEnableConfig</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Choose Yes to enable Config for the Region. Choose No if Config is already enabled.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Create SNS Topic for logs delivery
 (<code>Section9cConfigCreateSNSTopic</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Choose Yes to create SNS Topic and attach the SNS topic to AWS Config setting to deliver the logs. Choose No if Config logs are already delivered to an existing SNS topic.</p></td>
 </tr>
 <tr>
@@ -2397,7 +2429,7 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Create Sumo Logic HTTP logs source
 (<code>Section9eConfigCreateHttpLogsSource</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Yes: Create Sumo Logic HTTP log source to collect Config logs. No: Skip creation of the Sumo Logic HTTP log source.</p></td>
 </tr>
 <tr>
@@ -2426,13 +2458,13 @@ Unless you are customizing the Quick Start templates for your own deployment pro
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Choose resource to auto-enable S3 logging
 (<code>Section91aEnableAutoLogging</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>S3_VPC</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Skip</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">S3: Enable S3 audit Logging for new S3 buckets. VPC: Enable VPC flow logs for new VPC, subnets, and network interfaces. S3_VPC: Enable logging for both.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Auto-enable logging for existing AWS resources
 (<code>Section91bEnableLoggingForExistingResources</code>)</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Yes</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>No</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Yes: Enable Logging for existing resources. No: Skip existing resources.</p></td>
 </tr>
 </tbody>
