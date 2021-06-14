@@ -3,7 +3,7 @@ infrastructure resources required to provision applications to your Sumo Logic a
 necessary resources to your AWS account. During the deployment, you can choose which 
 applications to install. 
 
-=== Prepare your Sumo Logic account 
+== Prepare your Sumo Logic account 
 
 . If you don’t already have a Sumo Logic enterprise account, create one at https://sumologic.com[^] by following the on-screen instructions. 
 
@@ -16,7 +16,7 @@ NOTE: If you want to use the Threat Intel app but have not configured data
 collection, see https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Threat_Intel_for_AWS[Threat Intel for AWS^]. If you already configured data collection, note 
 the relevant Sumo Logic source category for your data. 
 
-=== Launch the Quick Start 
+== Launch the Quick Start 
 
 Deploy Sumo Logic Security Integrations. Each deployment takes about {deployment_time} to complete.
 
