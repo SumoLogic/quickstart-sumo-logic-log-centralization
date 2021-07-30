@@ -8,8 +8,8 @@ After the deployment completes, you will see the main stack, `QuickStartApps` in
 :xrefstyle: short
 [#output1]
 .Example output of created resources
-[link=images/output1.bmp]
-image::../images/output1.bmp[output1^]
+[link=images/output1.png]
+image::../images/output1.png[output1^]
 // If steps are required to test the deployment, add them here. If not, remove the heading
 
 === {partner-product-short-name} Account
@@ -18,8 +18,8 @@ Confirm that the AWS CloudFormation template installed the collectors and source
 :xrefstyle: short
 [#output2]
 .Example output of collectors and sources
-[link=images/output1.bmp]
-image::../images/output2.bmp[output2^]
+[link=images/output1.png]
+image::../images/output2.png[output2^]
 
 == Post-deployment steps
 === Using Existing S3 Bucket
@@ -34,15 +34,15 @@ After the deployment completes, the Sumo Logic apps are added to your Sumo Logic
 
 [#qsappfolder]
 .Top-level Quick Start apps folder
-[link=images/qsappfolder.bmp]
-image::../images/qsappfolder.bmp[qsappfolder^]
+[link=images/qsappfolder.png]
+image::../images/qsappfolder.png[qsappfolder^]
 
 Under the `SumoLogic Amazon QuickStart Apps <date>` folder, there are subfolders that represent each app, along with the date and timestamp.
 
 [#servicefolder]
 .Individual service folders
-[link=images/servicefolder.bmp]
-image::../images/servicefolder.bmp[servicefolder^]
+[link=images/servicefolder.png]
+image::../images/servicefolder.png[servicefolder^]
 
 To open the services dashboard, choose its folder in the Sumo Logic console. For instance, under the **Amazon GuardDuty** folder, open the **Amazon GuardDuty – Overview** dashboard to see detected threats.
 
