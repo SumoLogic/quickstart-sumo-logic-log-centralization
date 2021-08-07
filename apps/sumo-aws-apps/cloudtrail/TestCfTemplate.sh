@@ -1,23 +1,25 @@
 #!/bin/bash
 
-export AWS_REGION="us-east-1"
-export AWS_PROFILE="personal"
+export AWS_REGION="us-east-2"
+export AWS_PROFILE="default"
 # App to test
 export AppTemplateName="cloudtrail"
 export AppName="cloudtrail"
-export InstallTypes=("onlycisfoundationapp")
+export InstallTypes=("all")
 
 for InstallType in "${InstallTypes[@]}"
 do
     export CloudTrailLogsBucketName="${AppName}-${InstallType}-qwerty"
-    export QSS3BucketName="sumologiclambdahelper"
-    export QSS3BucketRegion="us-east-1"
+    export QSS3BucketName="aws-quickstart"
+    export QSS3BucketRegion="us-east-2"
 
     if [[ "${InstallType}" == "all" ]]
     then
         export InstallCloudTrailApp="Yes"
         export InstallPCICloudTrailApp="Yes"
         export InstallCISFoundationApp="Yes"
+        export InstallCloudTrailMonitoringAnalyticsApp="Yes"
+        export InstallCloudTrailSecOpsApp="Yes"
         export CreateCloudTrailBucket="Yes"
         export CreateCloudTrailLogSource="Yes"
     elif [[ "${InstallType}" == "onlycloudtrailapp" ]]
@@ -25,6 +27,26 @@ do
         export InstallCloudTrailApp="Yes"
         export InstallPCICloudTrailApp="No"
         export InstallCISFoundationApp="No"
+        export InstallCloudTrailMonitoringAnalyticsApp="No"
+        export InstallCloudTrailSecOpsApp="No"
+        export CreateCloudTrailBucket="No"
+        export CreateCloudTrailLogSource="No"
+    elif [[ "${InstallType}" == "onlymonitoringanalyticscloudtrailapp" ]]
+    then
+        export InstallCloudTrailApp="No"
+        export InstallPCICloudTrailApp="No"
+        export InstallCISFoundationApp="No"
+        export InstallCloudTrailMonitoringAnalyticsApp="Yes"
+        export InstallCloudTrailSecOpsApp="No"
+        export CreateCloudTrailBucket="No"
+        export CreateCloudTrailLogSource="No"
+    elif [[ "${InstallType}" == "onlysecopscloudtrailapp" ]]
+    then
+        export InstallCloudTrailApp="No"
+        export InstallPCICloudTrailApp="No"
+        export InstallCISFoundationApp="No"
+        export InstallCloudTrailMonitoringAnalyticsApp="No"
+        export InstallCloudTrailSecOpsApp="Yes"
         export CreateCloudTrailBucket="No"
         export CreateCloudTrailLogSource="No"
     elif [[ "${InstallType}" == "onlypcicloudtrailapp" ]]
@@ -32,6 +54,8 @@ do
         export InstallCloudTrailApp="No"
         export InstallPCICloudTrailApp="Yes"
         export InstallCISFoundationApp="No"
+        export InstallCloudTrailMonitoringAnalyticsApp="No"
+        export InstallCloudTrailSecOpsApp="No"
         export CreateCloudTrailBucket="No"
         export CreateCloudTrailLogSource="No"
     elif [[ "${InstallType}" == "onlycisfoundationapp" ]]
@@ -39,6 +63,8 @@ do
         export InstallCloudTrailApp="No"
         export InstallPCICloudTrailApp="No"
         export InstallCISFoundationApp="Yes"
+        export InstallCloudTrailMonitoringAnalyticsApp="No"
+        export InstallCloudTrailSecOpsApp="No"
         export CreateCloudTrailBucket="No"
         export CreateCloudTrailLogSource="No"
     elif [[ "${InstallType}" == "appexistingS3" ]]
@@ -46,6 +72,8 @@ do
         export InstallCloudTrailApp="Yes"
         export InstallPCICloudTrailApp="Yes"
         export InstallCISFoundationApp="Yes"
+        export InstallCloudTrailMonitoringAnalyticsApp="Yes"
+        export InstallCloudTrailSecOpsApp="Yes"
         export CreateCloudTrailBucket="No"
         export CreateCloudTrailLogSource="Yes"
         export CloudTrailLogsBucketName="lambda-all-randmomstring"
@@ -54,6 +82,8 @@ do
         export InstallCloudTrailApp="No"
         export InstallPCICloudTrailApp="No"
         export InstallCISFoundationApp="No"
+        export InstallCloudTrailMonitoringAnalyticsApp="No"
+        export InstallCloudTrailSecOpsApp="No"
         export CreateCloudTrailBucket="Yes"
         export CreateCloudTrailLogSource="Yes"
     else
@@ -64,7 +94,7 @@ do
     export SumoAccessID=""
     export SumoAccessKey=""
     export SumoOrganizationId=""
-    export SumoDeployment="us1"
+    export SumoDeployment="us2"
     export RemoveSumoResourcesOnDeleteStack=true
 
     # Export Collector Name
@@ -85,7 +115,9 @@ do
     CloudTrailLogsSourceName="${CloudTrailLogsSourceName}" CloudTrailLogsSourceCategoryName="${CloudTrailLogsSourceCategoryName}" \
     CreateCloudTrailBucket="${CreateCloudTrailBucket}" CreateCloudTrailLogSource="${CreateCloudTrailLogSource}" \
     QSS3BucketName="${QSS3BucketName}" QSS3BucketRegion="${QSS3BucketRegion}" InstallCloudTrailApp="${InstallCloudTrailApp}" \
-    InstallPCICloudTrailApp="${InstallPCICloudTrailApp}" InstallCISFoundationApp="${InstallCISFoundationApp}"
+    InstallPCICloudTrailApp="${InstallPCICloudTrailApp}" InstallCISFoundationApp="${InstallCISFoundationApp}" \
+    InstallCloudTrailMonitoringAnalyticsApp="${InstallCloudTrailMonitoringAnalyticsApp}" \
+    InstallCloudTrailSecOpsApp="${InstallCloudTrailSecOpsApp}"
 
 done
 
