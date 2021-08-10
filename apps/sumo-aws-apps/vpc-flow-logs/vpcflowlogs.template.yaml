@@ -221,7 +221,9 @@ Conditions:
 
   install_vpc_app: !Equals [!Ref InstallVpcApp, 'Yes']
   install_pci_vpc_app: !Equals [!Ref InstallPCIVpcApp, 'Yes']
-  create_target_s3_bucket: !Equals [!Ref CreateS3Bucket, 'Yes']
+  create_target_s3_bucket: !And 
+    - !Equals [!Ref CreateS3Bucket, 'Yes']
+    - !Condition create_sns_topic
   install_s3_source: !Equals [!Ref CreateS3Source, 'Yes']
 
   create_sns_topic: !And

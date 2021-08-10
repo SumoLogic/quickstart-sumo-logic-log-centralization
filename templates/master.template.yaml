@@ -326,9 +326,9 @@ Parameters:
     ConstraintDescription: "Sumo Logic organization ID cannot be empty."
   Section1eSumoLogicResourceRemoveOnDeleteStack:
     AllowedValues:
-      - true
-      - false
-    Default: true
+      - "true"
+      - "false"
+    Default: "true"
     Description: "If this parameter is set to true, the collector, sources, and Sumo Logic apps are deleted.
                   If this parameter is set to false, then the collector, sources, and Sumo Logic apps are not deleted."
     Type: String
