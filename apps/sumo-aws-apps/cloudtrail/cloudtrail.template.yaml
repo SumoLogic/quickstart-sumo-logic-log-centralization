@@ -243,7 +243,9 @@ Conditions:
   install_cis_foundation_app: !Equals [!Ref InstallCISFoundationApp, 'Yes']
   install_cloudtrail_monitoring_analytics_app: !Equals [!Ref InstallCloudTrailMonitoringAnalyticsApp,'Yes']
   install_cloudtrail_secops_app: !Equals [!Ref InstallCloudTrailSecOpsApp,'Yes']
-  create_target_s3_bucket: !Equals [!Ref CreateCloudTrailBucket, 'Yes']
+  create_target_s3_bucket: !And
+    - !Equals [!Ref CreateCloudTrailBucket, 'Yes']
+    - !Condition create_sns_topic
   install_cloudtrail_logs_source: !Equals [!Ref CreateCloudTrailLogSource, 'Yes']
 
   create_sns_topic: !And

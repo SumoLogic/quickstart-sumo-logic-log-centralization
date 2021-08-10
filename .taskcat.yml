@@ -1,18 +1,25 @@
+general:
+  s3_regional_buckets: true
 project:
   name: quickstart-sumo-logic-log-centralization
   regions:
-  - us-east-1
+  - us-east-2
+  lambda_zip_path: ./app/sumo-aws-apps/sumologic-app-utils
 
 tests:
   default:
     template: ./templates/master.template.yaml
     regions:
-    - us-east-1
+    - us-east-2
     parameters:
-      AvailabilityZones: "$[taskcat_getaz_2]"
-      EmailAddress: email@yourdomain.com
+      # AvailabilityZones: "$[taskcat_getaz_2]"
+      # EmailAddress: email@yourdomain.com
       # KeyPairName: YOUR-KEYPAIR-HERE
-      WebserverCIDR: "10.0.0.0/0"
+      # WebserverCIDR: "10.0.0.0/0"
       QSS3KeyPrefix: "quickstart-sumo-logic-log-centralization/"
       QSS3BucketName: "$[taskcat_autobucket]"
       QSS3BucketRegion: "$[taskcat_current_region]"
+      Section1aSumoLogicDeployment: "us2"
+      Section1bSumoLogicAccessID: ""
+      Section1cSumoLogicAccessKey: ""
+      Section1dSumoLogicOrganizationId: ""
