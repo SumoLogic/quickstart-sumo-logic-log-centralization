@@ -126,9 +126,9 @@ Parameters:
     ConstraintDescription: "Sumo Logic Organization Id can not be empty."
   RemoveSumoResourcesOnDeleteStack:
     AllowedValues:
-      - 'True'
-      - 'False'
-    Default: 'True'
+      - 'true'
+      - 'false'
+    Default: 'true'
     Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to true. Default is true.
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
