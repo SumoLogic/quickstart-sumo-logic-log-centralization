@@ -126,13 +126,12 @@ Parameters:
     ConstraintDescription: "Sumo Logic Organization Id can not be empty."
   RemoveSumoResourcesOnDeleteStack:
     AllowedValues:
-      - true
-      - false
-    Default: true
+      - 'True'
+      - 'False'
+    Default: 'True'
     Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to true. Default is true.
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
-
   InstallVpcApp:
     Type: String
     Description: "Yes -> To Install Sumo Logic Amazon VPC Flow Logs in Sumo Logic for AWS Quick Start Solution.
@@ -233,7 +232,9 @@ Conditions:
   install_vpc_app: !Equals [!Ref InstallVpcApp, 'Yes']
   install_pci_vpc_app: !Equals [!Ref InstallPCIVpcApp, 'Yes']
   install_csma_vpc_app: !Equals [!Ref InstallCSMAVpcApp, 'Yes']
-  create_target_s3_bucket: !Equals [!Ref CreateS3Bucket, 'Yes']
+  create_target_s3_bucket: !And
+    - !Equals [!Ref CreateS3Bucket, 'Yes']
+    - !Condition create_sns_topic
   install_s3_source: !Equals [!Ref CreateS3Source, 'Yes']
 
   create_sns_topic: !And
