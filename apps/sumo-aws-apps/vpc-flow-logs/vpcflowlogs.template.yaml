@@ -165,7 +165,7 @@ Parameters:
     Type: String
     Description: "Yes - Create a new S3 bucket in AWS S3.
                   No - Use an existing S3 bucket from AWS S3 which has VPC Logs."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -177,7 +177,7 @@ Parameters:
     Type: String
     Description: "Yes - to create Sumo Logic Amazon S3 Log Source with provided bucket Name.
                   No - to skip creation of the Sumo Logic Amazon S3 Log Source."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
