@@ -418,13 +418,15 @@ Parameters:
     Type: String
     Description: "VPC: Install Amazon VPC flow logs app in Sumo Logic.
                   PCI_VPC: Install PCI compliance VPC flow app.
-                  Both: Install both apps.
+                  CSMA_VPC: Install Amazon VPC Flow - Cloud Security Monitoring and Analytics app.
+                  All: Install both apps.
                   Skip: Skip installation of apps."
     Default: 'Skip'
     AllowedValues:
       - 'VPC'
       - 'PCI_VPC'
-      - 'Both'
+      - 'CSMA_VPC'
+      - 'All'
       - 'Skip'
   Section4bVpcCreateBucket:
     Type: String
@@ -453,7 +455,7 @@ Parameters:
   Section4fVpcLogsSourceCategoryName:
     Type: String
     Description: "Required when flag is set to No. Provide an existing source category name from Sumo Logic collecting VPC flow logs. This is used for Threat Intel as well."
-    Default: ""
+    Default: "AWS/Vpc/Flow/Logs"
 
   # Threat Intel for AWS Parameters
   Section5aInstallThreatIntelApp:
@@ -717,10 +719,13 @@ Conditions:
   # Conditions for VPC flow logs apps
   install_vpc_app: !Or
     - !Equals [ !Ref Section4aInstallVpcApps, 'VPC' ]
-    - !Equals [ !Ref Section4aInstallVpcApps, 'Both' ]
+    - !Equals [ !Ref Section4aInstallVpcApps, 'All' ]
   install_pci_vpc_app: !Or
     - !Equals [ !Ref Section4aInstallVpcApps, 'PCI_VPC' ]
-    - !Equals [ !Ref Section4aInstallVpcApps, 'Both' ]
+    - !Equals [ !Ref Section4aInstallVpcApps, 'All' ]
+  install_csma_vpc_app: !Or
+    - !Equals [ !Ref Section4aInstallVpcApps, 'CSMA_VPC' ]
+    - !Equals [ !Ref Section4aInstallVpcApps, 'All' ]  
   create_vpc_bucket: !Equals [ !Ref Section4bVpcCreateBucket, 'Yes' ]
   create_vpc_source: !Equals [ !Ref Section4dVpcCreateS3Source, 'Yes' ]
 
@@ -790,6 +795,7 @@ Conditions:
   call_vpc_stack: !Or
     - !Condition install_vpc_app
     - !Condition install_pci_vpc_app
+    - !Condition install_csma_vpc_app
     - !Condition create_vpc_source
   call_threat_intel_stack: !Condition install_threat_intel_app
   call_s3_audit_stack: !Or
@@ -943,6 +949,7 @@ Resources:
         RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         InstallVpcApp: !If [install_vpc_app, "Yes", "No"]
         InstallPCIVpcApp: !If [install_pci_vpc_app, "Yes", "No"]
+        InstallCSMAVpcApp: !If [install_csma_vpc_app, "Yes", "No"]
         CollectorName: !Sub "aws-quickstart-collector-${AWS::AccountId}"
         CreateS3Bucket: "No"
         LogsS3BucketName: !If [create_vpc_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section4cVpcLogsBucketName]
