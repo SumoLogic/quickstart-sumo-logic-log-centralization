@@ -19,7 +19,7 @@ export CollectorName="AWS-langlq-Collector-${AppName}-${InstallType}"
 export LogsS3BucketName="vpc-flow-logs-${AppName}-${InstallType}"
 
 # AWS Quick Start configuration
-export QSS3BucketName="aws-quickstart"
+export QSS3BucketName="sumologiclambdahelper"
 export QSS3BucketRegion=${AWS_REGION}
 
 
