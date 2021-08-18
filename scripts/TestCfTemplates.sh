@@ -15,6 +15,7 @@ export Section1eSumoLogicResourceRemoveOnDeleteStack=true
 
 for AWS_REGION in "${regions[@]}"
 do
+	
     # AWS Quick Start configuration
     export QSS3BucketName="sumologiclambdahelper"-${AWS_REGION}
     export QSS3BucketRegion=${AWS_REGION}
@@ -124,12 +125,12 @@ do
         export Section5aInstallThreatIntelApp="Yes"
     elif [[ "${InstallType}" == "vpcall" ]]
     then
-        export Section4aInstallVpcApps="Both"
+        export Section4aInstallVpcApps="All"
         export Section4bVpcCreateBucket="Yes"
         export Section4dVpcCreateS3Source="Yes"
     elif [[ "${InstallType}" == "vpcwithoutbucket" ]]
     then
-        export Section4aInstallVpcApps="Both"
+        export Section4aInstallVpcApps="All"
         export Section4dVpcCreateS3Source="Yes"
     elif [[ "${InstallType}" == "vpcapponly" ]]
     then
@@ -220,7 +221,7 @@ do
     # Stack Name
     export stackName="${AppName}-${InstallType}"
 
-    aws cloudformation deploy --s3-bucket ${QSS3BucketName} --profile ${AWS_PROFILE} --template-file ./master.template.yaml --region ${AWS_REGION} \
+    aws cloudformation deploy --s3-bucket ${QSS3BucketName} --profile ${AWS_PROFILE} --template-file ../templates/master.template.yaml --region ${AWS_REGION} \
     --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM --stack-name ${stackName} \
     --parameter-overrides Section1aSumoLogicDeployment="${Section1aSumoLogicDeployment}" Section1bSumoLogicAccessID="${Section1bSumoLogicAccessID}" \
     Section1cSumoLogicAccessKey="${Section1cSumoLogicAccessKey}" Section1dSumoLogicOrganizationId="${Section1dSumoLogicOrganizationId}" \
