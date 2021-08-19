@@ -17,7 +17,7 @@ Metadata:
           default: "App Details - Collector Configuration"
         Parameters:
           - InstallGuardDutyApp
-          - InstallGlobalGuarddutyApp
+          - InstallGlobalGuardDutyApp
           - CollectorName
 
       - Label:
@@ -51,7 +51,7 @@ Metadata:
 
       InstallGuardDutyApp:
         default: "Install Sumo Logic Amazon GuardDuty App"
-      InstallGlobalGuarddutyApp:
+      InstallGlobalGuardDutyApp:
         default: "Install Sumo Logic Global Intelligence for Amazon GuardDuty"
       CollectorName:
         default: "Collector Name"
@@ -116,7 +116,7 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  InstallGlobalGuarddutyApp:
+  InstallGlobalGuardDutyApp:
     Type: String
     Description: "Yes -> To Install Global Intelligence for Amazon GuardDuty in Sumo Logic for AWS Quick Start Solution.
                   No -> Skip Installation of the app."
@@ -173,7 +173,7 @@ Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
   install_guardduty_app: !Equals [!Ref InstallGuardDutyApp, 'Yes']
-  install_global_guardduty_app: !Equals [!Ref InstallGlobalGuarddutyApp, 'Yes']
+  install_global_guardduty_app: !Equals [!Ref InstallGlobalGuardDutyApp, 'Yes']
   install_http_logs_source: !Equals [!Ref CreateHttpLogsSource, 'Yes']
 
 Resources:
