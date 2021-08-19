@@ -23,22 +23,22 @@ export QSS3BucketRegion="us-east-1"
 if [[ "${InstallType}" == "all" ]]
 then
     export InstallGuardDutyApp="Yes"
-    export InstallGlobalGuarddutyApp="Yes"
+    export InstallGlobalGuardDutyApp="Yes"
     export CreateHttpLogsSource="Yes"
 elif [[ "${InstallType}" == "onlyguraddutyapp" ]]
 then
     export InstallGuardDutyApp="Yes"
-    export InstallGlobalGuarddutyApp="No"
+    export InstallGlobalGuardDutyApp="No"
     export CreateHttpLogsSource="No"
 elif [[ "${InstallType}" == "onlyguraddutybenchmarkapp" ]]
 then
     export InstallGuardDutyApp="No"
-    export InstallGlobalGuarddutyApp="Yes"
+    export InstallGlobalGuardDutyApp="Yes"
     export CreateHttpLogsSource="No"
 elif [[ "${InstallType}" == "onlysource" ]]
 then
     export InstallGuardDutyApp="No"
-    export InstallGlobalGuarddutyApp="No"
+    export InstallGlobalGuardDutyApp="No"
     export CreateHttpLogsSource="Yes"
 else
     echo "No Choice"
@@ -52,7 +52,7 @@ aws cloudformation deploy --profile ${AWS_PROFILE} --template-file ./guardduty.t
 --parameter-overrides SumoDeployment="${SumoDeployment}" SumoAccessID="${SumoAccessID}" SumoAccessKey="${SumoAccessKey}" \
 RemoveSumoResourcesOnDeleteStack="${RemoveSumoResourcesOnDeleteStack}" \
 QSS3BucketName="${QSS3BucketName}" InstallGuardDutyApp="${InstallGuardDutyApp}" CollectorName="${CollectorName}" \
-QSS3BucketRegion="${QSS3BucketRegion}" CreateHttpLogsSource="${CreateHttpLogsSource}" InstallGlobalGuarddutyApp="${InstallGlobalGuarddutyApp}"
+QSS3BucketRegion="${QSS3BucketRegion}" CreateHttpLogsSource="${CreateHttpLogsSource}" InstallGlobalGuardDutyApp="${InstallGlobalGuardDutyApp}"
 
 
 
