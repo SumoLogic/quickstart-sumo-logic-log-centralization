@@ -19,20 +19,22 @@ Metadata:
       - Label:
           default: "2.1 CloudTrail app configuration"
         Parameters:
-          - Section2aInstallCloudTrailApp
-          - Section2bInstallPCICloudTrailApp
-          - Section2cInstallCISFoundationApp
+          - Section2InstallCloudTrailApp
+          - Section2InstallPCICloudTrailApp
+          - Section2InstallCISFoundationApp
+          - Section2InstallCloudTrailMonitoringAnalyticsApp
+          - Section2InstallCloudTrailSecOpsApp
       - Label:
           default: "2.2 S3 configuration"
         Parameters:
-          - Section2dCloudTrailCreateBucket
-          - Section2eCloudTrailLogsBucketName
+          - Section2CloudTrailCreateBucket
+          - Section2CloudTrailLogsBucketName
       - Label:
           default: "2.3 CloudTrail source configuration"
         Parameters:
-          - Section2fCloudTrailCreateLogSource
-          - Section2gCloudTrailBucketPathExpression
-          - Section2hCloudTrailLogsSourceCategoryName
+          - Section2CloudTrailCreateLogSource
+          - Section2CloudTrailBucketPathExpression
+          - Section2CloudTrailLogsSourceCategoryName
 
       - Label:
           default: "3.1 GuardDuty app configuration"
@@ -168,21 +170,25 @@ Metadata:
         default: "Delete Sumo Logic resources when stack is deleted"
 
       # CloudTrail apps parameters
-      Section2aInstallCloudTrailApp:
+      Section2InstallCloudTrailApp:
         default: "Install Sumo Logic AWS CloudTrail app"
-      Section2bInstallPCICloudTrailApp:
+      Section2InstallPCICloudTrailApp:
         default: "Install Sumo Logic PCI compliance for AWS CloudTrail app"
-      Section2cInstallCISFoundationApp:
+      Section2InstallCISFoundationApp:
         default: "Install Sumo Logic CIS AWS Foundations Benchmark app"
-      Section2dCloudTrailCreateBucket:
+      Section2InstallCloudTrailMonitoringAnalyticsApp:
+        default: "Install Amazon CloudTrail - Sumo Cloud Security Monitoring and Analytics App"
+      Section2InstallCloudTrailSecOpsApp:
+        default: "Install Sumo Global Intelligence for AWS CloudTrail SecOps App"
+      Section2CloudTrailCreateBucket:
         default: "Create S3 bucket"
-      Section2eCloudTrailLogsBucketName:
+      Section2CloudTrailLogsBucketName:
         default: "S3 bucket name"
-      Section2fCloudTrailCreateLogSource:
+      Section2CloudTrailCreateLogSource:
         default: "Create Sumo Logic CloudTrail logs source"
-      Section2gCloudTrailBucketPathExpression:
+      Section2CloudTrailBucketPathExpression:
         default: "Path expression for logs"
-      Section2hCloudTrailLogsSourceCategoryName:
+      Section2CloudTrailLogsSourceCategoryName:
         default: "Sumo Logic CloudTrail logs source category name"
 
       # GuardDuty apps parameters
@@ -334,7 +340,7 @@ Parameters:
     Type: String
 
   # CloudTrail apps parameters
-  Section2aInstallCloudTrailApp:
+  Section2InstallCloudTrailApp:
     Type: String
     Description: "Yes: Install Sumo Logic AWS CloudTrail app.
                   No: Skip installation of app."
@@ -342,7 +348,7 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  Section2bInstallPCICloudTrailApp:
+  Section2InstallPCICloudTrailApp:
     Type: String
     Description: "Yes: Install PCI compliance For AWS CloudTrail app.
                   No: Skip installation of app."
@@ -350,7 +356,7 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  Section2cInstallCISFoundationApp:
+  Section2InstallCISFoundationApp:
     Type: String
     Description: "Yes: Install CIS AWS Foundations Benchmark app.
                   No: Skip installation of app."
@@ -358,19 +364,35 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  Section2dCloudTrailCreateBucket:
+  Section2InstallCloudTrailMonitoringAnalyticsApp:
     Type: String
-    Description: "Yes: Create a new CloudTrail S3 bucket.
-                  No: Use an existing CloudTrail S3 bucket that has CloudTrail logs."
+    Description: "Yes: Install Amazon CloudTrail - Sumo Cloud Security Monitoring and Analytics App.
+                  No: Skip installation of app."
     Default: 'Yes'
     AllowedValues:
       - 'Yes'
       - 'No'
-  Section2eCloudTrailLogsBucketName:
+  Section2InstallCloudTrailSecOpsApp:
+    Type: String
+    Description: "Yes: Install Sumo Global Intelligence for AWS CloudTrail SecOps App.
+                  No: Skip installation of app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section2CloudTrailCreateBucket:
+    Type: String
+    Description: "Yes: Create a new CloudTrail S3 bucket.
+                  No: Use an existing CloudTrail S3 bucket that has CloudTrail logs."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section2CloudTrailLogsBucketName:
     Type: String
     Description: "Required when flag is set to No. Provide an existing bucket name that has CloudTrail logs."
     Default: ""
-  Section2fCloudTrailCreateLogSource:
+  Section2CloudTrailCreateLogSource:
     Type: String
     Description: "Yes: Create Sumo Logic CloudTrail log source with provided bucket name.
                   No: Skip creation of the Sumo Logic CloudTrail log source."
@@ -378,14 +400,14 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  Section2gCloudTrailBucketPathExpression:
+  Section2CloudTrailBucketPathExpression:
     Type: String
     Description: "Path expression to match the folder structure for CloudTrail logs (e.g., AWSLogs/*/CloudTrail/*)."
     Default: "AWSLogs/*/CloudTrail/*"
-  Section2hCloudTrailLogsSourceCategoryName:
+  Section2CloudTrailLogsSourceCategoryName:
     Type: String
     Description: "Required when flag is set to No. Provide an existing source category name from Sumo Logic collecting CloudTrail logs. This is used for Threat Intel for AWS app installation also."
-    Default: ""
+    Default: "AWS/Cloudtrail/Logs"
 
   # GuardDuty apps parameters
   Section3aInstallGuardDutyApps:
@@ -699,11 +721,13 @@ Parameters:
 
 Conditions:
   # Conditions for CloudTrail apps
-  install_cloudtrail_app: !Equals [ !Ref Section2aInstallCloudTrailApp, 'Yes' ]
-  install_pci_cloudtrail_app: !Equals [ !Ref Section2bInstallPCICloudTrailApp, 'Yes' ]
-  install_cis_foundations_app: !Equals [ !Ref Section2cInstallCISFoundationApp, 'Yes' ]
-  create_cloudtrail_bucket: !Equals [ !Ref Section2dCloudTrailCreateBucket, 'Yes' ]
-  create_cloudtrail_source: !Equals [ !Ref Section2fCloudTrailCreateLogSource, 'Yes' ]
+  install_cloudtrail_app: !Equals [ !Ref Section2InstallCloudTrailApp, 'Yes' ]
+  install_pci_cloudtrail_app: !Equals [ !Ref Section2InstallPCICloudTrailApp, 'Yes' ]
+  install_cis_foundations_app: !Equals [ !Ref Section2InstallCISFoundationApp, 'Yes' ]
+  install_cloudtrail_monitoring_analytics_app: !Equals [!Ref Section2InstallCloudTrailMonitoringAnalyticsApp,'Yes']
+  install_cloudtrail_secops_app: !Equals [!Ref Section2InstallCloudTrailSecOpsApp,'Yes']
+  create_cloudtrail_bucket: !Equals [ !Ref Section2CloudTrailCreateBucket, 'Yes' ]
+  create_cloudtrail_source: !Equals [ !Ref Section2CloudTrailCreateLogSource, 'Yes' ]
 
   # Conditions for GuardDuty apps
   install_guardduty_app: !Or
@@ -782,6 +806,8 @@ Conditions:
     - !Condition install_cloudtrail_app
     - !Condition install_pci_cloudtrail_app
     - !Condition install_cis_foundations_app
+    - !Condition install_cloudtrail_monitoring_analytics_app
+    - !Condition install_cloudtrail_secops_app
     - !Condition create_cloudtrail_source
   call_guardduty_stack: !Or
     - !Condition install_guardduty_app
@@ -862,16 +888,18 @@ Resources:
         SumoAccessKey: !Ref Section1cSumoLogicAccessKey
         SumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
         RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        InstallCloudTrailApp: !Ref Section2aInstallCloudTrailApp
-        InstallPCICloudTrailApp: !Ref Section2bInstallPCICloudTrailApp
-        InstallCISFoundationApp: !Ref Section2cInstallCISFoundationApp
+        InstallCloudTrailApp: !Ref Section2InstallCloudTrailApp
+        InstallPCICloudTrailApp: !Ref Section2InstallPCICloudTrailApp
+        InstallCISFoundationApp: !Ref Section2InstallCISFoundationApp
+        InstallCloudTrailMonitoringAnalyticsApp: !Ref Section2InstallCloudTrailMonitoringAnalyticsApp
+        InstallCloudTrailSecOpsApp: !Ref Section2InstallCloudTrailSecOpsApp 
         CollectorName: !Sub "aws-quickstart-collector-${AWS::AccountId}"
         CreateCloudTrailBucket: "No"
-        CloudTrailLogsBucketName: !If [create_cloudtrail_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section2eCloudTrailLogsBucketName]
+        CloudTrailLogsBucketName: !If [create_cloudtrail_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section2CloudTrailLogsBucketName]
         CreateCloudTrailLogSource: !If [create_cloudtrail_source, "Yes", "No"]
-        CloudTrailBucketPathExpression: !If [create_cloudtrail_bucket, !Sub "AWSLogs/${AWS::AccountId}/CloudTrail/*", !Ref Section2gCloudTrailBucketPathExpression]
+        CloudTrailBucketPathExpression: !If [create_cloudtrail_bucket, !Sub "AWSLogs/${AWS::AccountId}/CloudTrail/*", !Ref Section2CloudTrailBucketPathExpression]
         CloudTrailLogsSourceName: !Sub "aws-quickstart-cloudtrail-${AWS::Region}"
-        CloudTrailLogsSourceCategoryName: !If [create_cloudtrail_source, "aws/quickstart/cloudtrail/logs", !Ref Section2hCloudTrailLogsSourceCategoryName]
+        CloudTrailLogsSourceCategoryName: !If [create_cloudtrail_source, "aws/quickstart/cloudtrail/logs", !Ref Section2CloudTrailLogsSourceCategoryName]
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
@@ -981,7 +1009,7 @@ Resources:
         SumoAccessID: !Ref Section1bSumoLogicAccessID
         SumoAccessKey: !Ref Section1cSumoLogicAccessKey
         RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
-        CloudTrailSourceCategory: !If [create_cloudtrail_source, "aws/quickstart/cloudtrail/logs", !Ref Section2hCloudTrailLogsSourceCategoryName]
+        CloudTrailSourceCategory: !If [create_cloudtrail_source, "aws/quickstart/cloudtrail/logs", !Ref Section2CloudTrailLogsSourceCategoryName]
         VPCFlowLogsSourceCategory: !If [create_vpc_source, "aws/quickstart/vpc/logs", !Ref Section4fVpcLogsSourceCategoryName]
         ElasticLoadBalancerSourceCategory: !Ref Section5bElasticLoadBalancerSourceCategory
         QSS3BucketName: !Ref QSS3BucketName

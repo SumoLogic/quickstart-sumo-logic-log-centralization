@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export AWS_REGION="us-east-2"
+export AWS_REGION="us-east-1"
 export AWS_PROFILE="default"
 # App to test
 export AppTemplateName="cloudtrail"
@@ -10,8 +10,8 @@ export InstallTypes=("all")
 for InstallType in "${InstallTypes[@]}"
 do
     export CloudTrailLogsBucketName="${AppName}-${InstallType}-qwerty"
-    export QSS3BucketName="aws-quickstart"
-    export QSS3BucketRegion="us-east-2"
+    export QSS3BucketName="sumologiclambdahelper-2-us-east-1"
+    export QSS3BucketRegion="us-east-1"
 
     if [[ "${InstallType}" == "all" ]]
     then

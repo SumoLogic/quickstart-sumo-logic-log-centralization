@@ -4,7 +4,7 @@ project:
   name: quickstart-sumo-logic-log-centralization
   regions:
   - us-east-2
-  lambda_zip_path: ./app/sumo-aws-apps/sumologic-app-utils
+  lambda_zip_path: ./apps/sumo-aws-apps/sumologic-app-utils
 
 tests:
   default:
@@ -23,3 +23,4 @@ tests:
       Section1bSumoLogicAccessID: ""
       Section1cSumoLogicAccessKey: ""
       Section1dSumoLogicOrganizationId: ""
+      Section2CloudTrailCreateBucket: "Yes"
