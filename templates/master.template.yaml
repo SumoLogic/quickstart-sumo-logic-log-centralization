@@ -391,13 +391,13 @@ Parameters:
   Section3aInstallGuardDutyApps:
     Type: String
     Description: "GuardDuty: Install Amazon GuardDuty app.
-                  GlobalGuarddutyApp: Install Global Intelligence for Amazon GuardDuty app.
+                  GlobalGuardDutyApp: Install Global Intelligence for Amazon GuardDuty app.
                   Both: Install both apps.
                   Skip: Skip installation of apps."
     Default: 'Both'
     AllowedValues:
       - 'GuardDuty'
-      - 'GlobalGuardduty'
+      - 'GlobalGuardDuty'
       - 'Both'
       - 'Skip'
   Section3bGuardDutyCreateHttpLogsSource:
