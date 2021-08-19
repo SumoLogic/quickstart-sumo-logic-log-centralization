@@ -308,7 +308,7 @@ Resources:
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
 
-  sumoGlobalGuarddutyApp:
+  sumoGlobalGuardDutyApp:
     Type: Custom::App
     Condition: install_global_guardduty_app
     Properties:
@@ -335,10 +335,10 @@ Outputs:
     Description: "CloudWatchEvent Processor Function ARN"
     Condition: install_http_logs_source
     Value: !GetAtt CloudWatchEventFunction.Arn
-  GlobalGuarddutyAppFolder:
+  GlobalGuardDutyAppFolder:
     Description: "Folder Name"
     Condition: install_global_guardduty_app
-    Value: !GetAtt sumoGlobalGuarddutyApp.APP_FOLDER_NAME
+    Value: !GetAtt sumoGlobalGuardDutyApp.APP_FOLDER_NAME
   GuarddutyAppFolder:
     Description: "Folder Name"
     Condition: install_guardduty_app
