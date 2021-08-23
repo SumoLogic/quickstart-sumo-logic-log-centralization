@@ -1380,7 +1380,7 @@ Resources:
         LogsS3BucketName: !If [create_nfw_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section11NFWLogsS3BucketName]
         LogsNFWBucketPrefix: !Ref Section11NFWLogsNFWBucketPrefix
         CreateS3Source: !If [create_nfw_source, "Yes", "No"]
-        S3BucketLogsPathExpression: !If [create_nfw_bucket, !Sub "AWSLogs/${AWS::AccountId}/networ-firewall/*", !Ref Section11NFWS3BucketLogsPathExpression]
+        S3BucketLogsPathExpression: !If [create_nfw_bucket, !Sub "*AWSLogs/${AWS::AccountId}/network-firewall/*", !Ref Section11NFWS3BucketLogsPathExpression]
         S3SourceName: !Sub "aws-quickstart-nfw-${AWS::Region}"
         S3SourceCategoryName: !If [create_nfw_source, "aws/quickstart/nfw/logs", !Ref Section11NFWS3SourceCategoryName]
         QSS3BucketName: !Ref QSS3BucketName

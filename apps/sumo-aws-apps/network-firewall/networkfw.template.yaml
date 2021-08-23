@@ -303,9 +303,9 @@ Resources:
       FirewallPolicyName: AWSQuickStartFirewallPolicy
       FirewallPolicy:
         StatelessDefaultActions:
-          - 'aws:drop'
+          - 'aws:forward_to_sfe'
         StatelessFragmentDefaultActions:
-          - 'aws:drop'
+          - 'aws:forward_to_sfe'
         StatefulRuleGroupReferences:
           - ResourceArn: !Ref StatefuleRuleGroupResource
         StatelessRuleGroupReferences:
@@ -352,6 +352,23 @@ Resources:
                   Actions:
                     - 'aws:pass'
                 Priority: 1
+              - RuleDefinition:
+                  MatchAttributes:
+                    Sources:
+                      - AddressDefinition: 0.0.0.0/0
+                    Destinations:
+                      - AddressDefinition: 0.0.0.0/0
+                    SourcePorts:
+                      - FromPort: !Ref StatelessRule
+                        ToPort: !Ref StatelessRule
+                    DestinationPorts:
+                      - FromPort: 1024
+                        ToPort: 65535
+                    Protocols:
+                      - 6
+                  Actions:
+                    - 'aws:pass'
+                Priority: 2
       Capacity: 100
       Description: Stateless Rule Group for QuickStart
 

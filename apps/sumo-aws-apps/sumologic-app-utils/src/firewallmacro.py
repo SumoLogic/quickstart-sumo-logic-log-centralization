@@ -24,6 +24,7 @@ def process_template(event):
             #process for multi allowed ports
             if resource_values['Type'] == 'AWS::NetworkFirewall::RuleGroup' and resource_values['Properties']['Type'] == 'STATELESS':
                 final_fragment['Resources'][resource_name]['Properties']['RuleGroup']['RulesSource']['StatelessRulesAndCustomActions']['StatelessRules'][0]['RuleDefinition']['MatchAttributes']['DestinationPorts']=stateless_results
+                final_fragment['Resources'][resource_name]['Properties']['RuleGroup']['RulesSource']['StatelessRulesAndCustomActions']['StatelessRules'][1]['RuleDefinition']['MatchAttributes']['SourcePorts']=stateless_results
         return final_fragment
     except Exception as e:
         print("Error: " + str(e))
