@@ -1,5 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
+Transform: 
+  - AWS::Serverless-2016-10-31
+  - MacroFirewall
 Description: "Template to setup the  AWS Network Firewall app with AWS and Sumo Logic resources for AWS Quick Start Solution."
 
 Metadata:
@@ -36,6 +38,7 @@ Metadata:
         Parameters:
           - CreateS3Bucket
           - LogsS3BucketName
+          - LogsNFWBucketPrefix
           - CreateS3Source
           - S3BucketLogsPathExpression
           - S3SourceName
@@ -45,7 +48,6 @@ Metadata:
           default: "AWS Quick Start configuration"
         Parameters:
           - QSS3BucketName
-          - QSS3BucketRegion
           - QSS3KeyPrefix
 
       - Label:
@@ -86,6 +88,8 @@ Metadata:
         default: "Create AWS S3 Bucket"
       LogsS3BucketName:
         default: "AWS S3 Bucket Name"
+      LogsNFWBucketPrefix:
+        default: "AWS S3 Bucket Prefix for Network Firewall"
       CreateS3Source:
         default: "Create Sumo Logic Amazon S3 Logs Source"
       S3BucketLogsPathExpression:
@@ -98,8 +102,6 @@ Metadata:
 
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
-      QSS3BucketRegion:
-        default: "Quick Start S3 bucket region"
       QSS3KeyPrefix:
         default: "Quick Start S3 key prefix"
 
@@ -172,7 +174,7 @@ Parameters:
     Default: ""
   SubnetID:
     Type: String
-    Description: "Skip if No is selected. A Subnet ID mapping to new Network Firewall"
+    Description: "Skip if No is selected. Multi Subnets ID mapping to new Network Firewall. Subnets separated by comma"
     Default: ""
   CreateFirewallPolicy:
     Type: String
@@ -195,7 +197,7 @@ Parameters:
   
   StatelessRule:
     Type: String
-    Description: "Skip if use a exists Firewall Policy. Enter a allowed port"
+    Description: "Skip if use a exists Firewall Policy. Enter multi allowed ports. Ports separated by comma"
     Default: "80"
   
 
@@ -208,7 +210,7 @@ Parameters:
     Type: String
     Description: "Yes - Create a new S3 bucket in AWS S3.
                   No - Use an existing S3 bucket from AWS S3 which has NFW Logs."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -216,6 +218,13 @@ Parameters:
     Type: String
     Description: "Existing Bucket Name - Provide value if the Flag is set to No.
                   New Bucket Name - Provide a unique Bucket Name if the flag is set to Yes."
+  
+  LogsNFWBucketPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "S3 bucket prefix for network firewall logs can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: "NFW/"
+    Description: "S3 key prefix for Network Firewall logs. Bucket prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: "String"
 
   CreateS3Source:
     Type: String
@@ -228,7 +237,7 @@ Parameters:
   S3BucketLogsPathExpression:
     Type: String
     Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
-    Default: "*"
+    Default: "*AWSLogs/*/network-firewall/*"
   S3SourceName:
     Type: String
     Description: Change the Sumo Logic Amazon S3 Source name to be created else default name will be used.
@@ -237,7 +246,7 @@ Parameters:
     Type: String
     Description: "Existing - Change to an existing Source Category from Sumo Logic if Amazon S3 Source is not created.
                   New - Default will be used if Amazon S3 Source is Created."
-    Default: AWS/NFW/Flow/Logs
+    Default: AWS/NFW/Logs
 
 
   QSS3BucketName:
@@ -246,10 +255,7 @@ Parameters:
     Default: "aws-quickstart"
     Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
     Type: "String"
-  QSS3BucketRegion:
-    Default: "us-east-1"
-    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
-    Type: String
+
   QSS3KeyPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
     ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
@@ -286,7 +292,7 @@ Resources:
     Properties:
       FirewallName: 'AWSQuickStartNetworkFirewall'
       FirewallPolicyArn: !If [create_fw_policy, !Ref FirewallPolicyResource, !Ref NameFirewallPolicy]
-      SubnetMappings: 
+      SubnetMappings:
         - SubnetId: !Ref SubnetID
       VpcId: !Ref VPCID
 
@@ -297,7 +303,7 @@ Resources:
       FirewallPolicyName: AWSQuickStartFirewallPolicy
       FirewallPolicy:
         StatelessDefaultActions:
-          - 'aws:pass'
+          - 'aws:drop'
         StatelessFragmentDefaultActions:
           - 'aws:drop'
         StatefulRuleGroupReferences:
@@ -360,12 +366,12 @@ Resources:
             LogDestinationType: S3
             LogDestination:
               bucketName: !Ref LogsS3BucketName
-              prefix: !Ref S3BucketLogsPathExpression
+              prefix: !Sub "${LogsNFWBucketPrefix}flows"
           - LogType: ALERT
             LogDestinationType: S3
             LogDestination:
               bucketName: !Ref LogsS3BucketName
-              prefix: !Ref S3BucketLogsPathExpression
+              prefix: !Sub "${LogsNFWBucketPrefix}alerts"
           
 
   SumoLogicHelperRole:
@@ -394,7 +400,6 @@ Resources:
 
   SumoLogicHelperFunction:
     Type: 'AWS::Serverless::Function'
-    DependsOn: SumoLogicHelperRole
     Condition: do_not_use_parent_stack
     Properties:
       Handler: main.handler
@@ -515,7 +520,7 @@ Resources:
           'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
       CollectorType: Hosted
-      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      RemoveOnDeleteStack: !If [do_not_use_parent_stack,!Ref RemoveSumoResourcesOnDeleteStack,"No"]
       CollectorName: !Ref CollectorName
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey

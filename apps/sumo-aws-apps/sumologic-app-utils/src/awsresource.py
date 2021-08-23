@@ -1157,18 +1157,21 @@ class NetworkFireWallResource(AWSResourcesAbstract):
                         },           
                     ]
                 }
-                #config flow  log for network firewall
-                response = self.client.update_logging_configuration(
-                    FirewallArn = record['FirewallArn'],
-                    FirewallName = record['FirewallName'],
-                    LoggingConfiguration = logging_config_flow
-                )
-                #config addition alert log for network firewall
-                response = self.client.update_logging_configuration(
-                    FirewallArn = record['FirewallArn'],
-                    FirewallName = record['FirewallName'],
-                    LoggingConfiguration = logging_config_flow_alert
-                )
+                try:
+                    #config flow  log for network firewall
+                    response = self.client.update_logging_configuration(
+                        FirewallArn = record['FirewallArn'],
+                        FirewallName = record['FirewallName'],
+                        LoggingConfiguration = logging_config_flow
+                    )
+                    #config addition alert log for network firewall
+                    response = self.client.update_logging_configuration(
+                        FirewallArn = record['FirewallArn'],
+                        FirewallName = record['FirewallName'],
+                        LoggingConfiguration = logging_config_flow_alert
+                    )
+                except Exception as e:
+                    continue
                 # if "*Access Denied for LogDestination*" in str(response):
                 #     self.add_bucket_policy(s3_bucket, s3_prefix)
                 #     time.sleep(10)

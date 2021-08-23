@@ -147,6 +147,36 @@ Metadata:
         Parameters:
           - Section91eVPCLoggingBucketPrefix
           - Section91fVPCLoggingFilterExpression
+      - Label:
+          default: "10.3 Firewall logs auto-enable configuration"
+        Parameters:
+          - Section91FireWallLoggingFilterExpression
+      - Label:
+          default: "11.1 Network Firewall app configuration"
+        Parameters:
+          - Section11InstallNFWApp
+      - Label:
+          default: "11.2 Network Firewall configuration"
+        Parameters:
+          - Section11CreateNewFW
+          - Section11VPCID
+          - Section11SubnetID
+          - Section11CreateFirewallPolicy
+          - Section11NameFirewallPolicy
+          - Section11StatefulRule
+          - Section11StatelessRule
+      - Label:
+          default: "11.3 Network Firewall S3 configuration"
+        Parameters:
+          - Section11NFWCreateS3Bucket
+          - Section11NFWLogsS3BucketName
+          - Section11NFWLogsNFWBucketPrefix
+      - Label:
+          default: "11.4 Network Firewall source configuration"
+        Parameters:
+          - Section11NFWCreateS3Source
+          - Section11NFWS3BucketLogsPathExpression
+          - Section11NFWS3SourceCategoryName
 
       - Label:
           default: "AWS Quick Start configuration"
@@ -286,6 +316,39 @@ Metadata:
         default: "Bucket prefix to store VPC flow logs"
       Section91fVPCLoggingFilterExpression:
         default: "Regex expression to filter VPC resources"
+      Section91FireWallLoggingFilterExpression:
+        default: "Regex expression to filter firewall resources"
+      
+      # Network Firewall app parameters
+      Section11InstallNFWApp:
+        default: "Install Sumo Logic Amazon NetworkFirewall Logs App"
+      Section11CreateNewFW:
+        default: "Create a AWS Network Firewall"
+      Section11VPCID:
+        default: "A VPCID for new AWS Network Firewall"
+      Section11SubnetID:
+        default: "A SubnetID for new AWS Network Firewall"
+      Section11CreateFirewallPolicy:
+        default: "Create a Policy for new Network Firewall"
+      Section11NameFirewallPolicy:
+        default: "ARN of exists Network Policy"
+      Section11StatefulRule:
+       default: "Create a default statefull rule group for Network Policy"
+      Section11StatelessRule:
+        default: " Create a default stateless rule group for Network Policy"
+
+      Section11NFWCreateS3Bucket:
+        default: "Create AWS S3 Bucket"
+      Section11NFWLogsS3BucketName:
+        default: "AWS S3 Bucket Name"
+      Section11NFWLogsNFWBucketPrefix:
+        default: "AWS S3 Bucket Prefix"
+      Section11NFWCreateS3Source:
+        default: "Create Sumo Logic Amazon S3 Logs Source"
+      Section11NFWS3BucketLogsPathExpression:
+        default: "Path Expression for the logs"
+      Section11NFWS3SourceCategoryName:
+        default: "Sumo Logic Amazon S3 Logs Source Category Name"
 
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
@@ -643,13 +706,14 @@ Parameters:
     Type: String
     Description: "S3: Enable S3 audit Logging for new S3 buckets.
                   VPC: Enable VPC flow logs for new VPC, subnets, and network interfaces.
-                  S3_VPC: Enable logging for both."
+                  Firewall: Enable Firewall logs for new Firewall."
     AllowedPattern: ".+"
     Default: 'Skip'
     AllowedValues:
       - 'S3'
       - 'VPC'
-      - 'S3_VPC'
+      - 'Firewall'
+      - 'All'
       - 'Skip'
   Section91bEnableLoggingForExistingResources:
     Type: String
@@ -679,6 +743,98 @@ Parameters:
     Type: String
     Default: ""
     Description: "Provide regular expression for matching VPC resources (e.g., 'VpcId': 't1.micro.*?'|'NetworkInterfaceId': 'Test.*?']|'SubnetId': 'prod.*?'|test|prod')."
+  Section91FireWallLoggingFilterExpression:
+    Type: String
+    Default: ""
+    Description: "Provide regular expression for matching Firewall resources (e.g., 'FirewallName': 'firewall-example.*?')."
+  
+  # Network Firewall apps Parameters
+  Section11InstallNFWApp:
+    Type: String
+    Description: "Yes -> To Install Sumo Logic Amazon Network Firewall Logs in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section11CreateNewFW:
+    Type: String
+    Description: "Yes - Create a new Network Firewall in AWS.
+                  No - To skip creating a new Network Firewall."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'    
+  Section11VPCID:
+    Type: String
+    Description: "Skip if No is selected. A VPC ID mapping to new Network Firewall"
+    Default: ""
+  Section11SubnetID:
+    Type: String
+    Description: "Skip if No is selected. A Subnet ID mapping to new Network Firewall"
+    Default: ""
+  Section11CreateFirewallPolicy:
+    Type: String
+    Description: "Yes - Create a Policy for new Network Firewall.
+                  No - To skip creating a Policy."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section11NameFirewallPolicy: 
+    Type: String
+    Description: "Skip if Yes is selected. Enter ARN of exists Firewall Policy"
+    Default: ""
+  
+  Section11StatefulRule:
+    Type: String
+    Description: "Skip if use a exists Firewall Policy. Enter a stateful rule
+                  ex: pass tcp 10.20.20.0/24 45400:45500 <> 10.10.10.0/24 5203 (msg:\"test\";sid:1;rev:1;)"
+    Default: ""
+  
+  Section11StatelessRule:
+    Type: String
+    Description: "Skip if use a exists Firewall Policy. Enter a allowed port"
+    Default: "80"
+
+  Section11NFWCreateS3Bucket:
+    Type: String
+    Description: "Yes - Create a new S3 bucket in AWS S3.
+                  No - Use an existing S3 bucket from AWS S3 which has NFW Logs."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section11NFWLogsS3BucketName:
+    Type: String
+    Description: "Existing Bucket Name - Provide value if the Flag is set to No.
+                  New Bucket Name - Provide a unique Bucket Name if the flag is set to Yes."
+
+  Section11NFWLogsNFWBucketPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "S3 bucket prefix for network firewall logs can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: "QS-NFW/"
+    Description: "S3 key prefix for Network Firewall logs. Bucket prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: "String"
+
+  Section11NFWCreateS3Source:
+    Type: String
+    Description: "Yes - to create Sumo Logic Amazon S3 Log Source with provided bucket Name.
+                  No - to skip creation of the Sumo Logic Amazon S3 Log Source."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section11NFWS3BucketLogsPathExpression:
+    Type: String
+    Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
+    Default: "*AWSLogs/*/network-firewall/*"
+  Section11NFWS3SourceCategoryName:
+    Type: String
+    Description: "Existing - Change to an existing Source Category from Sumo Logic if Amazon S3 Source is not created.
+                  New - Default will be used if Amazon S3 Source is Created."
+    Default: AWS/NFW/Flow/Logs
+
 
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
@@ -750,13 +906,20 @@ Conditions:
   create_sns_topic: !Equals [ !Ref Section9cConfigCreateSNSTopic, 'Yes' ]
   create_config_source: !Equals [ !Ref Section9eConfigCreateHttpLogsSource, 'Yes' ]
 
+  #conditions for NFW app
+  install_nfw_app: !Equals [!Ref Section11InstallNFWApp, 'Yes' ]
+  create_nfw_bucket: !Equals [!Ref Section11NFWCreateS3Bucket,'Yes']
+  create_nfw_source: !Equals [!Ref Section11NFWCreateS3Source, 'Yes']
   # Conditions for auto-enable
   auto_enable_s3_audit: !Or
     - !Equals [ !Ref Section91aEnableAutoLogging, 'S3' ]
-    - !Equals [ !Ref Section91aEnableAutoLogging, 'S3_VPC' ]
+    - !Equals [ !Ref Section91aEnableAutoLogging, 'All' ]
   auto_enable_vpc_logs: !Or
     - !Equals [ !Ref Section91aEnableAutoLogging, 'VPC' ]
-    - !Equals [ !Ref Section91aEnableAutoLogging, 'S3_VPC' ]
+    - !Equals [ !Ref Section91aEnableAutoLogging, 'All' ]
+  auto_enable_firewall_logs: !Or
+    - !Equals [ !Ref Section91aEnableAutoLogging, 'Firewall' ]
+    - !Equals [ !Ref Section91aEnableAutoLogging, 'All' ]
   auto_exisitng_resources: !Equals [ !Ref Section91bEnableLoggingForExistingResources, 'Yes' ]
 
   # Conditions for common resources
@@ -767,6 +930,7 @@ Conditions:
     - !Condition create_security_hub_bucket
     - !Condition create_waf_bucket
     - !Condition enable_config
+    - !Condition create_nfw_bucket
   create_common_collector: !Or
     - !Condition create_cloudtrail_source
     - !Condition create_guardduty_source
@@ -775,7 +939,12 @@ Conditions:
     - !Condition create_security_hub_source
     - !Condition create_waf_source
     - !Condition create_config_source
-  create_cloudtrail: !Condition create_cloudtrail_bucket
+    - !Condition create_nfw_source
+  create_cloudtrail: !Or
+    - !Condition create_cloudtrail_bucket
+    - !Condition auto_enable_s3_audit
+    - !Condition auto_enable_vpc_logs
+    - !Condition auto_enable_firewall_logs
 
   # Conditions for calling child stack of each app if any resource create condition is true.
   call_cloudtrail_stack: !Or
@@ -808,6 +977,9 @@ Conditions:
     - !Condition enable_config
     - !Condition create_sns_topic
     - !Condition create_config_source
+  call_nfw_stack: !Or
+    - !Condition install_nfw_app
+    - !Condition create_nfw_source
 
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
@@ -1155,6 +1327,66 @@ Resources:
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         ParentStackName: !GetAtt CreateCommonResources.Outputs.StackName
 
+  #Stack for Network Firewall app
+  sumoFirewallStackWaitHandle:
+    Condition: call_nfw_stack
+    DependsOn: sumoFireWallAppsStack
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  sumoFirewallStackWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [call_nfw_stack, !Ref sumoFirewallStackWaitHandle, !Ref WaitHandle]
+      Timeout: "5"
+      Count: 0
+
+  sumoFireWallMacroStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: call_nfw_stack
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/network-firewall/networkfw_macro.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        
+  sumoFireWallAppsStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: call_nfw_stack
+    DependsOn: sumoFireWallMacroStack
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/network-firewall/networkfw.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        SumoDeployment: !Ref Section1aSumoLogicDeployment
+        SumoAccessID: !Ref Section1bSumoLogicAccessID
+        SumoAccessKey: !Ref Section1cSumoLogicAccessKey
+        SumoOrganizationId: !Ref Section1dSumoLogicOrganizationId
+        RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        InstallNFWApp: !Ref Section11InstallNFWApp
+        CreateNewFW: !Ref Section11CreateNewFW
+        VPCID: !Ref Section11VPCID
+        SubnetID: !Ref Section11SubnetID
+        CreateFirewallPolicy: !Ref Section11CreateFirewallPolicy
+        NameFirewallPolicy: !Ref Section11NameFirewallPolicy
+        StatefulRule: !Ref Section11StatefulRule 
+        StatelessRule: !Ref Section11StatelessRule
+        CollectorName: !Sub "aws-quickstart-collector-${AWS::AccountId}"
+        CreateS3Bucket: "No"
+        LogsS3BucketName: !If [create_nfw_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section11NFWLogsS3BucketName]
+        LogsNFWBucketPrefix: !Ref Section11NFWLogsNFWBucketPrefix
+        CreateS3Source: !If [create_nfw_source, "Yes", "No"]
+        S3BucketLogsPathExpression: !If [create_nfw_bucket, !Sub "AWSLogs/${AWS::AccountId}/networ-firewall/*", !Ref Section11NFWS3BucketLogsPathExpression]
+        S3SourceName: !Sub "aws-quickstart-nfw-${AWS::Region}"
+        S3SourceCategoryName: !If [create_nfw_source, "aws/quickstart/nfw/logs", !Ref Section11NFWS3SourceCategoryName]
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        ParentStackName: !GetAtt CreateCommonResources.Outputs.StackName
+
   sumoAutoEnableS3AuditLogs:
     Type: AWS::CloudFormation::Stack
     Condition: auto_enable_s3_audit
@@ -1192,3 +1424,22 @@ Resources:
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
+
+  sumoAutoEnableFirewallAuditLogs:
+    Type: AWS::CloudFormation::Stack
+    Condition: auto_enable_firewall_logs
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/AutoEnableS3Logging/auto_enable_s3_logging.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        EnableLogging: 'Firewall'
+        ExistingResource: !If [auto_exisitng_resources, 'Yes', 'No']
+        BucketName: !If [create_nfw_bucket, !GetAtt CreateCommonResources.Outputs.BucketName, !Ref Section11NFWLogsS3BucketName]
+        BucketPrefix: !Ref Section11NFWLogsNFWBucketPrefix
+        FilterExpression: !Ref Section91FireWallLoggingFilterExpression
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+ 
