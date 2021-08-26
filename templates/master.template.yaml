@@ -391,13 +391,13 @@ Parameters:
   Section3aInstallGuardDutyApps:
     Type: String
     Description: "GuardDuty: Install Amazon GuardDuty app.
-                  GuardDutyBenchmark: Install Amazon GuardDuty Benchmark app.
+                  GlobalGuardDutyApp: Install Global Intelligence for Amazon GuardDuty app.
                   Both: Install both apps.
                   Skip: Skip installation of apps."
     Default: 'Both'
     AllowedValues:
       - 'GuardDuty'
-      - 'GuardDutyBenchmark'
+      - 'GlobalGuardDuty'
       - 'Both'
       - 'Skip'
   Section3bGuardDutyCreateHttpLogsSource:
@@ -711,8 +711,8 @@ Conditions:
   install_guardduty_app: !Or
     - !Equals [ !Ref Section3aInstallGuardDutyApps, 'GuardDuty' ]
     - !Equals [ !Ref Section3aInstallGuardDutyApps, 'Both' ]
-  install_guardduty_benchmark_app: !Or
-    - !Equals [ !Ref Section3aInstallGuardDutyApps, 'GuardDutyBenchmark' ]
+  install_global_guardduty_app: !Or
+    - !Equals [ !Ref Section3aInstallGuardDutyApps, 'GlobalGuardDuty' ]
     - !Equals [ !Ref Section3aInstallGuardDutyApps, 'Both' ]
   create_guardduty_source: !Equals [ !Ref Section3bGuardDutyCreateHttpLogsSource, 'Yes' ]
 
@@ -790,7 +790,7 @@ Conditions:
     - !Condition create_cloudtrail_source
   call_guardduty_stack: !Or
     - !Condition install_guardduty_app
-    - !Condition install_guardduty_benchmark_app
+    - !Condition install_global_guardduty_app
     - !Condition create_guardduty_source
   call_vpc_stack: !Or
     - !Condition install_vpc_app
@@ -910,7 +910,7 @@ Resources:
         SumoAccessKey: !Ref Section1cSumoLogicAccessKey
         RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
         InstallGuardDutyApp: !If [install_guardduty_app, "Yes", "No"]
-        InstallGuardDutyBenchMarkApp: !If [install_guardduty_benchmark_app, "Yes", "No"]
+        InstallGlobalGuardDutyApp: !If [install_global_guardduty_app, "Yes", "No"]
         CollectorName: !Sub "aws-quickstart-collector-${AWS::AccountId}"
         CreateHttpLogsSource: !If [create_guardduty_source, "Yes", "No"]
         HttpLogsSourceName: !Sub "aws-quickstart-guardduty-${AWS::Region}"
