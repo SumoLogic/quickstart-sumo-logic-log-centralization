@@ -147,7 +147,29 @@ Metadata:
         Parameters:
           - Section91eVPCLoggingBucketPrefix
           - Section91fVPCLoggingFilterExpression
-
+          
+      - Label:
+          default: "11.1 Amazon Inspector app configuration"  
+        Parameters:
+          - Section11InstallSumoInspectorApp
+      - Label:
+          default: "11.2 Amazon Inspector app configuration"          
+        Parameters:
+          - Section11InstallAmazonInspectorApp
+          - Section11AssessmentTemplateName
+          - Section11AssessmentTargetName
+          - Section11AssessmentDuration
+          - Section11EnableAllEC2Instances
+          - Section11EC2Tags
+          - Section11EnableAutomaticAssessment
+          - Section11ScheduleBuilderType
+          - Section11InspectorRunCronSchedule
+      - Label:
+          default: "11.3 Amazon Inspector log-source configuration"
+        Parameters:
+          - Section11AmazonInspectorCreateHttpLogsSource
+          - Section11AmazonInspectorHttpLogsSourceCategoryName
+          
       - Label:
           default: "AWS Quick Start configuration"
         Parameters:
@@ -286,7 +308,31 @@ Metadata:
         default: "Bucket prefix to store VPC flow logs"
       Section91fVPCLoggingFilterExpression:
         default: "Regex expression to filter VPC resources"
-
+     
+      # Amazon Inspector app configuration
+      Section11InstallSumoInspectorApp:
+        default: "Install Sumo Logic Amazon Inspector Logs App"              
+      Section11InstallAmazonInspectorApp:
+        default: "Install Amazon Inspector"
+      Section11AssessmentTemplateName:
+        default: "Amazon Inspector Assessment Template Name"
+      Section11AssessmentTargetName:
+        default: "Amazon Inspector Assessment Target name"
+      Section11AssessmentDuration:
+        default: "Assessment Duration (In Seconds)"
+      Section11EnableAllEC2Instances:
+        default: "Include all EC2 instances"
+      Section11EnableAutomaticAssessment:
+        default: "Enable Automatic Assessments"
+      Section11ScheduleBuilderType:
+        default: "Schedule Builder Type"
+      Section11InspectorRunCronSchedule:
+        default: "Inspector Run trigger time"
+      Section11AmazonInspectorCreateHttpLogsSource:
+        default: "Create Sumo Logic HTTP logs source"
+      Section11AmazonInspectorHttpLogsSourceCategoryName:
+        default: "Sumo Logic HTTP logs source category name"      
+ 
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
       QSS3BucketRegion:
@@ -682,6 +728,78 @@ Parameters:
     Default: ""
     Description: "Provide regular expression for matching VPC resources (e.g., 'VpcId': 't1.micro.*?'|'NetworkInterfaceId': 'Test.*?']|'SubnetId': 'prod.*?'|test|prod')."
 
+  # Amazon Inspector app configuration
+  Section11InstallAmazonInspectorApp:
+    Type: String
+    Description: "Choose Yes to create Amazon Inspector - Assessment Templates. Choose No if Amazon Inspector - Assessment Templates already exist."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section11AssessmentTemplateName:
+    Type: String
+    Default: inspector-assessment-template    
+  Section11AssessmentTargetName:
+    Type: String
+    Default: inspector-assessment-target
+  Section11AssessmentDuration:
+    Type: Number
+    AllowedValues:
+      - 900
+      - 3600
+      - 28800
+      - 43200
+      - 86400
+    Description: "The duration of the assessment run in seconds 900(15 Minutes), 3600(1 Hour - Recommended), 28800(8 Hours), 43200(12 Hours), 86400(24 Hours)."
+    Default: 3600    
+  Section11EnableAllEC2Instances:
+    Type: String
+    Description: "Yes -> Include all EC2 instances in this AWS account and region. No -> Use Tags."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No' 
+  Section11EC2Tags:
+    Description: "Contains information about a resource group. The resource group defines a set of tags that, when queried, identify the AWS resources that make up the assessment target."
+    Type: String
+    Default: "environment=production,environment=dev,team=search"    
+  Section11EnableAutomaticAssessment:
+    Type: String
+    Description: Yes -> Enable Automatic Assessment. No -> Disable Automatic Assessment.
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section11ScheduleBuilderType:
+    Type: String
+    Default: 'Rate Scheduler'
+    AllowedValues:
+      - 'Rate Scheduler'
+      - 'Cron Scheduler'     
+  Section11InspectorRunCronSchedule:
+    Description: 'If the Schedule Builder Type value is [Rate Scheduler], then Inspector Run Trigger Time has type day(s) and the value is [Cron Scheduler], then Inspector Run Trigger Time is in cron format.'
+    Type: String
+    Default: '7'
+  Section11AmazonInspectorCreateHttpLogsSource:
+    Type: String
+    Description: "Yes: Create Sumo Logic HTTP log source to collect Amazon Inspector logs. No: Skip creation of the Sumo Logic HTTP log source."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section11AmazonInspectorHttpLogsSourceCategoryName:
+    Type: String
+    Description: "Required when flag is set to No. Provide an existing source category name from the Amazon Inspector logs. This is used for app installation."
+    Default: ""
+  Section11InstallSumoInspectorApp:
+    Type: String
+    Description: "Yes -> To Install Sumo Logic Amazon Inspector Logs in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+      
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
@@ -706,7 +824,11 @@ Conditions:
   install_cis_foundations_app: !Equals [ !Ref Section2cInstallCISFoundationApp, 'Yes' ]
   create_cloudtrail_bucket: !Equals [ !Ref Section2dCloudTrailCreateBucket, 'Yes' ]
   create_cloudtrail_source: !Equals [ !Ref Section2fCloudTrailCreateLogSource, 'Yes' ]
-
+  
+  # Configtion for Amazon Inspector apps
+  install_inspector_sumo_app: !Equals [!Ref Section11InstallSumoInspectorApp, 'Yes' ]
+  create_amazoninspector_source: !Equals [ !Ref Section11AmazonInspectorCreateHttpLogsSource, 'Yes']
+  
   # Conditions for GuardDuty apps
   install_guardduty_app: !Or
     - !Equals [ !Ref Section3aInstallGuardDutyApps, 'GuardDuty' ]
@@ -780,9 +902,14 @@ Conditions:
     - !Condition create_security_hub_source
     - !Condition create_waf_source
     - !Condition create_config_source
+    - !Condition create_amazoninspector_source
+    
   create_cloudtrail: !Condition create_cloudtrail_bucket
 
   # Conditions for calling child stack of each app if any resource create condition is true.
+  call_amazoninspector_stack: !Or
+    - !Condition install_inspector_sumo_app
+    - !Condition create_amazoninspector_source   
   call_cloudtrail_stack: !Or
     - !Condition install_cloudtrail_app
     - !Condition install_pci_cloudtrail_app
@@ -852,7 +979,53 @@ Resources:
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
-
+        
+  sumoAmazonInspectorStackWaitHandle:
+    Condition: call_amazoninspector_stack
+    DependsOn: sumoAmazonInspectorAppsStack
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+    
+  sumoAmazonInspectorStackWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [call_amazoninspector_stack, !Ref sumoAmazonInspectorStackWaitHandle, !Ref WaitHandle]
+      Timeout: "5"
+      Count: 0
+      
+  sumoAmazonInspectorAppsStack:
+  
+    Type: AWS::CloudFormation::Stack
+    Condition: call_amazoninspector_stack
+    DependsOn: CreateCommonResources
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/Inspector/inspector.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:     
+        SumoDeployment: !Ref Section1aSumoLogicDeployment
+        SumoAccessID: !Ref Section1bSumoLogicAccessID
+        SumoAccessKey: !Ref Section1cSumoLogicAccessKey     
+        RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        InstallSumoInspectorApp: !Ref Section11InstallSumoInspectorApp
+        InstallAmazonInspectorApp: !Ref Section11InstallAmazonInspectorApp
+        AssessmentTemplateName: !Ref Section11AssessmentTemplateName
+        AssessmentTargetName: !Ref Section11AssessmentTargetName
+        EnableAllEC2Instances: !Ref Section11EnableAllEC2Instances
+        AssessmentDuration: !Ref Section11AssessmentDuration
+        EnableAutomaticAssessment: !Ref Section11EnableAutomaticAssessment
+        ScheduleBuilderType: !Ref Section11ScheduleBuilderType
+        InspectorRunCronSchedule: !Ref Section11InspectorRunCronSchedule
+        EC2Tags: !Ref Section11EC2Tags       
+        CollectorName: !Sub "aws-quickstart-collector-${AWS::AccountId}"
+        CreateHttpLogsSource: !Ref Section11AmazonInspectorCreateHttpLogsSource
+        HttpLogsSourceName: !Sub "aws-quickstart-amazon-inspector-${AWS::Region}"
+        HttpLogsSourceCategoryName: !If [create_amazoninspector_source, "aws/quickstart/inspector/logs", !Ref Section11AmazonInspectorHttpLogsSourceCategoryName]      
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix       
+        ParentStackName: !GetAtt CreateCommonResources.Outputs.StackName
+        
   sumoCloudTrailAppsStack:
     Type: AWS::CloudFormation::Stack
     Condition: call_cloudtrail_stack
