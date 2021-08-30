@@ -262,7 +262,7 @@ Resources:
       ServiceToken: !GetAtt SumoLogicLambdaHelper.Arn
       Region: !Ref "AWS::Region"
       CollectorType: Hosted
-      RemoveOnDeleteStack: false
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       CollectorName: !Ref CollectorName
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey

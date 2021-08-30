@@ -1,13 +1,13 @@
 #!/bin/sh
 
 declare -a regions=("us-east-1")
-export AWS_PROFILE="personal"
+export AWS_PROFILE="default"
 # App to test
 export AppName=master
-export InstallType=configwithoutenablewithoutsns
+export InstallType=cloudtrailall
 
 # Export Sumo Properties
-export Section1aSumoLogicDeployment="us1"
+export Section1aSumoLogicDeployment="us2"
 export Section1bSumoLogicAccessID=""
 export Section1cSumoLogicAccessKey=""
 export Section1dSumoLogicOrganizationId=""
@@ -17,15 +17,17 @@ for AWS_REGION in "${regions[@]}"
 do
 	
     # AWS Quick Start configuration
-    export QSS3BucketName="sumologiclambdahelper"-${AWS_REGION}
+    export QSS3BucketName="sumologiclambdahelper-2"-${AWS_REGION}
     export QSS3BucketRegion=${AWS_REGION}
 
     # Make Everything as No by Default
-    export Section2aInstallCloudTrailApp="No"
-    export Section2bInstallPCICloudTrailApp="No"
-    export Section2cInstallCISFoundationApp="No"
-    export Section2dCloudTrailCreateBucket="No"
-    export Section2fCloudTrailCreateLogSource="No"
+    export Section2InstallCloudTrailApp="No"
+    export Section2InstallPCICloudTrailApp="No"
+    export Section2InstallCISFoundationApp="No"
+    export Section2InstallCloudTrailMonitoringAnalyticsApp="No"
+    export Section2InstallCloudTrailSecOpsApp="No"
+    export Section2CloudTrailCreateBucket="No"
+    export Section2CloudTrailCreateLogSource="No"
     export Section3aInstallGuardDutyApps="Skip"
     export Section3bGuardDutyCreateHttpLogsSource="No"
     export Section4aInstallVpcApps="Skip"
@@ -51,9 +53,9 @@ do
     export Section91bEnableLoggingForExistingResources="No"
 
     # CloudTrail Config
-    export Section2eCloudTrailLogsBucketName="sumologiclambdahelper"-${AWS_REGION}
-    export Section2gCloudTrailBucketPathExpression="AWS/CLOUDTRAIL/"${InstallType}
-    export Section2hCloudTrailLogsSourceCategoryName="SUMO/CloudTrail/"${InstallType}
+    export Section2CloudTrailLogsBucketName="sumologiclambdahelper"-${AWS_REGION}
+    export Section2CloudTrailBucketPathExpression="AWS/CLOUDTRAIL/"${InstallType}
+    export Section2CloudTrailLogsSourceCategoryName="SUMO/CloudTrail/"${InstallType}
     # Guard duty Config
     export Section3cGuardDutyHttpLogsSourceCategoryName="SUMO/GuardDuty/"${InstallType}
     # VPC Config
@@ -84,41 +86,49 @@ do
     export Section91fVPCLoggingFilterExpression=""
     if [[ "${InstallType}" == "cloudtrailall" ]]
     then
-        export Section2aInstallCloudTrailApp="Yes"
-        export Section2bInstallPCICloudTrailApp="Yes"
-        export Section2cInstallCISFoundationApp="Yes"
-        export Section2dCloudTrailCreateBucket="Yes"
-        export Section2fCloudTrailCreateLogSource="Yes"
+        export Section2InstallCloudTrailApp="Yes"
+        export Section2InstallPCICloudTrailApp="Yes"
+        export Section2InstallCISFoundationApp="Yes"
+        export Section2InstallCloudTrailMonitoringAnalyticsApp="Yes"
+        export Section2InstallCloudTrailSecOpsApp="Yes"
+        export Section2CloudTrailCreateBucket="Yes"
+        export Section2CloudTrailCreateLogSource="Yes"
     elif [[ "${InstallType}" == "guarddutyall" ]]
     then
         export Section3aInstallGuardDutyApps="Both"
         export Section3bGuardDutyCreateHttpLogsSource="Yes"
     elif [[ "${InstallType}" == "cloudtrailguardutyall" ]]
     then
-        export Section2aInstallCloudTrailApp="Yes"
-        export Section2bInstallPCICloudTrailApp="Yes"
-        export Section2cInstallCISFoundationApp="Yes"
-        export Section2dCloudTrailCreateBucket="Yes"
-        export Section2fCloudTrailCreateLogSource="Yes"
+        export Section2InstallCloudTrailApp="Yes"
+        export Section2InstallPCICloudTrailApp="Yes"
+        export Section2InstallCISFoundationApp="Yes"
+        export Section2InstallCloudTrailMonitoringAnalyticsApp="Yes"
+        export Section2InstallCloudTrailSecOpsApp="Yes"
+        export Section2CloudTrailCreateBucket="Yes"
+        export Section2CloudTrailCreateLogSource="Yes"
         export Section3aInstallGuardDutyApps="Both"
         export Section3bGuardDutyCreateHttpLogsSource="Yes"
     elif [[ "${InstallType}" == "cloudtrailwithoutbucket" ]]
     then
-        export Section2aInstallCloudTrailApp="Yes"
-        export Section2fCloudTrailCreateLogSource="Yes"
+        export Section2InstallCloudTrailApp="Yes"
+        export Section2CloudTrailCreateLogSource="Yes"
     elif [[ "${InstallType}" == "guardutyappsonly" ]]
     then
         export Section3aInstallGuardDutyApps="Both"
     elif [[ "${InstallType}" == "cloudtrailappsonly" ]]
     then
-        export Section2aInstallCloudTrailApp="Yes"
-        export Section2bInstallPCICloudTrailApp="Yes"
-        export Section2cInstallCISFoundationApp="Yes"
+        export Section2InstallCloudTrailApp="Yes"
+        export Section2InstallPCICloudTrailApp="Yes"
+        export Section2InstallCISFoundationApp="Yes"
+        export Section2InstallCloudTrailMonitoringAnalyticsApp="Yes"
+        export Section2InstallCloudTrailSecOpsApp="Yes"
     elif [[ "${InstallType}" == "allappsonly" ]]
     then
-        export Section2aInstallCloudTrailApp="Yes"
-        export Section2bInstallPCICloudTrailApp="Yes"
-        export Section2cInstallCISFoundationApp="Yes"
+        export Section2InstallCloudTrailApp="Yes"
+        export Section2InstallPCICloudTrailApp="Yes"
+        export Section2InstallCISFoundationApp="Yes"
+        export Section2InstallCloudTrailMonitoringAnalyticsApp="Yes"
+        export Section2InstallCloudTrailSecOpsApp="Yes"
         export Section3aInstallGuardDutyApps="Both"
     elif [[ "${InstallType}" == "threatintelapp" ]]
     then
@@ -226,12 +236,12 @@ do
     --parameter-overrides Section1aSumoLogicDeployment="${Section1aSumoLogicDeployment}" Section1bSumoLogicAccessID="${Section1bSumoLogicAccessID}" \
     Section1cSumoLogicAccessKey="${Section1cSumoLogicAccessKey}" Section1dSumoLogicOrganizationId="${Section1dSumoLogicOrganizationId}" \
     Section1eSumoLogicResourceRemoveOnDeleteStack="${Section1eSumoLogicResourceRemoveOnDeleteStack}" QSS3BucketName="${QSS3BucketName}" QSS3BucketRegion="${QSS3BucketRegion}" \
-    Section2aInstallCloudTrailApp="${Section2aInstallCloudTrailApp}" Section2bInstallPCICloudTrailApp="${Section2bInstallPCICloudTrailApp}" \
-    Section2cInstallCISFoundationApp="${Section2cInstallCISFoundationApp}" Section2dCloudTrailCreateBucket="${Section2dCloudTrailCreateBucket}" Section2fCloudTrailCreateLogSource="${Section2fCloudTrailCreateLogSource}" \
+    Section2InstallCloudTrailApp="${Section2InstallCloudTrailApp}" Section2InstallPCICloudTrailApp="${Section2InstallPCICloudTrailApp}" \
+    Section2InstallCISFoundationApp="${Section2InstallCISFoundationApp}" Section2InstallCloudTrailMonitoringAnalyticsApp="${Section2InstallCloudTrailMonitoringAnalyticsApp}" Section2InstallCloudTrailSecOpsApp="${Section2InstallCloudTrailSecOpsApp}"  Section2CloudTrailCreateBucket="${Section2CloudTrailCreateBucket}" Section2CloudTrailCreateLogSource="${Section2CloudTrailCreateLogSource}" \
     Section3aInstallGuardDutyApps="${Section3aInstallGuardDutyApps}" Section3bGuardDutyCreateHttpLogsSource="${Section3bGuardDutyCreateHttpLogsSource}" \
     Section4aInstallVpcApps="${Section4aInstallVpcApps}" Section4bVpcCreateBucket="${Section4bVpcCreateBucket}" \
-    Section4dVpcCreateS3Source="${Section4dVpcCreateS3Source}" Section5aInstallThreatIntelApp="${Section5aInstallThreatIntelApp}" Section2eCloudTrailLogsBucketName="${Section2eCloudTrailLogsBucketName}" \
-    Section2gCloudTrailBucketPathExpression="${Section2gCloudTrailBucketPathExpression}" Section2hCloudTrailLogsSourceCategoryName="${Section2hCloudTrailLogsSourceCategoryName}" \
+    Section4dVpcCreateS3Source="${Section4dVpcCreateS3Source}" Section5aInstallThreatIntelApp="${Section5aInstallThreatIntelApp}" Section2CloudTrailLogsBucketName="${Section2CloudTrailLogsBucketName}" \
+    Section2CloudTrailBucketPathExpression="${Section2CloudTrailBucketPathExpression}" Section2CloudTrailLogsSourceCategoryName="${Section2CloudTrailLogsSourceCategoryName}" \
     Section3cGuardDutyHttpLogsSourceCategoryName="${Section3cGuardDutyHttpLogsSourceCategoryName}" Section4cVpcLogsBucketName="${Section4cVpcLogsBucketName}" \
     Section4eVpcBucketPathExpression="${Section4eVpcBucketPathExpression}" Section4fVpcLogsSourceCategoryName="${Section4fVpcLogsSourceCategoryName}" \
     Section5bElasticLoadBalancerSourceCategory="${Section5bElasticLoadBalancerSourceCategory}" Section6aInstallS3AuditApp="${Section6aInstallS3AuditApp}" \
