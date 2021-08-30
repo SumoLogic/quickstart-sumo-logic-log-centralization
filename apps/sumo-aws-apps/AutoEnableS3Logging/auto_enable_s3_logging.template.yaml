@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: "Lambda Function for auto enable s3 logging for S3 Buckets, VPCs, Subnets and Network Interfaces."
+Description: "Lambda Function for auto enable s3 logging for S3 Buckets, Network Firewall, VPCs, Subnets and Network Interfaces."
 
 Globals:
   Function:
@@ -12,11 +12,13 @@ Parameters:
   EnableLogging:
     Type: String
     Description: "S3 - To Enable S3 Audit Logging for new S3 buckets.
-                  VPC - To Enable VPC flow logs for new VPC, Subnets and Network Interfaces."
+                  VPC - To Enable VPC flow logs for new VPC, Subnets and Network Interfaces.
+                  Firewall - To Enable Firewall logs for new Firewall"
     AllowedPattern: ".+"
     AllowedValues:
       - 'S3'
       - 'VPC'
+      - 'Firewall'
 
   ExistingResource:
     Type: String
@@ -63,8 +65,17 @@ Parameters:
 Conditions:
   enable_s3_buckets_logging: !Equals [!Ref EnableLogging, 'S3']
   enable_vpc_flow_logs_logging: !Equals [!Ref EnableLogging, 'VPC']
-
+  enable_firewall_logging: !Equals [!Ref EnableLogging,'Firewall']
   enable_existing_resources: !Equals [!Ref ExistingResource, 'Yes']
+  enable_logging_existing_s3_resources: !And
+    - !Equals [!Ref ExistingResource, 'Yes']
+    - !Equals [!Ref EnableLogging, 'S3']
+  enable_logging_existing_vpc_resources: !And
+    - !Equals [!Ref ExistingResource, 'Yes']
+    - !Equals [!Ref EnableLogging, 'VPC']
+  enable_logging_existing_firewall_resources: !And
+    - !Equals [!Ref ExistingResource, 'Yes']
+    - !Equals [!Ref EnableLogging, 'Firewall']
 
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
@@ -96,7 +107,10 @@ Resources:
                   - ec2:CreateFlowLogs
                   - ec2:DescribeFlowLogs
                   - logs:CreateLogDelivery
+                  - logs:GetLogDelivery
+                  - logs:UpdateLogDelivery
                   - logs:DeleteLogDelivery
+                  - logs:ListLogDeliveries
                   - s3:GetBucketPolicy
                   - s3:PutBucketPolicy
                   - s3:ListAllMyBuckets
@@ -105,6 +119,9 @@ Resources:
                   - s3:GetBucketAcl
                   - s3:GetBucketLogging
                   - s3:PutBucketLogging
+                  - network-firewall:ListFirewalls
+                  - network-firewall:DescribeFirewall
+                  - network-firewall:UpdateLoggingConfiguration
                 Resource: '*'
 
   AwsS3LogsResourcesLambda:
@@ -189,6 +206,37 @@ Resources:
       Targets:
         - Arn: !GetAtt AwsS3LogsResourcesLambda.Arn
           Id: Main
+#Section for network firewall
+  AutoEnableNetFWEventsInvokePermission:
+    Type: AWS::Lambda::Permission
+    Condition: enable_firewall_logging
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref AwsS3LogsResourcesLambda
+      Principal: "events.amazonaws.com"
+      SourceArn: !GetAtt AutoEnableNetFWEventsRuleTrigger.Arn
+
+  AutoEnableNetFWEventsRuleTrigger:
+    Type: 'AWS::Events::Rule'
+    DependsOn: AwsS3LogsResourcesLambda
+    Condition: enable_firewall_logging
+    Properties:
+      Description: Auto-Enable logging for Network Firewall with Lambda from events
+      EventPattern:
+        source:
+          - aws.network-firewall
+        detail-type:
+          - AWS API Call via CloudTrail
+        detail:
+          eventSource:
+            - network-firewall.amazonaws.com
+          eventName:
+            - CreateFirewall
+      Name: !Sub "QuickStartAutoEnableFirewallLogs"
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt AwsS3LogsResourcesLambda.Arn
+          Id: Main
 
   SumoLogicHelperFunction:
     Type: 'AWS::Serverless::Function'
@@ -211,11 +259,33 @@ Resources:
 
   EnableS3LogsResources:
     Type: Custom::EnableS3LogsResources
-    Condition: enable_existing_resources
+    Condition: enable_logging_existing_s3_resources
     DependsOn: AwsS3LogsResourcesLambda
     Properties:
       ServiceToken: !GetAtt SumoLogicHelperFunction.Arn
-      AWSResource: !If [enable_s3_buckets_logging, "s3", "vpc"]
+      AWSResource: "s3"
+      BucketName: !Ref BucketName
+      Filter: !Ref FilterExpression
+      BucketPrefix: !Ref BucketPrefix
+      AccountID: !Ref "AWS::AccountId"
+  EnableVPCLogsResources:
+    Type: Custom::EnableS3LogsResources
+    Condition: enable_logging_existing_vpc_resources
+    DependsOn: AwsS3LogsResourcesLambda
+    Properties:
+      ServiceToken: !GetAtt SumoLogicHelperFunction.Arn
+      AWSResource: "vpc"
+      BucketName: !Ref BucketName
+      Filter: !Ref FilterExpression
+      BucketPrefix: !Ref BucketPrefix
+      AccountID: !Ref "AWS::AccountId"
+  EnableFirewallLogsResources:
+    Type: Custom::EnableS3LogsResources
+    Condition: enable_logging_existing_firewall_resources
+    DependsOn: AwsS3LogsResourcesLambda
+    Properties:
+      ServiceToken: !GetAtt SumoLogicHelperFunction.Arn
+      AWSResource: "firewall"
       BucketName: !Ref BucketName
       Filter: !Ref FilterExpression
       BucketPrefix: !Ref BucketPrefix
