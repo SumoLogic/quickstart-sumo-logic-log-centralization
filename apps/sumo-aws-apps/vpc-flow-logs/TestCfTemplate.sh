@@ -14,7 +14,7 @@ export SumoDeployment="us1"
 export RemoveSumoResourcesOnDeleteStack=true
 
 # App Details - Collector Configuration
-export CollectorName="AWS-Sourabh-Collector-${AppName}-${InstallType}"
+export CollectorName="AWS-langlq-Collector-${AppName}-${InstallType}"
 
 export LogsS3BucketName="vpc-flow-logs-${AppName}-${InstallType}"
 
@@ -22,22 +22,33 @@ export LogsS3BucketName="vpc-flow-logs-${AppName}-${InstallType}"
 export QSS3BucketName="sumologiclambdahelper"
 export QSS3BucketRegion=${AWS_REGION}
 
+
 if [[ "${InstallType}" == "all" ]]
 then
     export InstallVpcApp="Yes"
     export InstallPCIVpcApp="Yes"
+	export InstallCSMAVpcApp="Yes"
     export CreateS3Bucket="Yes"
     export CreateS3Source="Yes"
 elif [[ "${InstallType}" == "onlyvpcapp" ]]
 then
     export InstallVpcApp="Yes"
     export InstallPCIVpcApp="No"
+	export InstallCSMAVpcApp="No"
     export CreateS3Bucket="No"
     export CreateS3Source="No"
 elif [[ "${InstallType}" == "onlypcivpcapp" ]]
 then
     export InstallVpcApp="No"
     export InstallPCIVpcApp="Yes"
+	export InstallCSMAVpcApp="No"
+    export CreateS3Bucket="No"
+    export CreateS3Source="No"
+elif [[ "${InstallType}" == "onlycsmavpcapp" ]]
+then
+    export InstallVpcApp="No"
+    export InstallPCIVpcApp="No"
+    export InstallCSMAVpcApp="Yes"
     export CreateS3Bucket="No"
     export CreateS3Source="No"
 elif [[ "${InstallType}" == "sourcewithoutbucket" ]]
@@ -67,4 +78,4 @@ aws cloudformation deploy --profile ${AWS_PROFILE} --template-file ./vpcflowlogs
 RemoveSumoResourcesOnDeleteStack="${RemoveSumoResourcesOnDeleteStack}" \
 QSS3BucketName="${QSS3BucketName}" InstallVpcApp="${InstallVpcApp}" CollectorName="${CollectorName}" \
 QSS3BucketRegion="${QSS3BucketRegion}" LogsS3BucketName="${LogsS3BucketName}" CreateS3Source="${CreateS3Source}" \
-CreateS3Bucket="${CreateS3Bucket}" InstallPCIVpcApp="${InstallPCIVpcApp}" SumoOrganizationId="${SumoOrganizationId}"
+CreateS3Bucket="${CreateS3Bucket}" InstallPCIVpcApp="${InstallPCIVpcApp}" InstallCSMAVpcApp="${InstallCSMAVpcApp}" SumoOrganizationId="${SumoOrganizationId}"

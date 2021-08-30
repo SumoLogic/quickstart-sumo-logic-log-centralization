@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: "Template to setup the Amazon GuardDuty, Amazon GuardDuty Benchmark app with AWS and Sumo Logic resources for AWS Quick Start Solution."
+Description: "Template to setup the Amazon GuardDuty, Global Intelligence for Amazon GuardDuty with AWS and Sumo Logic resources for AWS Quick Start Solution."
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -17,7 +17,7 @@ Metadata:
           default: "App Details - Collector Configuration"
         Parameters:
           - InstallGuardDutyApp
-          - InstallGuardDutyBenchMarkApp
+          - InstallGlobalGuardDutyApp
           - CollectorName
 
       - Label:
@@ -51,8 +51,8 @@ Metadata:
 
       InstallGuardDutyApp:
         default: "Install Sumo Logic Amazon GuardDuty App"
-      InstallGuardDutyBenchMarkApp:
-        default: "Install Sumo Logic Amazon GuardDuty BenchMark App"
+      InstallGlobalGuardDutyApp:
+        default: "Install Sumo Logic Global Intelligence for Amazon GuardDuty"
       CollectorName:
         default: "Collector Name"
 
@@ -116,9 +116,9 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  InstallGuardDutyBenchMarkApp:
+  InstallGlobalGuardDutyApp:
     Type: String
-    Description: "Yes -> To Install Amazon GuardDuty BenchMark App in Sumo Logic for AWS Quick Start Solution.
+    Description: "Yes -> To Install Global Intelligence for Amazon GuardDuty in Sumo Logic for AWS Quick Start Solution.
                   No -> Skip Installation of the app."
     Default: 'Yes'
     AllowedValues:
@@ -173,7 +173,7 @@ Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
   install_guardduty_app: !Equals [!Ref InstallGuardDutyApp, 'Yes']
-  install_guardduty_benchmark_app: !Equals [!Ref InstallGuardDutyBenchMarkApp, 'Yes']
+  install_global_guardduty_app: !Equals [!Ref InstallGlobalGuardDutyApp, 'Yes']
   install_http_logs_source: !Equals [!Ref CreateHttpLogsSource, 'Yes']
 
 Resources:
@@ -308,9 +308,9 @@ Resources:
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
 
-  sumoGuardDutyBenchmarkApp:
+  sumoGlobalGuardDutyApp:
     Type: Custom::App
-    Condition: install_guardduty_benchmark_app
+    Condition: install_global_guardduty_app
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -320,7 +320,7 @@ Resources:
         - !ImportValue
           'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
-      AppName: "Amazon QuickStart - Amazon GuardDuty Benchmark"
+      AppName: "Amazon QuickStart - Global Intelligence for Amazon GuardDuty"
       AppId: "8e7efcb3-040a-4a92-9f8d-922fafb24afb"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       AppSources:
@@ -335,10 +335,10 @@ Outputs:
     Description: "CloudWatchEvent Processor Function ARN"
     Condition: install_http_logs_source
     Value: !GetAtt CloudWatchEventFunction.Arn
-  GuarddutyBenchmarkAppFolder:
+  GlobalGuardDutyAppFolder:
     Description: "Folder Name"
-    Condition: install_guardduty_benchmark_app
-    Value: !GetAtt sumoGuardDutyBenchmarkApp.APP_FOLDER_NAME
+    Condition: install_global_guardduty_app
+    Value: !GetAtt sumoGlobalGuardDutyApp.APP_FOLDER_NAME
   GuarddutyAppFolder:
     Description: "Folder Name"
     Condition: install_guardduty_app

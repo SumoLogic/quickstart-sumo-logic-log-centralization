@@ -6,8 +6,7 @@ project:
   name: quickstart-sumo-logic-log-centralization
   regions:
   - us-east-2
-
-
+  
 tests:
   default:
     template: ./apps/sumo-aws-apps/AutoEnableS3Logging/auto_enable_s3_logging.template.yaml
@@ -21,4 +20,8 @@ tests:
       QSS3KeyPrefix: "quickstart-sumo-logic-log-centralization/"
       QSS3BucketName: "$[taskcat_autobucket]"
       QSS3BucketRegion: "$[taskcat_current_region]"
-
+      Section1aSumoLogicDeployment: "us2"
+      Section1bSumoLogicAccessID: ""
+      Section1cSumoLogicAccessKey: ""
+      Section1dSumoLogicOrganizationId: ""
+      Section2CloudTrailCreateBucket: "Yes"

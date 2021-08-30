@@ -248,6 +248,7 @@ Conditions:
     - !Condition create_sns_topic
   install_cloudtrail_logs_source: !Equals [!Ref CreateCloudTrailLogSource, 'Yes']
 
+
   create_sns_topic: !And
     - !Condition do_not_use_parent_stack
     - !Condition install_cloudtrail_logs_source
@@ -331,7 +332,7 @@ Resources:
 
   SumoHostedCollector:
     Type: Custom::Collector
-    Condition: install_cloudtrail_logs_source
+    Condition: do_not_use_parent_stack
     Properties:
       ServiceToken: !If
         - do_not_use_parent_stack
@@ -422,7 +423,7 @@ Resources:
         - !ImportValue
           'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
-      AppName: "Amazon QuickStart - Cloud Security Monitoring and Analytics App"
+      AppName: "Amazon QuickStart - Amazon CloudTrail - Cloud Security Monitoring and Analytics App"
       AppId: "a0ce63ad-ed4f-4ea2-967b-da2854c53aa9"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       AppSources:
@@ -586,7 +587,7 @@ Resources:
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       SourceCategory: !Ref CloudTrailLogsSourceCategoryName
       CollectorId: !If
-        - install_cloudtrail_logs_source
+        - do_not_use_parent_stack
         - !GetAtt
           - SumoHostedCollector
           - COLLECTOR_ID
