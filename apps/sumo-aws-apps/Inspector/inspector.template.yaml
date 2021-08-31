@@ -314,6 +314,7 @@ Resources:
                   - 'inspector:Create*'
                   - 'inspector:RegisterCrossAccountAccessRole'
                   - 'inspector:SubscribeToEvent'
+                  - 'inspector:UnsubscribeFromEvent'
                   - 'inspector:StartAssessmentRun'                  
                   - 'ec2:DescribeInstances'
                   - 'ec2:DescribeTags'
@@ -406,7 +407,7 @@ Resources:
       State: "ENABLED"
       Targets:
         - Arn:
-            !GetAtt [AWSInspectorTemplate, Result]
+            !GetAtt AWSInspectorTemplate.AssessmentTemplateArn
           Id: "AmazonInspectorAssessment"
           RoleArn:
             Fn::GetAtt:
@@ -426,13 +427,14 @@ Resources:
               - !Sub '${QSS3BucketName}-${AWS::Region}'
               - !Ref QSS3BucketName
         Key: !Sub '${QSS3KeyPrefix}apps/sumo-aws-apps/Inspector/AWSInspector.zip'
-      Handler: AWSInspector::AWSInspector.Function::Handler
+      Handler: AWSInspector.handler
       Role:
         'Fn::GetAtt':
           - SumoLogicHelperRole
           - Arn
-      Runtime: dotnetcore3.1
+      Runtime: python3.7
       Timeout: 900
+      MemorySize: 128
       
   AWSInspectorTemplate:
     Condition: install_http_logs_source
