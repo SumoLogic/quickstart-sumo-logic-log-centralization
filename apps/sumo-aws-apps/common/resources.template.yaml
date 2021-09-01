@@ -191,6 +191,19 @@ Resources:
                   - cloudtrail:DeleteTrail
                   - cloudtrail:UpdateTrail
                   - cloudtrail:StartLogging
+                  - inspector:Describe*
+                  - inspector:Del*
+                  - inspector:Get*
+                  - inspector:List*
+                  - inspector:Preview*
+                  - inspector:Create*
+                  - inspector:RegisterCrossAccountAccessRole
+                  - inspector:SubscribeToEvent
+                  - inspector:UnsubscribeFromEvent
+                  - inspector:StartAssessmentRun 
+                  - sns:ListTopics
+                  - events:DescribeRule
+                  - events:ListRuleNamesByTarget
                   - s3:ListAllMyBuckets
                   - s3:GetBucketLocation
                   - s3:GetBucketLogging
@@ -356,6 +369,11 @@ Resources:
       TrailName: !Sub "SumoCloudTrail-${AWS::StackName}"
 
 Outputs:
+  SumoLogicHelperRoleARN:
+    Description: "Sumo Logic Helper Role ARN"
+    Value: !GetAtt SumoLogicHelperRole.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-SumoLogicHelperRoleARN"  
   StackName:
     Description: "Stack Name"
     Value: !Ref "AWS::StackName"

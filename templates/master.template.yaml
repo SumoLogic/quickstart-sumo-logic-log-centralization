@@ -181,6 +181,27 @@ Metadata:
           - Section11NFWS3SourceCategoryName
 
       - Label:
+          default: "12.1 Amazon Inspector app configuration"  
+        Parameters:
+          - Section12InstallSumoInspectorApp
+      - Label:
+          default: "12.2 Amazon Inspector app configuration"          
+        Parameters:
+          - Section12InstallAmazonInspectorApp
+          - Section12AssessmentTemplateName
+          - Section12AssessmentTargetName
+          - Section12AssessmentDuration
+          - Section12EnableAllEC2Instances
+          - Section12EC2Tags
+          - Section12EnableAutomaticAssessment
+          - Section12ScheduleBuilderType
+          - Section12InspectorRunCronSchedule
+      - Label:
+          default: "12.3 Amazon Inspector log-source configuration"
+        Parameters:
+          - Section12AmazonInspectorCreateHttpLogsSource
+          - Section12AmazonInspectorHttpLogsSourceCategoryName          
+      - Label:
           default: "AWS Quick Start configuration"
         Parameters:
           - QSS3BucketName
@@ -356,6 +377,30 @@ Metadata:
       Section11NFWS3SourceCategoryName:
         default: "Sumo Logic Amazon S3 Logs Source Category Name"
 
+      # Amazon Inspector app configuration
+      Section12InstallSumoInspectorApp:
+        default: "Install Sumo Logic Amazon Inspector Logs App"              
+      Section12InstallAmazonInspectorApp:
+        default: "Install Amazon Inspector"
+      Section12AssessmentTemplateName:
+        default: "Amazon Inspector Assessment Template Name"
+      Section12AssessmentTargetName:
+        default: "Amazon Inspector Assessment Target name"
+      Section12AssessmentDuration:
+        default: "Assessment Duration (In Seconds)"
+      Section12EnableAllEC2Instances:
+        default: "Include all EC2 instances"
+      Section12EnableAutomaticAssessment:
+        default: "Enable Automatic Assessments"
+      Section12ScheduleBuilderType:
+        default: "Schedule Builder Type"
+      Section12InspectorRunCronSchedule:
+        default: "Inspector Run trigger time"
+      Section12AmazonInspectorCreateHttpLogsSource:
+        default: "Create Sumo Logic HTTP logs source"
+      Section12AmazonInspectorHttpLogsSourceCategoryName:
+        default: "Sumo Logic HTTP logs source category name"   
+        
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
       QSS3BucketRegion:
@@ -504,7 +549,7 @@ Parameters:
     Description: "VPC: Install Amazon VPC flow logs app in Sumo Logic.
                   PCI_VPC: Install PCI compliance VPC flow app.
                   CSMA_VPC: Install Amazon VPC Flow - Cloud Security Monitoring and Analytics app.
-                  All: Install both apps.
+                  All: Install all apps.
                   Skip: Skip installation of apps."
     Default: 'Skip'
     AllowedValues:
@@ -825,7 +870,7 @@ Parameters:
     Type: String
     Description: "Yes - Create a new S3 bucket in AWS S3.
                   No - Use an existing S3 bucket from AWS S3 which has NFW Logs."
-    Default: 'Yes'
+    Default: 'Yes'  
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -859,6 +904,77 @@ Parameters:
                   New - Default will be used if Amazon S3 Source is Created."
     Default: AWS/NFW/Flow/Logs
 
+  # Amazon Inspector app configuration
+  Section12InstallAmazonInspectorApp:
+    Type: String
+    Description: "Choose Yes to create Amazon Inspector - Assessment Templates. Choose No if Amazon Inspector - Assessment Templates already exist."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section12AssessmentTemplateName:
+    Type: String
+    Default: inspector-assessment-template    
+  Section12AssessmentTargetName:
+    Type: String
+    Default: inspector-assessment-target
+  Section12AssessmentDuration:
+    Type: Number
+    AllowedValues:
+      - 900
+      - 3600
+      - 28800
+      - 43200
+      - 86400
+    Description: "The duration of the assessment run in seconds 900(15 Minutes), 3600(1 Hour - Recommended), 28800(8 Hours), 43200(12 Hours), 86400(24 Hours)."
+    Default: 3600    
+  Section12EnableAllEC2Instances:
+    Type: String
+    Description: "Yes -> Include all EC2 instances in this AWS account and region. No -> Use Tags."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No' 
+  Section12EC2Tags:
+    Description: "Contains information about a resource group. The resource group defines a set of tags that, when queried, identify the AWS resources that make up the assessment target."
+    Type: String
+    Default: "environment=production,environment=dev,team=search"    
+  Section12EnableAutomaticAssessment:
+    Type: String
+    Description: Yes -> Enable Automatic Assessment. No -> Disable Automatic Assessment.
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section12ScheduleBuilderType:
+    Type: String
+    Default: 'Rate Scheduler'
+    AllowedValues:
+      - 'Rate Scheduler'
+      - 'Cron Scheduler'     
+  Section12InspectorRunCronSchedule:
+    Description: 'If the Schedule Builder Type value is [Rate Scheduler], then Inspector Run Trigger Time has type day(s) and the value is [Cron Scheduler], then Inspector Run Trigger Time is in cron format.'
+    Type: String
+    Default: '7'
+  Section12AmazonInspectorCreateHttpLogsSource:
+    Type: String
+    Description: "Yes: Create Sumo Logic HTTP log source to collect Amazon Inspector logs. No: Skip creation of the Sumo Logic HTTP log source."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section12AmazonInspectorHttpLogsSourceCategoryName:
+    Type: String
+    Description: "Required when flag is set to No. Provide an existing source category name from the Amazon Inspector logs. This is used for app installation."
+    Default: ""
+  Section12InstallSumoInspectorApp:
+    Type: String
+    Description: "Yes -> To Install Sumo Logic Amazon Inspector Logs in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'    
 
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
@@ -939,6 +1055,11 @@ Conditions:
   install_nfw_app: !Equals [!Ref Section11InstallNFWApp, 'Yes' ]
   create_nfw_bucket: !Equals [!Ref Section11NFWCreateS3Bucket,'Yes']
   create_nfw_source: !Equals [!Ref Section11NFWCreateS3Source, 'Yes']
+  
+  # Configtion for Amazon Inspector apps
+  install_inspector_sumo_app: !Equals [!Ref Section12InstallSumoInspectorApp, 'Yes' ]
+  create_amazoninspector_source: !Equals [ !Ref Section12AmazonInspectorCreateHttpLogsSource, 'Yes']
+  
   # Conditions for auto-enable
   auto_enable_s3_audit: !Or
     - !Equals [ !Ref Section91aEnableAutoLogging, 'S3' ]
@@ -969,6 +1090,8 @@ Conditions:
     - !Condition create_waf_source
     - !Condition create_config_source
     - !Condition create_nfw_source
+    - !Condition create_amazoninspector_source
+    
   create_cloudtrail: !Or
     - !Condition create_cloudtrail_bucket
     - !Condition auto_enable_s3_audit
@@ -1012,6 +1135,9 @@ Conditions:
   call_nfw_stack: !Or
     - !Condition install_nfw_app
     - !Condition create_nfw_source
+  call_amazoninspector_stack: !Or
+    - !Condition install_inspector_sumo_app
+    - !Condition create_amazoninspector_source     
 
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
@@ -1477,4 +1603,49 @@ Resources:
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
+
+  sumoAmazonInspectorStackWaitHandle:
+    Condition: call_amazoninspector_stack
+    DependsOn: sumoAmazonInspectorAppsStack
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+    
+  sumoAmazonInspectorStackWaitCondition:
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !If [call_amazoninspector_stack, !Ref sumoAmazonInspectorStackWaitHandle, !Ref WaitHandle]
+      Timeout: "5"
+      Count: 0
+      
+  sumoAmazonInspectorAppsStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: call_amazoninspector_stack
+    DependsOn: CreateCommonResources
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/Inspector/inspector.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:     
+        SumoDeployment: !Ref Section1aSumoLogicDeployment
+        SumoAccessID: !Ref Section1bSumoLogicAccessID
+        SumoAccessKey: !Ref Section1cSumoLogicAccessKey     
+        RemoveSumoResourcesOnDeleteStack: !Ref Section1eSumoLogicResourceRemoveOnDeleteStack
+        InstallSumoInspectorApp: !Ref Section12InstallSumoInspectorApp
+        InstallAmazonInspectorApp: !Ref Section12InstallAmazonInspectorApp
+        AssessmentTemplateName: !Ref Section12AssessmentTemplateName
+        AssessmentTargetName: !Ref Section12AssessmentTargetName
+        EnableAllEC2Instances: !Ref Section12EnableAllEC2Instances
+        AssessmentDuration: !Ref Section12AssessmentDuration
+        EnableAutomaticAssessment: !Ref Section12EnableAutomaticAssessment
+        ScheduleBuilderType: !Ref Section12ScheduleBuilderType
+        InspectorRunCronSchedule: !Ref Section12InspectorRunCronSchedule
+        EC2Tags: !Ref Section12EC2Tags       
+        CollectorName: !Sub "aws-quickstart-collector-${AWS::AccountId}"
+        CreateHttpLogsSource: !Ref Section12AmazonInspectorCreateHttpLogsSource
+        HttpLogsSourceName: !Sub "aws-quickstart-amazon-inspector-${AWS::Region}"
+        HttpLogsSourceCategoryName: !If [create_amazoninspector_source, "aws/quickstart/inspector/logs", !Ref Section12AmazonInspectorHttpLogsSourceCategoryName]      
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix       
+        ParentStackName: !GetAtt CreateCommonResources.Outputs.StackName        
  

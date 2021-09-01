@@ -1,0 +1,523 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: 'AWS::Serverless-2016-10-31'
+Description: >-
+  Template to setup the Amazon Inspector app with AWS and Sumo Logic resources
+  for AWS Quick Start Solution.
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: Sumo Logic Deployment Configuration
+        Parameters:
+          - SumoDeployment
+          - SumoAccessID
+          - SumoAccessKey
+          - RemoveSumoResourcesOnDeleteStack
+      - Label:
+          default: App Details - Collector Configuration
+        Parameters:
+          - InstallSumoInspectorApp
+          - CollectorName         
+      - Label:
+          default: App Details - HTTP Logs Source Configuration
+        Parameters:
+          - CreateHttpLogsSource
+          - HttpLogsSourceName
+          - HttpLogsSourceCategoryName
+      - Label:
+          default: Amazon Inspector Configuration
+        Parameters:
+          - InstallAmazonInspectorApp
+          - AssessmentTemplateName          
+          - AssessmentTargetName
+          - AssessmentDuration
+          - EnableAllEC2Instances
+          - EC2Tags
+          - EnableAutomaticAssessment
+          - ScheduleBuilderType
+          - InspectorRunCronSchedule
+          - RemoveAWSResourcesOnDeleteStack
+      - Label:
+          default: AWS Quick Start configuration
+        Parameters:
+          - QSS3BucketName
+          - QSS3BucketRegion
+          - QSS3KeyPrefix
+      - Label:
+          default: Local Parameters. Do Not Edit the values.
+        Parameters:
+          - ParentStackName
+    ParameterLabels:
+      SumoDeployment:
+        default: Sumo Logic Deployment Name
+      SumoAccessID:
+        default: Sumo Logic Access ID
+      SumoAccessKey:
+        default: Sumo Logic Access Key
+      RemoveSumoResourcesOnDeleteStack:
+        default: Delete Sumo Logic Resources when stack is deleted
+      RemoveAWSResourcesOnDeleteStack:
+        default: Delete Amazon Resources when stack is deleted
+      InstallSumoInspectorApp:
+        default: Install Sumo Logic Amazon Inspector App       
+      InstallAmazonInspectorApp:
+        default: Install Amazon Inspector
+      AssessmentTemplateName:
+        default: Amazon Inspector Assessment Template Name
+      AssessmentTargetName:
+        default: Amazon Inspector Assessment Target name
+      AssessmentDuration:
+        default: Assessment Duration (In Seconds)
+      EnableAutomaticAssessment:
+        default: Enable Automatic Assessments
+      InspectorRunCronSchedule:
+        default: Inspector Run trigger time
+      ScheduleBuilderType:
+        default: Schedule Builder Type
+      EnableAllEC2Instances:
+        default: Include all EC2 instances      
+      CollectorName:
+        default: Collector Name
+      CreateHttpLogsSource:
+        default: Create Sumo Logic HTTP Logs Source
+      HttpLogsSourceName:
+        default: Sumo Logic HTTP Logs Source Name
+      HttpLogsSourceCategoryName:
+        default: Sumo Logic HTTP Logs Source Category Name
+      QSS3BucketName:
+        default: Quick Start S3 bucket name
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket region
+      QSS3KeyPrefix:
+        default: Quick Start S3 key prefix
+      ParentStackName:
+        default: 'If Any, Name of parent Stack'
+Parameters:
+  SumoDeployment:
+    Type: String
+    AllowedValues:
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+      - in
+      - fed
+    Description: 'Enter au, ca, de, eu, jp, us2, in, fed or us1.'
+    AllowedPattern: .+
+    Default: 'us2'
+  SumoAccessID:
+    Type: String
+    Description: The Sumo Logic Access ID. Used for Sumo Logic API calls.
+    AllowedPattern: .+
+    ConstraintDescription: Sumo Logic Access ID can not be empty.
+  SumoAccessKey:
+    Type: String
+    Description: The Sumo Logic Access Key. Used for Sumo Logic API calls.
+    AllowedPattern: .+
+    ConstraintDescription: Sumo Logic Access Key can not be empty.
+    NoEcho: true
+  RemoveSumoResourcesOnDeleteStack:
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'true'
+    Description: >-
+      To delete collector, sources and app when stack is deleted, set this
+      parameter to true. Default is true. Deletes the resources created by the
+      stack. Deletion of updated resources will be skipped.
+    Type: String
+  RemoveAWSResourcesOnDeleteStack:
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'false'
+    Description: >-
+      To delete Amazon Inspector - Assessment Targets, Amazon Inspector - Assessment Templates when stack is deleted, set this
+      parameter to true. Default is false. Deletion of updated resources will be skipped.
+    Type: String  
+  InstallSumoInspectorApp:
+    Type: String
+    Description: >-
+      Yes -> To Install Amazon Inspector App in Sumo Logic for AWS Quick Start
+      Solution. No -> Skip Installation of the app.
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  InstallAmazonInspectorApp:
+    Type: String
+    Description: 'Choose Yes to create Amazon Inspector - Assessment Templates. Choose No if Amazon Inspector - Assessment Templates already exist.'
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  EnableAllEC2Instances:
+    Type: String
+    Description: >-
+      Yes -> Include all EC2 instances in this AWS account and region. No ->
+      Use Tags.
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'  
+  AssessmentTemplateName:
+    Type: String
+    Default: inspector-assessment-template
+  AssessmentTargetName:
+    Type: String
+    Default: inspector-assessment-target
+  AssessmentDuration:
+    Type: Number
+    AllowedValues:
+      - 900
+      - 3600
+      - 28800
+      - 43200
+      - 86400
+    Description: 'The duration of the assessment run in seconds 900(15 Minutes), 3600(1 Hour - Recommended), 28800(8 Hours), 43200(12 Hours), 86400(24 Hours).'
+    Default: 3600   
+  EnableAutomaticAssessment:
+    Type: String
+    Description: Yes -> Enable Automatic Assessment. No -> Disable Automatic Assessment.
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  ScheduleBuilderType:
+    Type: String
+    Default: 'Rate Scheduler'
+    AllowedValues:
+      - 'Rate Scheduler'
+      - 'Cron Scheduler'     
+  InspectorRunCronSchedule:
+    Description: 'If the Schedule Builder Type value is [Rate Scheduler], then Inspector Run Trigger Time has type day(s) and the value is [Cron Scheduler], then Inspector Run Trigger Time is in cron format.'
+    Type: String
+    Default: '7'
+    
+  EC2Tags:
+    Description: Contains information about a resource group. The resource group defines a set of tags that, when queried, identify the AWS resources that make up the assessment target.
+    Type: String
+    Default: environment=production,environment=dev,team=search
+
+  CollectorName:
+    Type: String
+    Description: Change the collector name to be created else default name will be used.
+    Default: AWS-Inspector-Collector
+  CreateHttpLogsSource:
+    Type: String
+    Description: >-
+      Choose Yes to create Sumo Logic HTTP logs source. Choose No if HTTP Logs
+      source already exist.
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  HttpLogsSourceName:
+    Type: String
+    Description: Change the HTTP Source name to be created else default name will be used.
+    Default: AWS-Inspector-Source
+  HttpLogsSourceCategoryName:
+    Type: String
+    Description: >-
+      Existing - Change to an existing Source Category from Sumo Logic if HTTP
+      Source is not created.
+       New - Change the source category else Default will be used if HTTP Source is Created
+    Default: AWS/Inspector/logs
+  QSS3BucketName:
+    AllowedPattern: '^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$'
+    ConstraintDescription: >-
+      Quick Start bucket name can include numbers, lowercase letters, uppercase
+      letters, and hyphens (-). It cannot start or end with a hyphen (-).
+    Default: aws-quickstart
+    Description: >-
+      S3 bucket name for the Quick Start assets. This string can include
+      numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot
+      start or end with a hyphen (-).
+    Type: String
+  QSS3BucketRegion:
+    Default: us-east-1
+    Description: >-
+      The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted.
+      When using your own bucket, you must specify this value.
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: '^[0-9a-zA-Z-/]*$'
+    ConstraintDescription: >-
+      Quick Start key prefix can include numbers, lowercase letters, uppercase
+      letters, hyphens (-), and forward slash (/).
+    Default: quickstart-sumo-logic-log-centralization/
+    Description: >-
+      S3 key prefix for the Quick Start assets. Quick Start key prefix can
+      include numbers, lowercase letters, uppercase letters, hyphens (-), and
+      forward slash (/).
+    Type: String
+  ParentStackName:
+    Type: String
+    Default: ParentStackName
+    Description: Parent Stack Name. Do Not Edit the value.
+Conditions:
+  do_not_use_parent_stack: !Equals 
+    - Ref: ParentStackName
+    - ParentStackName
+  UsingDefaultBucket: !Equals 
+    - Ref: QSS3BucketName
+    - aws-quickstart
+  install_sumo_inspector_app: !Equals 
+    - !Ref InstallSumoInspectorApp
+    - 'Yes'
+  install_http_logs_source: !Equals 
+    - Ref: CreateHttpLogsSource
+    - 'Yes'    
+  enable_aws_event_auto_assessment: !And 
+    - !Equals [!Ref EnableAutomaticAssessment, 'Yes']
+    - !Condition install_amazon_inspector_app
+    - !Condition install_http_logs_source
+    
+  schedule_builder_type: !Equals [!Ref ScheduleBuilderType, 'Rate Scheduler']
+  
+  inspector_run_cron_schedule: !Equals [!Ref InspectorRunCronSchedule, '1'] 
+  
+  install_amazon_inspector_app: !Equals [!Ref InstallAmazonInspectorApp, 'Yes']
+
+Resources:
+          
+  SumoLogicHelperRole:
+    Type: 'AWS::IAM::Role'
+    Condition: do_not_use_parent_stack
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: SumoPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                  - 'inspector:Describe*'
+                  - 'inspector:Del*'
+                  - 'inspector:Get*'
+                  - 'inspector:List*'
+                  - 'inspector:Preview*'
+                  - 'inspector:Create*'
+                  - 'inspector:RegisterCrossAccountAccessRole'
+                  - 'inspector:SubscribeToEvent'
+                  - 'inspector:UnsubscribeFromEvent'
+                  - 'inspector:StartAssessmentRun'                  
+                  - 'ec2:DescribeInstances'
+                  - 'ec2:DescribeTags'
+                  - 'sns:ListTopics'
+                  - 'events:DescribeRule'
+                  - 'iam:*'
+                  - 'events:ListRuleNamesByTarget'
+                Resource: '*'
+  SumoLogicHelperFunction:
+    Type: 'AWS::Serverless::Function'
+    DependsOn: SumoLogicHelperRole
+    Condition: do_not_use_parent_stack
+    Properties:
+      Handler: main.handler
+      Runtime: python3.7
+      CodeUri:
+        Bucket: !Sub 
+          - '${S3Bucket}'
+          - S3Bucket: !If 
+              - UsingDefaultBucket
+              - !Sub '${QSS3BucketName}-${AWS::Region}'
+              - !Ref QSS3BucketName
+        Key: !Sub >-
+          ${QSS3KeyPrefix}apps/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip
+      MemorySize: 128
+      Timeout: 900
+      Role:
+        'Fn::GetAtt':
+          - SumoLogicHelperRole
+          - Arn
+          
+  SumoInspectorEventFunction:
+    Condition: install_http_logs_source  
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri:
+        Bucket: !Sub 
+          - '${S3Bucket}'
+          - S3Bucket: !If 
+              - UsingDefaultBucket
+              - !Sub '${QSS3BucketName}-${AWS::Region}'
+              - !Ref QSS3BucketName
+        Key: !Sub '${QSS3KeyPrefix}apps/sumo-aws-apps/Inspector/inspector.zip'
+      Handler: inspector.sumo_inspector_handler
+      Role: !If 
+        - do_not_use_parent_stack
+        - !GetAtt 
+          - SumoLogicHelperRole
+          - Arn
+        - !ImportValue 
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperRoleARN'
+      Runtime: python3.7
+      MemorySize: 128
+      Timeout: 900
+      Events:
+        SNSEvent:
+            Type: SNS
+            Properties:
+                Topic: !Ref SumoSNSTopic      
+      Environment:
+        Variables:
+          SUMO_ENDPOINT: !GetAtt SumoHTTPSource.SUMO_ENDPOINT
+          
+  AWSAutoAssessmentIamRole:
+    Condition: enable_aws_event_auto_assessment
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "events.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns: []
+      Policies:
+        - PolicyName: "InspectorAssessmentTrigger"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "inspector:StartAssessmentRun"
+                Resource: "*"   
+                      
+  AWSEventAutoAssessment:
+    Condition: enable_aws_event_auto_assessment
+    Type: "AWS::Events::Rule"
+    Properties:
+      Description: "Scheduled trigger for Amazon Inspector Assessment"
+      State: "ENABLED"
+      Targets:
+        - Arn:
+            !GetAtt AWSInspectorTemplate.AssessmentTemplateArn
+          Id: "AmazonInspectorAssessment"
+          RoleArn:
+            Fn::GetAtt:
+              - "AWSAutoAssessmentIamRole"
+              - "Arn"
+      ScheduleExpression: !If [schedule_builder_type, !If [inspector_run_cron_schedule,!Sub 'rate(${InspectorRunCronSchedule} day)',!Sub 'rate(${InspectorRunCronSchedule} days)'], !Ref InspectorRunCronSchedule]
+
+      
+  AWSInspectorTemplate:
+    Condition: install_http_logs_source
+    Type: Custom::AWSInspector
+    Properties:
+      ServiceToken: !If 
+        - do_not_use_parent_stack
+        - !GetAtt 
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue 
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      AssessmentTargetName: !Ref AssessmentTargetName
+      AssessmentTemplateName: !Ref AssessmentTemplateName
+      DurationInSeconds: !Ref AssessmentDuration
+      EnableAllEC2Instances: !Ref EnableAllEC2Instances
+      TopicArn: !Ref SumoSNSTopic
+      Tags: !Ref EC2Tags
+      Region: !Ref AWS::Region
+      InstallAmazonInspectorApp: !Ref InstallAmazonInspectorApp
+      RemoveAWSResourcesOnDeleteStack: !Ref RemoveAWSResourcesOnDeleteStack
+            
+  SumoSNSTopic:
+    Condition: install_http_logs_source
+    Type: 'AWS::SNS::Topic'
+    Properties:
+      TopicName: !Sub 'SumoSNSTopic-${AWS::StackName}'
+      
+  SumoSNSpolicy:
+    Condition: install_http_logs_source
+    Type: 'AWS::SNS::TopicPolicy'
+    Properties:
+      PolicyDocument:
+        Id: inspector-sns-publish-policy
+        Statement:
+          - Action:
+              - 'SNS:Publish'
+            Effect: Allow
+            Sid: inspector-sns-publish-statement
+            Principal:
+              Service: inspector.amazonaws.com
+            Resource: 'arn:aws:sns:*'
+      Topics:
+        - Ref: SumoSNSTopic
+  SumoHostedCollector:
+    Type: 'Custom::Collector'
+    Condition: install_http_logs_source
+    Properties:
+      ServiceToken: !If 
+        - do_not_use_parent_stack
+        - !GetAtt 
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue 
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      Region: !Ref 'AWS::Region'
+      CollectorType: Hosted
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      CollectorName: !Ref CollectorName
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
+  SumoHTTPSource:
+    Condition: install_http_logs_source
+    Type: 'Custom::HTTPSource'
+    Properties:
+      ServiceToken: !If 
+        - do_not_use_parent_stack
+        - !GetAtt 
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue 
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      Region: !Ref 'AWS::Region'
+      SourceName: !Ref HttpLogsSourceName
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      SourceCategory: !Ref HttpLogsSourceCategoryName
+      CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
+      DateFormat: 'yyyy-MM-dd''T''HH:mm:ss.SSS''Z'''
+      DateLocatorRegex: '.*"updatedAt":"(.*)".*'
+  SumoInspectorApp:
+    Type: 'Custom::App'
+    Condition: install_sumo_inspector_app
+    Properties:
+      ServiceToken: !If 
+        - do_not_use_parent_stack
+        - !GetAtt 
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue 
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      Region: !Ref 'AWS::Region'
+      AppName: Amazon QuickStart - Amazon Inspector
+      AppId: 9dafb154-3482-406b-8aef-95629b093b6a
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      AppSources:
+        paramId123: !Sub '_sourceCategory=${HttpLogsSourceCategoryName}'
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
