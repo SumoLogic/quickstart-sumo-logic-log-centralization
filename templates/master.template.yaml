@@ -1377,6 +1377,7 @@ Resources:
   sumoFireWallMacroStack:
     Type: AWS::CloudFormation::Stack
     Condition: call_nfw_stack
+    DependsOn: CreateCommonResources
     Properties:
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/network-firewall/networkfw_macro.template.yaml'

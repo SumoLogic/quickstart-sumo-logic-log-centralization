@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: 
+Transform:
   - AWS::Serverless-2016-10-31
   - MacroFirewall
 Description: "Template to setup the  AWS Network Firewall app with AWS and Sumo Logic resources for AWS Quick Start Solution."
@@ -167,7 +167,7 @@ Parameters:
     Default: 'No'
     AllowedValues:
       - 'Yes'
-      - 'No'    
+      - 'No'
   VPCID:
     Type: String
     Description: "Skip if No is selected. A VPC ID mapping to new Network Firewall"
@@ -184,22 +184,22 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  NameFirewallPolicy: 
+  NameFirewallPolicy:
     Type: String
     Description: "Skip if Yes is selected. Enter ARN of exists Firewall Policy"
     Default: ""
-  
+
   StatefulRule:
     Type: String
     Description: "Skip if use a exists Firewall Policy. Enter a stateful rule
                   ex: pass tcp 10.20.20.0/24 45400:45500 <> 10.10.10.0/24 5203 (msg:\"test\";sid:1;rev:1;)"
     Default: ""
-  
+
   StatelessRule:
     Type: String
     Description: "Skip if use a exists Firewall Policy. Enter multi allowed ports. Ports separated by comma"
     Default: "80"
-  
+
 
   CollectorName:
     Type: String
@@ -218,7 +218,7 @@ Parameters:
     Type: String
     Description: "Existing Bucket Name - Provide value if the Flag is set to No.
                   New Bucket Name - Provide a unique Bucket Name if the flag is set to Yes."
-  
+
   LogsNFWBucketPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
     ConstraintDescription: "S3 bucket prefix for network firewall logs can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
@@ -276,7 +276,7 @@ Conditions:
     - !Equals [!Ref CreateFirewallPolicy, 'Yes']
     - !Condition create_new_fw_aws
   install_nfw_app: !Equals [!Ref InstallNFWApp, 'Yes']
-  create_target_s3_bucket: !And 
+  create_target_s3_bucket: !And
     - !Equals [!Ref CreateS3Bucket, 'Yes']
     - !Condition create_sns_topic
   install_s3_source: !Equals [!Ref CreateS3Source, 'Yes']
@@ -324,7 +324,7 @@ Resources:
           RulesString: !Ref StatefulRule
       Capacity: 100
       Description: AWS QuickStart Stateful Rule Group
-  
+
   StatelessRuleGroupResource:
     Type: 'AWS::NetworkFirewall::RuleGroup'
     Condition: create_fw_policy
@@ -389,7 +389,7 @@ Resources:
             LogDestination:
               bucketName: !Ref LogsS3BucketName
               prefix: !Sub "${LogsNFWBucketPrefix}alerts"
-          
+
 
   SumoLogicHelperRole:
     Type: AWS::IAM::Role
@@ -537,7 +537,7 @@ Resources:
           'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
       CollectorType: Hosted
-      RemoveOnDeleteStack: !If [do_not_use_parent_stack,!Ref RemoveSumoResourcesOnDeleteStack,"No"]
+      RemoveOnDeleteStack: !If [do_not_use_parent_stack,!Ref RemoveSumoResourcesOnDeleteStack,false]
       CollectorName: !Ref CollectorName
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
