@@ -327,7 +327,7 @@ Metadata:
 
       # Network Firewall app parameters
       Section11InstallNFWApp:
-        default: "Install Sumo Logic Amazon NetworkFirewall Logs App"
+        default: "Install Sumo Logic Amazon Network Firewall App"
       Section11CreateNewFW:
         default: "Create a AWS Network Firewall"
       Section11VPCID:
@@ -836,7 +836,7 @@ Parameters:
   Section11NFWLogsNFWBucketPrefix:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
     ConstraintDescription: "S3 bucket prefix for network firewall logs can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
-    Default: "QS-NFW/"
+    Default: "NFW/"
     Description: "S3 key prefix for Network Firewall logs. Bucket prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Type: "String"
 
