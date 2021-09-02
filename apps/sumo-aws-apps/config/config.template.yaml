@@ -212,6 +212,10 @@ Conditions:
     - !Condition enable_config
     - !Condition do_not_use_parent_stack
 
+  create_delivery_channel: !And
+    - !Condition enable_config
+    - !Condition create_sns_topic
+
 Resources:
 
   SumoLogicHelperRole:
@@ -343,7 +347,7 @@ Resources:
 
   DeliveryChannelWhenConfigIsTurnedOn:
     Type: "Custom::ConfigDeliveryChannel"
-    Condition: create_sns_topic
+    Condition: create_delivery_channel
     DependsOn: [ConfigTopicPolicy, EnableConfigWaitCondition]
     Properties:
       ServiceToken: !If
