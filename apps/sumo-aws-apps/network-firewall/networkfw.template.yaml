@@ -286,51 +286,96 @@ Conditions:
     - !Condition install_s3_source
 
 Resources:
-  NetworkFirewallResource:
+  QuickStartNetworkFirewall:
     Type: AWS::NetworkFirewall::Firewall
     Condition: create_new_fw_aws
     Properties:
-      FirewallName: 'AWSQuickStartNetworkFirewall'
-      FirewallPolicyArn: !If [create_fw_policy, !Ref FirewallPolicyResource, !Ref NameFirewallPolicy]
+      FirewallName: !Join
+        - "-"
+        - - "AWSQuickStartNetworkFirewall"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split
+                  - "/"
+                  - !Ref "AWS::StackId"
+      FirewallPolicyArn: !If [create_fw_policy, !Ref QuickstartFirewallPolicy, !Ref NameFirewallPolicy]
       SubnetMappings:
         - SubnetId: !Ref SubnetID
       VpcId: !Ref VPCID
 
-  FirewallPolicyResource:
+  QuickstartFirewallPolicy:
     Type: 'AWS::NetworkFirewall::FirewallPolicy'
     Condition: create_fw_policy
     Properties:
-      FirewallPolicyName: AWSQuickStartFirewallPolicy
+      FirewallPolicyName: !Join
+        - "-"
+        - - "AWSQuickStartFirewallPolicy"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split
+                  - "/"
+                  - !Ref "AWS::StackId"
       FirewallPolicy:
         StatelessDefaultActions:
           - 'aws:forward_to_sfe'
         StatelessFragmentDefaultActions:
           - 'aws:forward_to_sfe'
         StatefulRuleGroupReferences:
-          - ResourceArn: !Ref StatefuleRuleGroupResource
+          - ResourceArn: !Ref QuickStartStatefulRuleGroup
         StatelessRuleGroupReferences:
-          - ResourceArn: !Ref StatelessRuleGroupResource
+          - ResourceArn: !Ref QuickStartStatelessRuleGroup
             Priority: 100
       Description: Firewall Policy for QuickStart
 
-  StatefuleRuleGroupResource:
+  QuickStartStatefulRuleGroup:
     Type: 'AWS::NetworkFirewall::RuleGroup'
     Condition: create_fw_policy
     Properties:
-      RuleGroupName: "AWSQuickStartStatefulRuleGroup"
       Type: STATEFUL
+      RuleGroupName: !Join
+        - "-"
+        - - "QuickStartStatelessRuleGroup"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split
+                  - "/"
+                  - !Ref "AWS::StackId"
       RuleGroup:
         RulesSource:
           RulesString: !Ref StatefulRule
       Capacity: 100
       Description: AWS QuickStart Stateful Rule Group
 
-  StatelessRuleGroupResource:
+  QuickStartStatelessRuleGroup:
     Type: 'AWS::NetworkFirewall::RuleGroup'
+
     Condition: create_fw_policy
     Properties:
-      RuleGroupName: AWSQuickStartStatelessRuleGroup
       Type: STATELESS
+      RuleGroupName: !Join
+        - "-"
+        - - "QuickStartStatelessRuleGroup"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split
+                  - "/"
+                  - !Ref "AWS::StackId"
       RuleGroup:
         RulesSource:
           StatelessRulesAndCustomActions:
@@ -376,7 +421,7 @@ Resources:
     Type: 'AWS::NetworkFirewall::LoggingConfiguration'
     Condition: create_new_fw_aws
     Properties:
-      FirewallArn: !Ref NetworkFirewallResource
+      FirewallArn: !Ref QuickStartNetworkFirewall
       LoggingConfiguration:
         LogDestinationConfigs:
           - LogType: FLOW
