@@ -1,7 +1,7 @@
-This Quick Start deployment builds a new AWS environment consisting of the 
-infrastructure resources required to provision applications to your Sumo Logic account and 
-necessary resources to your AWS account. During the deployment, you can choose which 
-applications to install. 
+// This Quick Start deployment builds a new AWS environment consisting of the 
+// infrastructure resources required to provision applications to your Sumo Logic account and 
+// necessary resources to your AWS account. During the deployment, you can choose which 
+// applications to install. 
 
 === Prepare your Sumo Logic account 
 
@@ -30,7 +30,5 @@ Deploy Sumo Logic Security Integrations. Each deployment takes about {deployment
 |===
 
 . Check the Region displayed in the upper-right corner of the navigation bar, and change it as necessary. This is where the infrastructure for the Sumo Logic app resources is built. 
-. On the *Create stack* page, keep the default setting for the template URL, then choose 
-. On the *Specify stack details* page, change the stack name if needed. Review the parameters for the template. Provide values for the parameters that require input. For all other parameters, review the default settings and customize them as necessary. 
-
-When you finish reviewing and customizing the parameters, choose *Next*.
+. On the *Create stack* page, keep the default setting for the template URL, then choose *Next*.
+. On the *Specify stack details* page, change the stack name if needed. Review the parameters for the template. Provide values for the parameters that require input. For all other parameters, review the default settings and customize them as necessary. When you finish reviewing and customizing the parameters, choose *Next*.
