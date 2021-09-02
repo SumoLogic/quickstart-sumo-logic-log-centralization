@@ -10,7 +10,7 @@ Sumo Logic has apps for each AWS security service (for example, AWS CloudTrail) 
 
 Sumo Logic customers can track user activity, monitor threats, and understand how their security posture compares with global benchmarks. This deployment uses Virtual Private Cloud Flow Logs (VPC Flow Logs) and a web application firewall (AWS WAF) to monitor traffic patterns. Sumo Logic also uses apps to audit and maintain compliance of the Payment Card Industry (PCI) Data Security Standard (DSS) and Center for Internet Security (CIS).
 
-The included template automatically creates resources that use various AWS services to collect logs, which are sent to your preregistered Sumo Logic account. 
+The included template automatically creates resources that use various AWS services to collect logs, which are sent to your preregistered Sumo Logic account.
 
 ### Pricing
 You are responsible for the cost of the AWS services used while running this Quick Start reference deployment. There is no additional cost for using the Quick Start. For Sumo Logic pricing information, see the [Sumo Logic website](https://www.sumologic.com/pricing/).
@@ -22,7 +22,7 @@ This Quick Start deployment builds a new AWS environment consisting of the infra
 
 ### Architecture
 Deploying this Quick Start with **default parameters** builds the following environment in a specific account and Region in the AWS Cloud.
-![quickstart-sumo-logic-security-integrations](https://d0.awsstatic.com/partner-network/QuickStart/datasheets/sumo-logic-security-integration-architecture-on-aws.png)
+![quickstart-sumo-logic-security-integrations](./docs/images/architecture.png)
 
 For architectural details, best practices, step-by-step instructions, and customization options, see the [deployment guide](https://fwd.aws/mpxj9).
 
