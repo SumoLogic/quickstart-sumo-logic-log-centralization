@@ -1,6 +1,6 @@
 ---
 Global:
-  TemplatePath: "../master.template.yaml"
+  TemplatePath: "../templates/master.template.yaml"
   TestProjectName: MasterTemplate
   ParallelTestsRun: 4
 Tests:
