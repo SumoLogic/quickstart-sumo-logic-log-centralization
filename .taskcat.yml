@@ -6,22 +6,22 @@ project:
   name: quickstart-sumo-logic-log-centralization
   regions:
   - us-east-2
-  
+
 tests:
   default:
-    template: ./apps/sumo-aws-apps/AutoEnableS3Logging/auto_enable_s3_logging.template.yaml
+    template: ./templates/master.template.yaml
     regions:
     - us-east-2
     parameters:
-      EnableLogging: "Firewall"
-      ExistingResource: "Yes"
-      BucketPrefix: "/"
-      BucketName: "firewall-mtt-test-3"
       QSS3KeyPrefix: "quickstart-sumo-logic-log-centralization/"
       QSS3BucketName: "$[taskcat_autobucket]"
       QSS3BucketRegion: "$[taskcat_current_region]"
-      Section1aSumoLogicDeployment: "us2"
-      Section1bSumoLogicAccessID: ""
-      Section1cSumoLogicAccessKey: ""
-      Section1dSumoLogicOrganizationId: ""
       Section2CloudTrailCreateBucket: "Yes"
+      Section4bVpcCreateBucket: "Yes"
+      Section6bS3AuditCreateBucket: "Yes"
+      Section7cSecurityHubCreateBucket: "Yes"
+      Section8cWafCreateBucket: "Yes"
+      Section11NFWCreateS3Bucket: "Yes"
+      Section9cConfigCreateSNSTopic: "Yes"
+      Section11NFWCreateS3Source: "No"
+      Section11InstallNFWApp: "No"

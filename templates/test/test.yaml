@@ -1,0 +1,238 @@
+---
+Global:
+  TemplatePath: "../master.template.yaml"
+  TestProjectName: MasterTemplate
+  ParallelTestsRun: 4
+Tests:
+    # with all new
+    # with existing bucket
+    # with existing firewall
+    # only source
+    # only app
+    # multiple template same time
+    # tests in /Users/hpal/git/quickstart-sumo-logic-log-centralization/scripts/TestCfTemplates.sh
+  - TestName: AllResourcesWithoutAutoEnable
+    Regions:
+      - ap-south-1
+    Skip: false
+    SkipDelete: false
+    Parameters:
+      Values:
+        Section1aSumoLogicDeployment: '${ENTERPRISE_DEPLOYMENT}'
+        Section1bSumoLogicAccessID: '${ENTERPRISE_ACCESS_ID}'
+        Section1cSumoLogicAccessKey: '${ENTERPRISE_ACCESS_KEY}'
+        Section1dSumoLogicOrganizationId: '${US1_ENTERPRISE_ORG_ID}'
+        QSS3BucketName: '${QSS3BucketName}'
+        Section1eSumoLogicResourceRemoveOnDeleteStack: 'false'
+        QSS3BucketRegion: '${QSS3BucketRegion}'
+        # Cloudtrail
+        Section2InstallCloudTrailApp: 'Yes'
+        Section2InstallPCICloudTrailApp: 'Yes'
+        Section2InstallCISFoundationApp: 'Yes'
+        Section2InstallCloudTrailMonitoringAnalyticsApp: 'Yes'
+        Section2InstallCloudTrailSecOpsApp: 'Yes'
+        Section2CloudTrailCreateBucket: 'Yes'
+        Section2CloudTrailCreateLogSource: 'Yes'
+        # Section2CloudTrailLogsBucketName
+        # Guardduty
+        Section3aInstallGuardDutyApps: 'Both'
+        Section3bGuardDutyCreateHttpLogsSource: 'Yes'
+        # VPC
+        Section4aInstallVpcApps: 'All'
+        Section4bVpcCreateBucket: 'Yes'
+        # Section4cVpcLogsBucketName
+        Section4dVpcCreateS3Source: 'Yes'
+        # Threat Intel for Config
+        Section5aInstallThreatIntelApp: 'Yes'
+        # Config App
+        Section9aInstallConfigApp: 'Yes'
+        Section9bConfigEnableConfig: 'Yes'
+        Section9cConfigCreateSNSTopic: 'Yes'
+        # Section9dConfigExistingTopicName: 'Yes' require if create sns is no
+        Section9eConfigCreateHttpLogsSource: 'Yes'
+        # S3 Audit
+        Section6aInstallS3AuditApp: 'Yes'
+        Section6bS3AuditCreateBucket: 'Yes'
+        # Section6cS3AuditLogsBucketName
+        # Problem in VPC S3 source configuration
+        Section6dS3AuditCreateS3Source: 'Yes'
+        #security hub
+        Section7aInstallSecurityHubAuditApp: 'Yes'
+        Section7bEnableSecurityHub: 'Yes'
+        Section7cSecurityHubCreateBucket: 'Yes'
+        # Section7dSecurityHubLogsBucketName
+        Section7eSecurityHubCreateS3Source: 'Yes'
+        # WAF
+        Section8aInstallWafApp: 'Yes'
+        Section8bCreateDeliveryStream: 'Yes'
+        Section8cWafCreateBucket: 'Yes'
+        # Section8dWafLogsBucketName
+        Section8eWafCreateS3Source: 'Yes'
+        # AutoEnable
+        Section91aEnableAutoLogging: 'Skip'
+        Section91bEnableLoggingForExistingResources: 'No'
+        # Section91cS3LoggingBucketPrefix
+        # Section91dS3LoggingFilterExpression
+        # Section91eVPCLoggingBucketPrefix
+        # Section91fVPCLoggingFilterExpression
+        # Section91FireWallLoggingFilterExpression
+        # Network Firewall
+        Section11InstallNFWApp: 'Yes'
+        Section11CreateNewFW: 'Yes'
+        Section11VPCID: '${EXISTING_VPC_ID}'
+        Section11SubnetID: '${EXISTING_SUBNET_ID}'
+        Section11CreateFirewallPolicy: 'Yes'
+        # Section11NameFirewallPolicy skip if yes
+        Section11StatefulRule: 'pass tls any any -> any any (tls.sni; content:"aws.amazon.com"; startswith; nocase; endswith; msg:"Permit HTTPS access to aws.amazon.com"; sid:1000002; rev:1;)'
+        Section11NFWCreateS3Bucket: 'Yes'
+        # Section11NFWLogsS3BucketName
+        # Section11NFWLogsNFWBucketPrefix
+        Section11NFWCreateS3Source: 'Yes'
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - CreateCommonResources.SumoCloudTrail,
+            - CreateCommonResources.SumoCloudTrailExportPolicy,
+            - CreateCommonResources.SumoHostedCollector,
+            - CreateCommonResources.SumoLogicHelperRole,
+            - CreateCommonResources.SumoLogicLambdaHelper,
+            - CreateCommonResources.SumoSNSTopic,
+            - CreateCommonResources.SumoSNSpolicy,
+            - CreateCommonResources.SumoSourceRole,
+            - CreateCommonResources.TargetS3Bucket,
+            - WaitHandle,
+            - sumoCloudTrailAppsStack,
+            - sumoCloudTrailAppsStack.SumoCloudTrailSource,
+            - sumoCloudTrailAppsStack.SumoSNSSubscription,
+            - sumoCloudTrailAppsStack.sumMonitoringAnalyticsApp,
+            - sumoCloudTrailAppsStack.sumSecOpsApp,
+            - sumoCloudTrailAppsStack.sumoCISFoundationsApp,
+            - sumoCloudTrailAppsStack.sumoCloudTrailApp,
+            - sumoCloudTrailAppsStack.sumoPCICloudTrailApp,
+            - sumoConfigAppsStack,
+            - sumoConfigAppsStack.ConfigRecorder,
+            - sumoConfigAppsStack.ConfigRole,
+            - sumoConfigAppsStack.ConfigTopicPolicy,
+            - sumoConfigAppsStack.DeliveryChannelWhenConfigIsTurnedOn,
+            - sumoConfigAppsStack.EnableConfigWaitCondition,
+            - sumoConfigAppsStack.EnableConfigWaitHandle,
+            - sumoConfigAppsStack.SumoHTTPSource,
+            - sumoConfigAppsStack.SumoHostedCollector,
+            - sumoConfigAppsStack.SumoSNSSubscription,
+            - sumoConfigAppsStack.SumoSNSTopic,
+            - sumoConfigAppsStack.WaitHandle,
+            - sumoConfigAppsStack.sumoApp,
+            - sumoConfigStackWaitCondition,
+            - sumoConfigStackWaitHandle,
+            - sumoFireWallAppsStack,
+            - sumoFireWallAppsStack.FirewallLoggingConfiguration,
+            - sumoFireWallAppsStack.QuickStartNetworkFirewall,
+            - sumoFireWallAppsStack.QuickStartStatefulRuleGroup,
+            - sumoFireWallAppsStack.QuickStartStatelessRuleGroup,
+            - sumoFireWallAppsStack.QuickstartFirewallPolicy,
+            - sumoFireWallAppsStack.SumoHostedCollector,
+            - sumoFireWallAppsStack.SumoNFWLogApp,
+            - sumoFireWallAppsStack.SumoS3Source,
+            - sumoFireWallAppsStack.SumoSNSSubscription,
+            - sumoFireWallMacroStack,
+            - sumoFireWallMacroStack.MacroNFWHelperFunction,
+            - sumoFireWallMacroStack.MacroNFWHelperRole,
+            - sumoFireWallMacroStack.NFWMacro,
+            - sumoFirewallStackWaitCondition,
+            - sumoFirewallStackWaitHandle,
+            - sumoGuardDutyAppsStack,
+            - sumoGuardDutyAppsStack.CloudWatchEventFunction,
+            - sumoGuardDutyAppsStack.CloudWatchEventFunctionCloudWatchEventTrigger,
+            - sumoGuardDutyAppsStack.CloudWatchEventFunctionCloudWatchEventTriggerPermission,
+            - sumoGuardDutyAppsStack.CloudWatchEventFunctionRole,
+            - sumoGuardDutyAppsStack.SumoHTTPSource,
+            - sumoGuardDutyAppsStack.SumoHostedCollector,
+            - sumoGuardDutyAppsStack.sumoGlobalGuardDutyApp,
+            - sumoGuardDutyAppsStack.sumoGuardDutyApp,
+            - sumoGuardDutyStackWaitCondition,
+            - sumoGuardDutyStackWaitHandle,
+            - sumoS3AuditAppsStack,
+            - sumoS3AuditAppsStack.SumoAmazonS3AuditApp,
+            - sumoS3AuditAppsStack.SumoHostedCollector,
+            - sumoS3AuditAppsStack.SumoS3AuditSource,
+            - sumoS3AuditAppsStack.SumoSNSSubscription,
+            - sumoS3AuditStackWaitCondition,
+            - sumoS3AuditStackWaitHandle,
+            - sumoSecurityHubAppsStack,
+            - sumoSecurityHubAppsStack.Connections,
+            - sumoSecurityHubAppsStack.SecurityHubCollector,
+            - sumoSecurityHubAppsStack.SecurityHubCollector.SecurityHubCollectorFunction,
+            - sumoSecurityHubAppsStack.SecurityHubCollector.SecurityHubCollectorFunctionCloudWatchEventTrigger,
+            - sumoSecurityHubAppsStack.SecurityHubCollector.SecurityHubCollectorFunctionCloudWatchEventTriggerPermission,
+            - sumoSecurityHubAppsStack.SecurityHubCollector.SecurityHubCollectorFunctionRole,
+            - sumoSecurityHubAppsStack.SecurityHubConfiguration,
+            - sumoSecurityHubAppsStack.SecurityHubForwarder,
+            - sumoSecurityHubAppsStack.SecurityHubForwarder.SecurityHubForwarderApiGateway,
+            - sumoSecurityHubAppsStack.SecurityHubForwarder.SecurityHubForwarderApiGatewayDeploymentbce151db25,
+            - sumoSecurityHubAppsStack.SecurityHubForwarder.SecurityHubForwarderApiGatewayprodStage,
+            - sumoSecurityHubAppsStack.SecurityHubForwarder.SecurityHubForwarderFunction,
+            - sumoSecurityHubAppsStack.SecurityHubForwarder.SecurityHubForwarderFunctionApi1Permissionprod,
+            - sumoSecurityHubAppsStack.SecurityHubForwarder.SecurityHubForwarderFunctionRole,
+            - sumoSecurityHubAppsStack.SecurityHubUser,
+            - sumoSecurityHubAppsStack.SecurityHubUserKey,
+            - sumoSecurityHubAppsStack.SumoApp,
+            - sumoSecurityHubAppsStack.SumoHostedCollector,
+            - sumoSecurityHubAppsStack.SumoS3Source,
+            - sumoSecurityHubAppsStack.SumoSNSSubscription,
+            - sumoSecurityHubStackWaitCondition,
+            - sumoSecurityHubStackWaitHandle,
+            - sumoThreatIntelAppsStack,
+            - sumoThreatIntelAppsStack.SumoApp,
+            - sumoThreatIntelStackWaitCondition,
+            - sumoThreatIntelStackWaitHandle,
+            - sumoVpcAppsStack,
+            - sumoVpcAppsStack.SumoHostedCollector,
+            - sumoVpcAppsStack.SumoPCIVPCFlowLogApp,
+            - sumoVpcAppsStack.SumoS3Source,
+            - sumoVpcAppsStack.SumoSNSSubscription,
+            - sumoVpcAppsStack.SumoVPCFlowCSMAApp,
+            - sumoVpcAppsStack.SumoVPCFlowLogApp,
+            - sumoVpcStackWaitCondition,
+            - sumoVpcStackWaitHandle,
+            - sumoWafAppsStack,
+            - sumoWafAppsStack.CreateDeliveryStreamWaitCondition,
+            - sumoWafAppsStack.KinesisFirehoseDeliveryStream,
+            - sumoWafAppsStack.KinesisS3Role,
+            - sumoWafAppsStack.SumoApp,
+            - sumoWafAppsStack.SumoHostedCollector,
+            - sumoWafAppsStack.SumoS3Source,
+            - sumoWafAppsStack.SumoSNSSubscription,
+            - sumoWafAppsStack.WaitHandle,
+            - sumoWafStackWaitCondition,
+            - sumoWafStackWaitHandle
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - CreateCommonResources.BucketName,
+            - CreateCommonResources.SNSTopicArn,
+            - CreateCommonResources.SumoCollectorID,
+            - CreateCommonResources.StackName,
+            - CreateCommonResources.SumoSourceRoleARN,
+            - sumoCloudTrailAppsStack.SumoEndpoint,
+            - sumoCloudTrailAppsStack.PciCloudTrailAppFolder,
+            - sumoCloudTrailAppsStack.CloudTrailAppFolder,
+            - sumoFireWallAppsStack.SumoEndpoint,
+            - sumoGuardDutyAppsStack.GlobalGuardDutyAppFolder,
+            - sumoGuardDutyAppsStack.CloudWatchEventFunction,
+            - sumoGuardDutyAppsStack.GuarddutyAppFolder,
+            - sumoS3AuditAppsStack.SumoEndpoint,
+            - sumoSecurityHubAppsStack.SecurityHubUserKey,
+            - sumoSecurityHubAppsStack.SecurityHubArn,
+            - sumoSecurityHubAppsStack.SecretKeyForSecurityHubUser,
+            - sumoSecurityHubAppsStack.SecurityHubCollector.SecurityHubCollectorFunction,
+            - sumoSecurityHubAppsStack.SecurityHubForwarder.SecurityHubForwarderApiUrl,
+            - sumoSecurityHubAppsStack.SecurityHubForwarder.SecurityHubForwarderFunction,
+            - sumoVpcAppsStack.SumoEndpoint
+      - AssertType: ParameterCheck
+        Assert:
+          CreateCommonResources:
+            CreateBucket: "Yes"
+            CreateCollector: "Yes"
+            CreateTrail: "Yes"
+
