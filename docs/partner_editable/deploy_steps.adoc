@@ -18,17 +18,16 @@ the relevant Sumo Logic source category for your data.
 
 === Launch the Quick Start 
 
-Deploy Sumo Logic Security Integrations. Each deployment takes about {deployment_time} to complete.
+Each deployment takes about {deployment_time} to complete.
 
-. Sign in to your AWS account at https://aws.amazon.com[^] with an IAM user role that has the necessary permissions. For details, see link:#_planning_the_deployment[Planning the deployment], earlier in this guide. 
+. Sign in to your AWS account at https://aws.amazon.com[^] with an IAM user role that has the necessary permissions. (For details, see link:#_planning_the_deployment[Planning the deployment], earlier in this guide.) Then choose the following option to deploy {partner-product-name}. (For details, see link:#_deployment_options[Deployment options] earlier in this guide.)
 +
-
 [cols="3,1"]
 |===
-^|https://fwd.aws/Nm69g[Deploy Sumo Logic Security Integrations^]
+^|https://fwd.aws/Nm69g[Deploy {partner-product-name}^]
 ^|https://fwd.aws/MG4nr[View template^]
 |===
 
-. Check the Region displayed in the upper-right corner of the navigation bar, and change it as necessary. This is where the infrastructure for the Sumo Logic app resources is built. 
+. Check the Region displayed in the upper-right corner of the navigation bar, and change it as necessary. This Region—{default_deployment_region} by default—is where the infrastructure for the Sumo Logic app resources is built. For more information, see link:#_supported_aws_regions[Supported AWS Regions] earlier in this guide.
 . On the *Create stack* page, keep the default setting for the template URL, then choose *Next*.
 . On the *Specify stack details* page, change the stack name if needed. Review the parameters for the template. Provide values for the parameters that require input. For all other parameters, review the default settings and customize them as necessary. When you finish reviewing and customizing the parameters, choose *Next*.

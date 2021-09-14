@@ -25,9 +25,9 @@ As shown in <<architecture1>>, the Quick Start sets up the following:
 
 * AWS CloudTrail to track user activity and API usage. 
 
-* Multiple CloudFormation stacks are deployed in your environment to set up forwarding of data to Sumo Logic. Each stack consists of more than one AWS resource, including Amazon S3 buckets, AWS Lambda functions, and Amazon Kinesis Data Firehose delivery streams. 
+* Multiple AWS CloudFormation stacks to set up forwarding of data to Sumo Logic. Each stack consists of more than one AWS resource, including Amazon S3 buckets, AWS Lambda functions, and Amazon Kinesis Data Firehose delivery streams. 
 
-* AWS Lambda functions to create a collector and multiple sources, and to install apps on your Sumo Logic account. 
+* AWS Lambda functions to create a collector and multiple sources and to install apps on your Sumo Logic account. 
 
 * Amazon S3 buckets capture logs from the various AWS services. 
 
@@ -35,4 +35,4 @@ As shown in <<architecture1>>, the Quick Start sets up the following:
 
 * Amazon Kinesis Data Firehose delivery streams to transfer logs from AWS WAF to S3 buckets. 
 
-* S3 Event Notifications, which triggers an Amazon Simple Notification Service 
+* S3 Event Notifications, which triggers an Amazon Simple Notification Service (Amazon SNS) topic when a new object appears.
