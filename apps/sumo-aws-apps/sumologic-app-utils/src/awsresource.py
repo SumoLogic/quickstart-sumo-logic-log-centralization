@@ -325,7 +325,6 @@ def resource_tagging(event, context):
 
 def enable_s3_logs(event, context):
     print("AWS S3 ENABLE ALB :- Starting s3 logs enable")
-    print(event)
     # Get Account Id and Alias from env.
     bucket_name = os.environ.get("BucketName")
     bucket_prefix = os.environ.get("BucketPrefix")
@@ -1172,16 +1171,6 @@ class NetworkFireWallResource(AWSResourcesAbstract):
                     )
                 except Exception as e:
                     continue
-                # if "*Access Denied for LogDestination*" in str(response):
-                #     self.add_bucket_policy(s3_bucket, s3_prefix)
-                #     time.sleep(10)
-                #     self.client.create_flow_logs(
-                #         ResourceIds=record,
-                #         ResourceType='VPC',
-                #         TrafficType='ALL',
-                #         LogDestinationType='s3',
-                #         LogDestination='arn:aws:s3:::' + s3_bucket + '/' + s3_prefix
-                #     )
 
     def add_bucket_policy(self, bucket_name, prefix):
         print("Adding policy to the bucket " + bucket_name)
@@ -1293,18 +1282,3 @@ class AWSResourcesProvider(object):
             raise Exception("%s provider not found" % provider_name)
 
 
-if __name__ == '__main__':
-    # params = {"AWSResource": "s3"}
-    # # value = ConfigDeliveryChannel()
-    # # value.create("Six_Hours", "config-bucket-668508221233", "config", "")
-
-    # value = EnableS3LogsResources(params)
-    # # value.create("us-east-2", "s3", "sadasdasdasd-us-east-2", "s3logs/", "", "", "")
-    # # value.delete("us-east-2", "s3", "sadasdasdasd-us-east-2", "s3logs", "", True, "")
-    # event = {'version': '0', 'id': 'e192c856-a665-c93b-92fb-3b32f0ddd734', 'detail-type': 'AWS API Call via CloudTrail', 'source': 'aws.ec2', 'account': '550976916382', 'time': '2021-08-13T09:34:44Z', 'region': 'us-east-2', 'resources': [], 'detail': {'eventVersion': '1.08', 'userIdentity': {'type': 'IAMUser', 'principalId': 'AIDAYASGIROPDCP6U6XXD', 'arn': 'arn:aws:iam::550976916382:user/phu.nguyen@mtt-software.com', 'accountId': '550976916382', 'accessKeyId': 'ASIAYASGIROPAYYMFPOC', 'userName': 'phu.nguyen@mtt-software.com', 'sessionContext': {'sessionIssuer': {}, 'webIdFederationData': {}, 'attributes': {'creationDate': '2021-08-13T08:48:47Z', 'mfaAuthenticated': 'false'}}}, 'eventTime': '2021-08-13T09:34:44Z', 'eventSource': 'ec2.amazonaws.com', 'eventName': 'CreateVpc', 'awsRegion': 'us-east-2', 'sourceIPAddress': '1.52.127.185', 'userAgent': 'console.ec2.amazonaws.com', 'requestParameters': {'cidrBlock': '10.0.2.0/24', 'instanceTenancy': 'default', 'amazonProvidedIpv6CidrBlock': False, 'tagSpecificationSet': {'items': [{'resourceType': 'vpc', 'tags': [{'key': 'Name', 'value': 'my-vpc'}]}]}}, 'responseElements': {'requestId': '1840733e-5791-437d-b0a0-f3c20806c0ad', 'vpc': {'vpcId': 'vpc-0646e8f0a39fe1aff', 'state': 'pending', 'ownerId': '550976916382', 'cidrBlock': '10.0.2.0/24', 'cidrBlockAssociationSet': {'items': [{'cidrBlock': '10.0.2.0/24', 'associationId': 'vpc-cidr-assoc-0d303c604a30d60c8', 'cidrBlockState': {'state': 'associated'}}]}, 'ipv6CidrBlockAssociationSet': {}, 'dhcpOptionsId': 'dopt-ee337585', 'instanceTenancy': 'default', 'tagSet': {'items': [{'key': 'Name', 'value': 'my-vpc'}]}, 'isDefault': False}}, 'requestID': '1840733e-5791-437d-b0a0-f3c20806c0ad', 'eventID': '7b323d77-535c-486e-992e-ecb5e2df18ea', 'readOnly': False, 'eventType': 'AwsApiCall', 'managementEvent': True, 'recipientAccountId': '550976916382', 'eventCategory': 'Management'}}
-    # enable_s3_logs(event=event,context=None)
-    fw = NetworkFireWallResource("network-firewall",'us-east-2','550976916382')
-    rs = fw.fetch_resources()
-    arns = fw.get_arn_list(rs)
-    #fw.enable_s3_logs(arns,'vpc-mtt-2','VPC-LOGs',None)
-    fw.disable_s3_logs(arns,'vpc-mtt-2','VPC-LOGs')

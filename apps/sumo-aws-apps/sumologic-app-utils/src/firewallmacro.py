@@ -31,7 +31,6 @@ def process_template(event):
         
 #function main to handle template event from cloudformation
 def handle(event,context):
-    print(event)
     processed_template=process_template(event)
     print(processed_template)
     r = {}

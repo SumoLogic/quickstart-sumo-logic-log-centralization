@@ -456,14 +456,18 @@ Resources:
               - Effect: Allow
                 Action:
                   - logs:CreateLogGroup
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+              - Effect: Allow
+                Action:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: '*'
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}-SumoLogicHelperFunction:*"
 
   SumoLogicHelperFunction:
     Type: 'AWS::Serverless::Function'
     Condition: do_not_use_parent_stack
     Properties:
+      FunctionName: !Sub "${AWS::StackName}-SumoLogicHelperFunction"
       Handler: main.handler
       Runtime: python3.7
       CodeUri:

@@ -39,13 +39,17 @@ Resources:
               - Effect: Allow
                 Action:
                   - logs:CreateLogGroup
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+              - Effect: Allow
+                Action:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: '*'
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}-MacroNFWHelperFunction:*"
 
   MacroNFWHelperFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
+      FunctionName: !Sub "${AWS::StackName}-MacroNFWHelperFunction"
       Handler: firewallmacro.handle
       Runtime: python3.7
       CodeUri:
