@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create an IAM role for deleting the GuardDuty detector
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: Role Attributes
+        Parameters:
+          - DeleteDetectorRoleName
+          - OrgPrimaryAccountId
+
+    ParameterLabels:
+      DeleteDetectorRoleName:
+        default: Delete Detector IAM Role Name
+      OrgPrimaryAccountId:
+        default: Organization Primary Account ID
+
+Parameters:
+  DeleteDetectorRoleName:
+    AllowedPattern: '^[\w+=,.@-]{1,64}$'
+    ConstraintDescription: Max 64 alphanumeric characters. Also special characters supported [+, =, ., @, -]
+    Description: Delete Detector IAM Role Name
+    Type: String
+
+  OrgPrimaryAccountId:
+    AllowedPattern: '^\d{12}$'
+    ConstraintDescription: Must be 12 digits
+    Description: Organization Primary Account ID
+    Type: String
+
+Resources:
+  rDeleteDetectorRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: Actions require * in resource
+          - id: W28
+            reason: Explicit role name provided
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: "Allow"
+            Principal:
+              AWS:
+                - !Sub arn:${AWS::Partition}:iam::${OrgPrimaryAccountId}:root
+        Version: "2012-10-17"
+
+      Path: "/"
+      Policies:
+        - PolicyName: "guardduty-org-policy-guardduty-delete"
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action: guardduty:ListDetectors
+                Effect: Allow
+                Resource: "*"
+                Sid: GuardDutyNoResource
+
+              - Action: guardduty:DeleteDetector
+                Effect: Allow
+                Resource: !Sub arn:${AWS::Partition}:guardduty:*:${AWS::AccountId}:detector/*
+                Sid: GuardDutyWithResource
+      RoleName: !Ref DeleteDetectorRoleName

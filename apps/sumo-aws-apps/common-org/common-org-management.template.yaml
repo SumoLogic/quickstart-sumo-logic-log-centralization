@@ -1,0 +1,354 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: "Template to setup the common AWS and Sumo Logic resources for AWS Quick Start Solution."
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: "Sumo Logic Access Configuration (Required)"
+        Parameters:
+          - SumoDeployment
+          - SumoAccessID
+          - SumoAccessKey
+          - SumoOrganizationId
+          - RemoveSumoResourcesOnDeleteStack
+      - Label:
+          default: "Role Details configuration"
+        Parameters:
+          - AdministrationRoleName
+          - ExecutionRoleRuleName
+          - OrganizationUnitID
+      - Label:
+          default: "AWS Quick Start configuration"
+        Parameters:
+          - QSS3BucketName
+          - QSS3BucketRegion
+          - QSS3KeyPrefix
+
+  ParameterLabels:
+      OrganizationUnitID:
+        default: "Organization unit (OU) ID"  
+      SumoDeployment:
+        default: "Sumo Logic Deployment Name"
+      SumoAccessID:
+        default: "Sumo Logic Access ID"
+      SumoAccessKey:
+        default: "Sumo Logic Access Key"
+      SumoOrganizationId:
+        default: "Sumo Logic Organization Id"
+      RemoveSumoResourcesOnDeleteStack:
+        default: "Delete Sumo Logic Resources when stack is deleted"
+
+      OrganizationId:
+        default: "AWS Organization ID"
+      AdministrationRoleName:
+        default: "Administration Role Name"
+      ExecutionRoleRuleName:
+        default: "Execution Role Name"       
+      QSS3BucketName:
+        default: "Quick Start S3 bucket name"
+      QSS3BucketRegion:
+        default: "Quick Start S3 bucket region"
+      QSS3KeyPrefix:
+        default: "Quick Start S3 key prefix"
+
+Parameters:
+  SumoDeployment:
+    Type: String
+    AllowedValues:
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+      - in
+      - fed
+    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1."
+  SumoAccessID:
+    Type: String
+    Description: "The Sumo Logic Access ID. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access ID can not be empty."
+  SumoAccessKey:
+    Type: String
+    Description: "The Sumo Logic Access Key. Used for Sumo Logic API calls."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Access Key can not be empty."
+    NoEcho: true
+  SumoOrganizationId:
+    Description: "The Account Overview page displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources."
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
+  RemoveSumoResourcesOnDeleteStack:
+    AllowedValues:
+      - true
+      - false
+    Default: true
+    Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to true. Default is true.
+                  Deletes the resources created by the stack. Deletion of updated resources will be skipped."
+    Type: String
+
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: "aws-quickstart"
+    Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Type: "String"
+  QSS3BucketRegion:
+    Default: "us-east-1"
+    Description: "The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value."
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: "quickstart-sumo-logic-log-centralization/"
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: "String"
+
+  OrganizationUnitID:
+    Description: >
+      Organizational unit (OU) ID - A string that begins with "ou-" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second "-" dash and from 8 to 32 additional lowercase letters or digits  
+    AllowedPattern: '^ou-[0-9a-z]{4,32}-[a-z0-9]{8,32}$'
+    MaxLength: 100
+    MinLength: 16
+    Type: String
+  AdministrationRoleName:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    Description: AWS Administration Role name to enable use of AWS CloudFormation StackSets.
+    Default: "AWSCloudFormationStackSetAdministrationRole"
+    Type: String
+
+  ExecutionRoleRuleName:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    Description: AWS Execution Role name of the administrator account (the account in which StackSets will be created).
+    Type: String
+    Default: AWSCloudFormationStackSetExecutionRole
+
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+
+Resources:
+#Role for management account
+  rAdministrationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref AdministrationRoleName 
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: !Sub 'AssumeRole-${ExecutionRoleRuleName}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sts:AssumeRole
+                Resource:
+                  - !Sub 'arn:*:iam::*:role/${ExecutionRoleRuleName}'
+  rExecutionRole:
+    DependsOn:
+      - "rAdministrationRole"
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref ExecutionRoleRuleName
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Ref "AWS::AccountId"
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess
+
+  rSumoLogicHelperRole:
+    DependsOn:
+      - "rExecutionRole"  
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+
+        - PolicyName: !Sub 'management-org-policy-logs-${AWS::StackName}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action: logs:CreateLogGroup
+                Effect: Allow
+                Resource: !Sub arn:*:logs:${AWS::Region}:${AWS::AccountId}:log-group:*
+                Sid: CreateLogGroup
+              - Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Effect: Allow
+                Resource: !Sub arn:*:logs:${AWS::Region}:${AWS::AccountId}:log-group:*:log-stream:*
+                Sid: CreateLogStreamAndEvents
+
+        - PolicyName: !Sub 'management-org-policy-organizations-${AWS::StackName}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - organizations:DescribeOrganization
+                  - organizations:ListAWSServiceAccessForOrganization
+                  - organizations:ListAccounts
+                  - organizations:ListDelegatedAdministrators
+                Effect: Allow
+                Resource: "*"
+                Sid: OrganizationsReadAccess
+
+              - Action:
+                  - organizations:DeregisterDelegatedAdministrator
+                  - organizations:DisableAWSServiceAccess
+                  - organizations:EnableAWSServiceAccess
+                  - organizations:RegisterDelegatedAdministrator
+                Condition:
+                  StringLikeIfExists:
+                    organizations:ServicePrincipal: guardduty.amazonaws.com
+                Effect: Allow
+                Resource: "*"
+                Sid: RegisterDeregisterDelegatedAdministrator
+
+        - PolicyName: !Sub 'management-org-policy-guardduty-${AWS::StackName}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - guardduty:DisableOrganizationAdminAccount
+                  - guardduty:EnableOrganizationAdminAccount
+                  - guardduty:ListDetectors
+                  - guardduty:ListOrganizationAdminAccounts
+                Effect: Allow
+                Resource: "*"
+                Sid: GuardDutyNoResource
+
+              - Action:
+                  - guardduty:DeleteDetector
+                  - guardduty:ListMembers
+                Effect: Allow
+                Resource:
+                  - !Sub arn:*:guardduty:*:${AWS::AccountId}:detector/*
+                  - !Sub arn:*:guardduty:*:${AWS::AccountId}:/detector/*
+                Sid: GuardDutyWithResource
+        - PolicyName: !Sub 'management-org-policy-iam-${AWS::StackName}'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+            - Action: iam:GetRole
+              Effect: Allow
+              Resource: !Sub arn:*:iam::${AWS::AccountId}:role/*
+              Sid: AllowReadIamActions
+
+            - Action:
+                - iam:CreateServiceLinkedRole
+                - iam:DeleteServiceLinkedRole
+              Effect: Allow
+              Condition:
+                StringLike:
+                  iam:AWSServiceName: guardduty.amazonaws.com
+              Resource: !Sub arn:*:iam::${AWS::AccountId}:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty
+              Sid: AllowCreateDeleteServiceLinkedRole
+
+            - Action:
+                - iam:DeleteRolePolicy
+                - iam:PutRolePolicy
+              Effect: Allow
+              Resource: !Sub arn:*:iam::${AWS::AccountId}:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty
+              Sid: AllowPolicyActions
+
+            - Action: sts:AssumeRole
+              Effect: Allow
+              Resource: "*"
+              Sid: AssumeRole             
+              
+  rSumoLogicLambdaHelper:
+    DependsOn:
+      - "rSumoLogicHelperRole"   
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: main.handler
+      Runtime: python3.8
+      CodeUri:
+        Bucket: !Sub
+                - "${S3Bucket}"
+                - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
+      MemorySize: 512
+      Timeout: 900
+      ReservedConcurrentExecutions: 1
+      Role:
+        Fn::GetAtt:
+          - rSumoLogicHelperRole
+          - Arn
+
+  OrgTrustAllStackset:
+    DependsOn:
+      - "rAdministrationRole"  
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: !Sub 'CommonOrgTrustAllAccount-${AWS::StackName}'
+      AutoDeployment: 
+        Enabled: true
+        RetainStacksOnAccountRemoval: true
+      Parameters: 
+        - ParameterKey: ManagementAccountID
+          ParameterValue: !Ref "AWS::AccountId"
+        - ParameterKey: ExecutionRoleRuleName
+          ParameterValue:  !Ref ExecutionRoleRuleName
+      PermissionModel: SERVICE_MANAGED
+      Capabilities:
+        - 'CAPABILITY_NAMED_IAM'
+        - 'CAPABILITY_IAM'
+        - 'CAPABILITY_AUTO_EXPAND'
+      StackInstancesGroup:
+        - Regions:
+            - !Ref AWS::Region
+          DeploymentTargets:
+              OrganizationalUnitIds: 
+                - !Ref OrganizationUnitID
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/common-org/common-org-trust-all.template.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+
+Outputs:
+  AdministrationRoleArn:
+    Description: ARN of the create Administration Role.
+    Value: !GetAtt rAdministrationRole.Arn
+
+  ExecutionRoleArn:
+    Description: ARN of the create Execution Role.
+    Value: !GetAtt rExecutionRole.Arn
+
+  SumoLogicLambdaHelperARN:
+    Description: "Sumo Logic Lambda Helper ARN"
+    Value: !GetAtt rSumoLogicLambdaHelper.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-SumoLogicHelperFunctionARN"
+
+  SumoLogicHelperRoleARN:
+    Description: "Sumo Logic Helper Role ARN"
+    Value: !GetAtt rSumoLogicHelperRole.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-SumoLogicHelperRoleARN"
+
