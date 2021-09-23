@@ -13,11 +13,20 @@ Metadata:
           - SumoOrganizationId
           - RemoveSumoResourcesOnDeleteStack
       - Label:
+          default: "AWS Access Configuration (Required)"
+        Parameters:
+          - SecurityToolingAccountId
+          - LoggingAccountId
+          - OrganizationUnitID
+      - Label:
           default: "Role Details configuration"
         Parameters:
           - AdministrationRoleName
           - ExecutionRoleRuleName
-          - OrganizationUnitID
+      - Label:
+          default: Delivery S3 Attributes
+        Parameters:
+          - DeliveryBucketPrefix          
       - Label:
           default: "AWS Quick Start configuration"
         Parameters:
@@ -26,6 +35,10 @@ Metadata:
           - QSS3KeyPrefix
 
   ParameterLabels:
+      LoggingAccountId:
+        default: Security Log Archive Account ID
+      SecurityToolingAccountId:
+        default: Security Tooling Account ID      
       OrganizationUnitID:
         default: "Organization unit (OU) ID"  
       SumoDeployment:
@@ -38,9 +51,6 @@ Metadata:
         default: "Sumo Logic Organization Id"
       RemoveSumoResourcesOnDeleteStack:
         default: "Delete Sumo Logic Resources when stack is deleted"
-
-      OrganizationId:
-        default: "AWS Organization ID"
       AdministrationRoleName:
         default: "Administration Role Name"
       ExecutionRoleRuleName:
@@ -90,7 +100,22 @@ Parameters:
     Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to true. Default is true.
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
-
+  LoggingAccountId:
+    Type: String
+    Description: Organization log archive account ID
+  SecurityToolingAccountId:
+    Type: String
+    Description: Organization tooling account ID  
+  DeliveryBucketPrefix:
+    AllowedPattern: "^$|^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription:
+      S3 bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-).
+      It cannot start or end with a hyphen (-).
+    Default: log-delivery
+    Description: >
+      Delivery S3 bucket prefix.
+      The account and region will get added to the end. e.g. log-delivery-123456789012-us-east-1
+    Type: String
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
@@ -331,6 +356,92 @@ Resources:
         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
 
+  OrgDeliveryKmsKeyStackset:
+    DependsOn:
+      - "OrgTrustAllStackset"  
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: !Sub 'CommonOrgDeliveryKmsKey-${AWS::StackName}'
+      AdministrationRoleARN: !GetAtt rAdministrationRole.Arn
+      ExecutionRoleName: !Ref ExecutionRoleRuleName
+      PermissionModel: SELF_MANAGED
+      Capabilities:
+        - 'CAPABILITY_NAMED_IAM'
+        - 'CAPABILITY_IAM'
+        - 'CAPABILITY_AUTO_EXPAND'
+      StackInstancesGroup:
+        - Regions:
+            - !Ref AWS::Region
+          DeploymentTargets:
+            Accounts:
+              - !Ref SecurityToolingAccountId    
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/common-org/common-org-delivery-kms-key.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        - ParameterKey: 'LoggingAccountId'
+          ParameterValue: !Ref LoggingAccountId
+        - ParameterKey: 'OrgPrimaryAccountId'
+          ParameterValue: !Ref "AWS::AccountId" 
+        - ParameterKey: 'DeliveryKeyAlias'
+          ParameterValue: !Sub "KMS-${AWS::StackName}"
+
+#Get ARN of Delivery KMS Key
+  rOrgDeliveryKMSKeyArn:
+    Type: Custom::AWSARN
+    DependsOn:
+      - "OrgDeliveryKmsKeyStackset"
+    Properties:
+      ServiceToken: !GetAtt rSumoLogicLambdaHelper.Arn
+      accountID: !Ref SecurityToolingAccountId
+      roleName: !Ref ExecutionRoleRuleName
+      region: !Ref AWS::Region
+      stackName: !Sub 'CommonOrgDeliveryKmsKey-${AWS::StackName}'
+      outputKey: oDeliveryKeyArn
+
+  OrgDeliveryS3BucketStackset:
+    DependsOn:
+      - "rOrgDeliveryKMSKeyArn"  
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: !Sub 'CommonOrgDeliveryS3Bucket-${AWS::StackName}'
+      AdministrationRoleARN: !GetAtt rAdministrationRole.Arn
+      ExecutionRoleName: !Ref ExecutionRoleRuleName
+      PermissionModel: SELF_MANAGED
+      Capabilities:
+        - 'CAPABILITY_NAMED_IAM'
+        - 'CAPABILITY_IAM'
+        - 'CAPABILITY_AUTO_EXPAND'
+      StackInstancesGroup:
+        - Regions:
+            - !Ref AWS::Region
+          DeploymentTargets:
+            Accounts:
+              - !Ref LoggingAccountId
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/common-org/common-org-delivery-s3-bucket.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        - ParameterKey: 'DeliveryKMSKeyArn'
+          ParameterValue: !GetAtt rOrgDeliveryKMSKeyArn.ARN
+        - ParameterKey: 'DeliveryBucketPrefix'
+          ParameterValue: !Ref DeliveryBucketPrefix
+
+  #Get ARN of GuardDuty S3 bucket
+  rDeliveryS3BucketArn:
+    Type: Custom::AWSARN
+    DependsOn:
+      - "OrgDeliveryS3BucketStackset"
+    Properties:
+      ServiceToken: !GetAtt rSumoLogicLambdaHelper.Arn
+      accountID: !Ref LoggingAccountId
+      roleName: !Ref ExecutionRoleRuleName
+      region: !Ref AWS::Region
+      stackName:  !Sub 'CommonOrgDeliveryS3Bucket-${AWS::StackName}'
+      outputKey: oDeliveryS3Bucket
+
 Outputs:
   AdministrationRoleArn:
     Description: ARN of the create Administration Role.
@@ -351,4 +462,12 @@ Outputs:
     Value: !GetAtt rSumoLogicHelperRole.Arn
     Export:
       Name: !Sub "${AWS::StackName}-SumoLogicHelperRoleARN"
+
+  OrgDeliveryKMSKeyArn:
+    Description: ARN of the delivery KMS key.
+    Value: !GetAtt rOrgDeliveryKMSKeyArn.ARN
+  
+  OrgDeliveryS3BucketArn:
+    Description: ARN of the delivery S3 bucket.
+    Value: !GetAtt rDeliveryS3BucketArn.ARN  
 

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Creates the GuardDuty Delivery KMS Key
+Description: Creates the Delivery KMS Key
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -8,23 +8,23 @@ Metadata:
         Label:
           default: KMS Key Attributes
         Parameters:
-          - GuardDutyDeliveryKeyAlias
+          - DeliveryKeyAlias
           - OrgPrimaryAccountId
           - LoggingAccountId
 
     ParameterLabels:
-      GuardDutyDeliveryKeyAlias:
-        default: GuardDuty Delivery KMS Key Alias
+      DeliveryKeyAlias:
+        default: Delivery KMS Key Alias
       OrgPrimaryAccountId:
         default: Organization Primary Account ID
       LoggingAccountId:
         default: Security Log Archive Account ID
 
 Parameters:
-  GuardDutyDeliveryKeyAlias:
+  DeliveryKeyAlias:
     Type: String
-    Description: GuardDuty Delivery KMS Key Alias
-    Default: GuardDutyDeliveryKMSKey
+    Description: Delivery KMS Key Alias
+    Default: DeliveryKMSKey
 
   OrgPrimaryAccountId:
     Type: String
@@ -36,14 +36,14 @@ Parameters:
 
 
 Resources:
-  rGuardDutyDeliveryKey:
+  rDeliveryKey:
     Type: AWS::KMS::Key
     Properties:
-      Description: GuardDuty Delivery Key
+      Description: Delivery KMS Key
       EnableKeyRotation: True
       KeyPolicy:
         Version: "2012-10-17"
-        Id: !Sub ${GuardDutyDeliveryKeyAlias}
+        Id: !Sub ${DeliveryKeyAlias}
         Statement:
           - Action: "kms:*"
             Effect: Allow
@@ -88,14 +88,14 @@ Resources:
             Resource: "*"
             Sid: Allow account access
 
-  rGuardDutyDeliveryKeyAlias:
+  rDeliveryKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
-      AliasName: !Sub alias/${GuardDutyDeliveryKeyAlias}
+      AliasName: !Sub alias/${DeliveryKeyAlias}
       TargetKeyId:
-        !Ref rGuardDutyDeliveryKey
+        !Ref rDeliveryKey
 
 Outputs:
-  oGuardDutyDeliveryKeyArn:
-    Description: GuardDuty Delivery KMS Key ARN
-    Value: !GetAtt rGuardDutyDeliveryKey.Arn
+  oDeliveryKeyArn:
+    Description: Delivery KMS Key ARN
+    Value: !GetAtt rDeliveryKey.Arn

@@ -1,9 +1,9 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: "This CloudFormation template sets up AWS GuardDuty apps."
+Description: "This CloudFormation template sets up AWS apps."
 Metadata:
   QuickStartDocumentation:
-    EntrypointName: "Parameters for deploying AWS GuardDuty"
+    EntrypointName: "Parameters for deploying AWS"
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
@@ -15,11 +15,13 @@ Metadata:
           - Section1SumoLogicOrganizationId
           - Section1SumoLogicResourceRemoveOnDeleteStack
           - Section1SecurityToolingAccountId
-          - Section1SecurityToolingRegion
           - Section1LogArchivingAccountId
-          - Section1LogArchivingRegion
           - Section1OrganizationID
           - Section1OrganizationUnitID
+      - Label:
+          default: "1.2 S3 Delivery Bucket configuration (required)"
+        Parameters:
+          - Section1DeliveryBucketPrefix  
       - Label:
           default: "2.1 GuardDuty App configuration"
         Parameters:
@@ -30,7 +32,6 @@ Metadata:
         Parameters:
           - Section2AutoEnableS3Logs
           - Section2FindingPublishingFrequency
-          - Section2GuardDutyDeliveryBucketPrefix
       - Label:
           default: "2.3 GuardDuty Regions configuration"
         Parameters:
@@ -61,16 +62,14 @@ Metadata:
         default: "Delete Sumo Logic resources when stack is deleted"
       Section1SecurityToolingAccountId:
         default: "Security tooling account ID"
-      Section1SecurityToolingRegion:
-        default: "Security tooling account region"
       Section1LogArchivingAccountId:
         default: "Log archiving account ID"
-      Section1LogArchivingRegion:
-        default: "Log archiving account region"
       Section1OrganizationID:
         default: "AWS Organizations ID"
       Section1OrganizationUnitID:
         default: "Organization unit (OU) ID"
+      Section1DeliveryBucketPrefix:
+        default: "Delivery Bucket Prefix"
 
       # GuardDuty apps parameters
       Section2InstallAWSGuardDutyApp:
@@ -87,9 +86,7 @@ Metadata:
         default: "Finding Publishing Frequency"
       Section2GuardDutyRegions:
         default: "GuardDuty Regions"
-      Section2GuardDutyDeliveryBucketPrefix:
-        default: "GuardDuty Delivery Bucket Prefix"
-        
+
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
       QSS3BucketRegion:
@@ -129,9 +126,9 @@ Parameters:
     ConstraintDescription: "Sumo Logic organization ID cannot be empty."
   Section1SumoLogicResourceRemoveOnDeleteStack:
     AllowedValues:
-      - true
-      - false
-    Default: true
+      - 'true'
+      - 'false'
+    Default: 'true'
     Description: "If this parameter is set to true, the collector, sources, and Sumo Logic apps are deleted.
                   If this parameter is set to false, then the collector, sources, and Sumo Logic apps are not deleted."
     Type: String
@@ -145,58 +142,6 @@ Parameters:
     Type: String
     AllowedPattern: '^\d{12}$'
     ConstraintDescription: "Log archiving account ID cannot be empty. Must be 12 digits"
-  Section1SecurityToolingRegion:
-    Type: String
-    AllowedValues:
-      - us-east-2
-      - us-east-1
-      - us-west-1
-      - us-west-2
-      - af-south-1
-      - ap-east-1
-      - ap-south-1
-      - ap-northeast-3
-      - ap-northeast-2
-      - ap-southeast-1
-      - ap-southeast-2
-      - ap-northeast-1
-      - ca-central-1
-      - eu-central-1
-      - eu-west-1
-      - eu-west-2
-      - eu-south-1
-      - eu-west-3
-      - eu-north-1
-      - me-south-1
-      - sa-east-1
-    Default: us-east-1
-    Description: "Enter your security tooling account region"
-  Section1LogArchivingRegion:
-    Type: String
-    AllowedValues:
-      - us-east-2
-      - us-east-1
-      - us-west-1
-      - us-west-2
-      - af-south-1
-      - ap-east-1
-      - ap-south-1
-      - ap-northeast-3
-      - ap-northeast-2
-      - ap-southeast-1
-      - ap-southeast-2
-      - ap-northeast-1
-      - ca-central-1
-      - eu-central-1
-      - eu-west-1
-      - eu-west-2
-      - eu-south-1
-      - eu-west-3
-      - eu-north-1
-      - me-south-1
-      - sa-east-1
-    Default: us-east-1
-    Description: "Enter your log archiving account region"
   Section1OrganizationID:
     AllowedPattern: '^o-[a-z0-9]{10,32}$'
     Description: >
@@ -211,11 +156,21 @@ Parameters:
     MaxLength: 100
     MinLength: 16
     Type: String
+  Section1DeliveryBucketPrefix:
+    AllowedPattern: "^$|^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription:
+      S3 bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-).
+      It cannot start or end with a hyphen (-).
+    Default: 'logs-delivery'
+    Description: >
+      Log Delivery S3 bucket prefix.
+      The account and region will get added to the end. e.g. logs-delivery-123456789012-us-east-1
+    Type: String
 
   # GuardDuty apps parameters
   Section2InstallAWSGuardDutyApp:
     Type: String
-    Description: "Yes: Install Amazon GuardDuty app.
+    Description: "Yes: Install AWS GuardDuty app.
                   No: Skip installation of app."
     Default: 'Yes'
     AllowedValues:
@@ -260,16 +215,7 @@ Parameters:
     Description: Comma delimited list of regions to enable GuardDuty. Leave blank to enable all regions.
     Default: 'us-east-1, us-east-2'
     Type: String
-  Section2GuardDutyDeliveryBucketPrefix:
-    AllowedPattern: "^$|^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
-    ConstraintDescription:
-      S3 bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-).
-      It cannot start or end with a hyphen (-).
-    Default: 'guardduty-delivery'
-    Description: >
-      GuardDuty Delivery S3 bucket prefix.
-      The account and region will get added to the end. e.g. guardduty-delivery-123456789012-us-east-1
-    Type: String
+
 
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
@@ -331,104 +277,15 @@ Resources:
         SumoAccessKey: !Ref Section1SumoLogicAccessKey
         SumoOrganizationId: !Ref Section1SumoLogicOrganizationId
         RemoveSumoResourcesOnDeleteStack: !Ref Section1SumoLogicResourceRemoveOnDeleteStack
-        
-#Stackset for GuardDuty Delivery KMS Key
-  DeliveryKMSKeyStackset:
-    Condition: call_guardduty_stack
-    Type: 'AWS::CloudFormation::StackSet'
-    DependsOn:
-      - "CommonOrgManagement"
-    Properties:
-      AdministrationRoleARN: !GetAtt CommonOrgManagement.Outputs.AdministrationRoleArn
-      ExecutionRoleName: !Select [ 1, !Split ['/', !GetAtt CommonOrgManagement.Outputs.ExecutionRoleArn]]
-      StackSetName: !Sub 'GuardDuty-DeliveryKMSKey-${AWS::StackName}'
-      PermissionModel: SELF_MANAGED
-      Capabilities:
-        - 'CAPABILITY_NAMED_IAM'
-        - 'CAPABILITY_IAM'
-        - 'CAPABILITY_AUTO_EXPAND'
-      StackInstancesGroup:
-        - Regions:
-            - !Ref Section1SecurityToolingRegion
-          DeploymentTargets:
-            Accounts:
-              - !Ref Section1SecurityToolingAccountId    
-      TemplateURL: !Sub
-        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/guardduty-org/guardduty-org-delivery-kms-key.yaml'
-        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-      Parameters:
-        - ParameterKey: 'LoggingAccountId'
-          ParameterValue: !Ref Section1LogArchivingAccountId
-        - ParameterKey: 'OrgPrimaryAccountId'
-          ParameterValue: !Ref "AWS::AccountId" 
-        - ParameterKey: 'GuardDutyDeliveryKeyAlias'
-          ParameterValue: !Sub "GuardDuty-KMS-${AWS::StackName}"         
-           
-#Get ARN of GuardDuty Delivery KMS Key
-  DeliveryKMSKeyARN:
-    Condition: call_guardduty_stack
-    Type: Custom::AWSARN
-    DependsOn:
-      - "DeliveryKMSKeyStackset"
-    Properties:
-      ServiceToken: !GetAtt CommonOrgManagement.Outputs.SumoLogicLambdaHelperARN
-      accountID: !Ref Section1SecurityToolingAccountId
-      roleName: !Select [ 1, !Split ['/', !GetAtt CommonOrgManagement.Outputs.ExecutionRoleArn]]
-      region: !Ref Section1SecurityToolingRegion
-      stackName: !Sub 'GuardDuty-DeliveryKMSKey-${AWS::StackName}'
-      outputKey: oGuardDutyDeliveryKeyArn
-
-  #Stackset for GuardDuty delivery S3 bucket
-  DeliveryS3BucketStackset:
-    Condition: call_guardduty_stack
-    DependsOn:
-      - "DeliveryKMSKeyARN"
-    Type: 'AWS::CloudFormation::StackSet'
-    Properties:
-      AdministrationRoleARN: !GetAtt CommonOrgManagement.Outputs.AdministrationRoleArn
-      ExecutionRoleName: !Select [ 1, !Split ['/', !GetAtt CommonOrgManagement.Outputs.ExecutionRoleArn]]
-      StackSetName: !Sub "GuardDuty-Delivery-S3-Bucket-${AWS::StackName}"
-      PermissionModel: SELF_MANAGED
-      Capabilities:
-        - 'CAPABILITY_NAMED_IAM'
-        - 'CAPABILITY_IAM'
-        - 'CAPABILITY_AUTO_EXPAND'
-      StackInstancesGroup:
-        - Regions:
-            - !Ref Section1LogArchivingRegion
-          DeploymentTargets:
-            Accounts:
-              - !Ref Section1LogArchivingAccountId
-      TemplateURL: !Sub
-        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/guardduty-org/guardduty-org-delivery-s3-bucket.yaml'
-        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-      Parameters:
-        - ParameterKey: 'GuardDutyDeliveryKMSKeyArn'
-          ParameterValue: !GetAtt DeliveryKMSKeyARN.ARN
-        - ParameterKey: 'GuardDutyDeliveryBucketPrefix'
-          ParameterValue: !Ref Section2GuardDutyDeliveryBucketPrefix
-
-  #Get ARN of GuardDuty S3 bucket
-  DeliveryS3BucketARN:
-    Condition: call_guardduty_stack
-    Type: Custom::AWSARN
-    DependsOn:
-      - "DeliveryS3BucketStackset"
-    Properties:
-      ServiceToken: !GetAtt CommonOrgManagement.Outputs.SumoLogicLambdaHelperARN
-      accountID: !Ref Section1LogArchivingAccountId
-      roleName: !Select [ 1, !Split ['/', !GetAtt CommonOrgManagement.Outputs.ExecutionRoleArn]]
-      region: !Ref Section1LogArchivingRegion
-      stackName:  !Sub "GuardDuty-Delivery-S3-Bucket-${AWS::StackName}"
-      outputKey: oGuardDutyDeliveryS3Bucket
+        SecurityToolingAccountId: !Ref Section1SecurityToolingAccountId
+        LoggingAccountId: !Ref Section1LogArchivingAccountId
+        DeliveryBucketPrefix: !Ref Section1DeliveryBucketPrefix
 
 #Stackset for GuardDuty Delete Detector Role
-  DeleteDetectorRoleStackset:
+  GuardDutyDeleteDetectorRoleStackset:
     Condition: call_guardduty_stack
     DependsOn:
-      - "DeliveryS3BucketARN"
+      - "CommonOrgManagement"
     Type: 'AWS::CloudFormation::StackSet'
     Properties:
       StackSetName: !Sub "GuardDuty-Delete-Detector-Role-${AWS::StackName}"
@@ -439,7 +296,7 @@ Resources:
         - 'CAPABILITY_AUTO_EXPAND' 
       StackInstancesGroup:
         - Regions:
-            - !Ref Section1SecurityToolingRegion
+            - !Ref AWS::Region
           DeploymentTargets:
               OrganizationalUnitIds: 
                 - !Ref Section1OrganizationUnitID
@@ -457,10 +314,10 @@ Resources:
           ParameterValue: !Ref "AWS::AccountId"
 
 #Stack for GuardDuty Configuration
-  ConfigurationStack:
+  GuardDutyConfigurationStack:
     Condition: call_guardduty_stack
     DependsOn:
-      - "DeleteDetectorRoleStackset"
+      - "GuardDutyDeleteDetectorRoleStackset"
     Type: 'AWS::CloudFormation::Stack'
     Properties:
       TemplateURL: !Sub
@@ -485,15 +342,12 @@ Resources:
         DeleteDetectorRoleName: !Sub 'DeleteDetectorRole-${AWS::StackName}'
         EnabledRegions: !Ref Section2GuardDutyRegions
         FindingPublishingFrequency: !Ref Section2FindingPublishingFrequency 
-        KMSKeyArn: !GetAtt DeliveryKMSKeyARN.ARN 
-        PublishingDestinationBucketName: !GetAtt DeliveryS3BucketARN.ARN
+        KMSKeyArn: !GetAtt CommonOrgManagement.Outputs.OrgDeliveryKMSKeyArn 
+        PublishingDestinationBucketName: !GetAtt CommonOrgManagement.Outputs.OrgDeliveryS3BucketArn
         LambdaExecutionRoleName: !Select [ 1, !Split ['/', !GetAtt CommonOrgManagement.Outputs.SumoLogicHelperRoleARN]]
         OrganizationId: !Ref Section1OrganizationID 
         QSS3BucketName: !Ref QSS3BucketName  
         QSS3BucketRegion: !Ref QSS3BucketRegion 
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         ParentStackName: !Sub 'ParentStack-${AWS::StackName}'
-        ParentHelperFunctionArn: !GetAtt CommonOrgManagement.Outputs.SumoLogicLambdaHelperARN                                    
-                
-                                                                            
-
+        ParentHelperFunctionArn: !GetAtt CommonOrgManagement.Outputs.SumoLogicLambdaHelperARN
