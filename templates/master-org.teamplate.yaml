@@ -172,7 +172,7 @@ Parameters:
     Type: String
     Description: "Yes: Install AWS GuardDuty app.
                   No: Skip installation of app."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'  
