@@ -48,12 +48,16 @@ Metadata:
           - LambdaExecutionRoleName
           - OrganizationId
       - Label:
+          default: AWS StackSet Attributes
+        Parameters:
+          - AdministrationRoleArn
+          - ExecutionRoleRuleName
+      - Label:
           default: "AWS Quick Start configuration"
         Parameters:
           - QSS3BucketName
           - QSS3BucketRegion
           - QSS3KeyPrefix
-
       - Label:
           default: "Local Parameters. Do Not Edit the values."
         Parameters:
@@ -104,6 +108,11 @@ Metadata:
         default: Organization ID
       PublishingDestinationBucketName:
         default: Publishing Destination Bucket Name
+
+      AdministrationRoleArn:
+        default: Arn of Administration Role
+      ExecutionRoleRuleName:
+        default: Execution Role Name
 
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
@@ -224,9 +233,9 @@ Parameters:
     Type: String
 
   EnabledRegions:
-    Description: Comma delimited list of regions to enable GuardDuty. Leave blank to enable all regions.
+    Description: Comma delimited list of regions to enable GuardDuty.
     Type: String
-    Default: "us-east-1, us-east-2"
+    Default: "us-east-1,us-east-2"
 
   FindingPublishingFrequency:
     AllowedValues: [FIFTEEN_MINUTES, ONE_HOUR, SIX_HOURS]
@@ -262,6 +271,16 @@ Parameters:
       It cannot start or end with a hyphen (-).
     Description: GuardDuty S3 bucket name
     Type: String
+
+  AdministrationRoleArn:
+    Description: Arn of AWS Administration Role name to enable use of AWS CloudFormation StackSets.
+    Type: String
+
+  ExecutionRoleRuleName:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    Description: AWS Execution Role name of the administrator account (the account in which StackSets will be created).
+    Type: String
+    Default: AWSCloudFormationStackSetExecutionRole
 
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
@@ -535,27 +554,38 @@ Resources:
       Runtime: python3.8
       Timeout: 900
 
-  rSumoCloudWatchEventFunction:
-    Type: AWS::Serverless::Function
+  OrgSumoCloudWatchEventFunctionStackset:
     Condition: install_http_logs_source
+    DependsOn:
+      - "SumoHTTPSource"  
+    Type: AWS::CloudFormation::StackSet
     Properties:
-      CodeUri:
-        Bucket: !Sub
-          - "${S3Bucket}"
-          - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/guardduty-org/cloudwatchevents.zip"
-      Handler: cloudwatchevents.handler
-      Runtime: nodejs14.x
-      Environment:
-        Variables:
-          SUMO_ENDPOINT: !GetAtt SumoHTTPSource.SUMO_ENDPOINT
-      Events:
-        CloudWatchEventTrigger:
-          Type: CloudWatchEvent
-          Properties:
-            Pattern:
-              source:
-                - aws.guardduty
+      StackSetName: !Sub 'GuardDutyOrgCloudWatchEventFunction-${AWS::StackName}'
+      AdministrationRoleARN: !Ref AdministrationRoleArn
+      ExecutionRoleName: !Ref ExecutionRoleRuleName
+      PermissionModel: SELF_MANAGED
+      Capabilities:
+        - 'CAPABILITY_NAMED_IAM'
+        - 'CAPABILITY_IAM'
+        - 'CAPABILITY_AUTO_EXPAND'
+      StackInstancesGroup:
+        - Regions: !Split [",", !Ref EnabledRegions]
+          DeploymentTargets:
+            Accounts:
+              - !Ref AWS::AccountId
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/guardduty-org/guardduty-org-cloudwatch-event.yaml'
+        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        - ParameterKey: 'SumoEndpoint'
+          ParameterValue: !GetAtt SumoHTTPSource.SUMO_ENDPOINT
+        - ParameterKey: 'QSS3BucketName'
+          ParameterValue: !Ref QSS3BucketName
+        - ParameterKey: 'QSS3BucketRegion'
+          ParameterValue: !Ref QSS3BucketRegion
+        - ParameterKey: 'QSS3KeyPrefix'
+          ParameterValue: !Ref QSS3KeyPrefix
 
   rAWSGuardDutyCustomResource:
     Type: Custom::GuardDuty
