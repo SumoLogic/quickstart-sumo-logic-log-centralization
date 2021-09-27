@@ -10,12 +10,25 @@ Metadata:
         Parameters:
           - DeliveryBucketPrefix
           - DeliveryKMSKeyArn
+      -
+        Label:
+          default: Sumologic Configuration
+        Parameters:
+          - SumoAWSAccountID
+          - SumoDeployment
+          - SumoOrganizationId
 
     ParameterLabels:
       DeliveryBucketPrefix:
         default: Delivery Bucket Prefix
       DeliveryKMSKeyArn:
         default: Delivery KMS Key
+      SumoAWSAccountID:
+        default: "ID AWS Account of Sumo Logic"
+      SumoDeployment:
+        default: "Sumo Logic Deployment Name"
+      SumoOrganizationId:
+        default: "Sumo Logic Organization Id"
 
 Parameters:
   DeliveryBucketPrefix:
@@ -36,9 +49,110 @@ Parameters:
       'Key ARN example:  arn:aws:kms:us-east-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab'
     Description: KMS Key ARN to use for encrypting data findings sent to S3
     Type: String
+  SumoAWSAccountID:
+    Description: "The AWS Account ID of Sumo Logic to collect logs from customer"
+    Type: String
+    AllowedPattern: '^\d{12}$'
+    ConstraintDescription: "Log archiving account ID cannot be empty. Must be 12 digits"
+    Default: "926226587429"
+  ManagementAccountID:
+    Description: "The AWS Management AccountID"
+    Type: String
+    AllowedPattern: '^\d{12}$'
+  SumoDeployment:
+    Type: String
+    AllowedValues:
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+      - in
+      - fed
+    Description: "Enter au, ca, de, eu, jp, us2, in, fed or us1."
+  SumoOrganizationId:
+    Description: "The Account Overview page displays information about your Sumo Logic organization. Used for IAM Role in Sumo Logic AWS Sources."
+    Type: String
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic Organization Id can not be empty."
 
 Resources:
+#SNS topic for listen event put object from s3 bucket. After send event to Sumo Logic
+  SumoSNSTopic:
+    Type: "AWS::SNS::Topic"
+    Properties:
+      TopicName: !Sub "SumoSNSTopic-${AWS::StackName}"
+
+  SumoSNSpolicy:
+    Type: "AWS::SNS::TopicPolicy"
+    Properties:
+      PolicyDocument:
+        Id: SumoTopicPolicy
+        Statement:
+          - Sid: "Allow S3 publish message to sns topic"
+            Action:
+              - sns:Publish
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref "AWS::AccountId"
+              ArnLike:
+                aws:SourceArn: !Sub "arn:aws:s3:::${DeliveryBucketPrefix}-orgs"
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Resource:
+              - !Ref SumoSNSTopic
+          - Sid: "Allow Management Account subcribe"
+            Action: "sns:Subscribe"
+            Effect: "Allow"
+            Principal:
+              AWS: !Ref ManagementAccountID
+            Resource: 
+              - !Ref SumoSNSTopic
+
+      Topics:
+        - Ref: SumoSNSTopic
+  #Role for aws account of sumologic read data in s3 bucket of customer.
+  SumoRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${SumoAWSAccountID}:root"
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Sub "${SumoDeployment}:${SumoOrganizationId}"
+      Path: "/"
+      Policies:
+        - PolicyName: SumoPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: "AllowSumologicGetObjectS3"
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:ListBucketVersions
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:aws:s3:::${DeliveryBucketPrefix}-orgs/*"
+                  - !Sub "arn:aws:s3:::${DeliveryBucketPrefix}-orgs"
+              - Sid: "SumoLogicDescyptS3Object"
+                Action:
+                  - kms:Decrypt
+                Effect: "Allow"
+                Resource: !Ref DeliveryKMSKeyArn
+              
   rS3Bucket:
+    DependsOn:
+      - "SumoSNSpolicy"
     DeletionPolicy: Retain
     Type: AWS::S3::Bucket
     Metadata:
@@ -52,7 +166,11 @@ Resources:
           - ServerSideEncryptionByDefault:
               KMSMasterKeyID: !Ref DeliveryKMSKeyArn
               SSEAlgorithm: aws:kms
-      BucketName: !Sub ${DeliveryBucketPrefix}-${AWS::AccountId}-${AWS::Region}
+      BucketName: !Sub ${DeliveryBucketPrefix}-orgs
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Event: s3:ObjectCreated:Put
+            Topic: !Ref SumoSNSTopic
       OwnershipControls:
         Rules:
           - ObjectOwnership: BucketOwnerPreferred
@@ -74,13 +192,15 @@ Resources:
           - Action: s3:PutObject
             Condition:
               ForAnyValue:StringNotEquals:
-                aws:CalledVia: guardduty.amazonaws.com
+                aws:CalledVia: 
+                  - guardduty.amazonaws.com
+                  - cloudtrail.amazonaws.com
             Effect: Deny
             Principal: "*"
             Resource:
               - !Sub arn:aws:s3:::${rS3Bucket}
               - !Sub arn:aws:s3:::${rS3Bucket}/*
-            Sid: DenyPutObjectUnlessGuardDuty
+            Sid: DenyPutObjectUnlessGuardDutyCloudtrail
 
           - Action: "s3:*"
             Condition:
@@ -101,6 +221,7 @@ Resources:
             Principal:
               Service:
                 - guardduty.amazonaws.com
+                - cloudtrail.amazonaws.com
             Resource: !Sub arn:aws:s3:::${rS3Bucket}
             Sid: AWSBucketPermissionsCheck
 
@@ -112,6 +233,7 @@ Resources:
             Principal:
               Service:
                 - guardduty.amazonaws.com
+                - cloudtrail.amazonaws.com
             Resource: !Sub arn:aws:s3:::${rS3Bucket}/*
             Sid: AWSBucketDelivery
 
@@ -141,3 +263,9 @@ Outputs:
   oDeliveryS3Bucket:
     Description: Delivery S3 Bucket
     Value: !Ref rS3Bucket
+  oSNSTopicArn:
+    Description: Arn of SNS Topic
+    Value: !Ref SumoSNSTopic
+  oSumoRoleArn:
+    Description: Arn of Sumo Role
+    Value: !GetAtt SumoRole.Arn

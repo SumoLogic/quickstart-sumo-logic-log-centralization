@@ -18,6 +18,8 @@ Metadata:
           - SecurityToolingAccountId
           - LoggingAccountId
           - OrganizationUnitID
+          - SecurityToolingAccountRegion
+          - LogArchivingAccountRegion
       - Label:
           default: "Role Details configuration"
         Parameters:
@@ -38,7 +40,11 @@ Metadata:
       LoggingAccountId:
         default: Security Log Archive Account ID
       SecurityToolingAccountId:
-        default: Security Tooling Account ID      
+        default: Security Tooling Account ID    
+      SecurityToolingAccountRegion:
+        default: "Security tooling account Region"
+      LogArchivingAccountRegion:
+        default: "Log archiving account Region"  
       OrganizationUnitID:
         default: "Organization unit (OU) ID"  
       SumoDeployment:
@@ -106,6 +112,12 @@ Parameters:
   SecurityToolingAccountId:
     Type: String
     Description: Organization tooling account ID  
+  SecurityToolingAccountRegion:
+    Description: "Enter your security tooling account region"
+    Type: String
+  LogArchivingAccountRegion:
+    Description: "Enter your log archiving account region"
+    Type: String
   DeliveryBucketPrefix:
     AllowedPattern: "^$|^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription:
@@ -152,8 +164,7 @@ Parameters:
     Type: String
     Default: AWSCloudFormationStackSetExecutionRole
 
-Conditions:
-  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+
 
 Resources:
 #Role for management account
@@ -307,8 +318,7 @@ Resources:
               Sid: AssumeRole             
               
   rSumoLogicLambdaHelper:
-    DependsOn:
-      - "rSumoLogicHelperRole"   
+
     Type: 'AWS::Serverless::Function'
     Properties:
       Handler: main.handler
@@ -316,7 +326,7 @@ Resources:
       CodeUri:
         Bucket: !Sub
                 - "${S3Bucket}"
-                - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+                - S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'
         Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
       MemorySize: 512
       Timeout: 900
@@ -353,8 +363,8 @@ Resources:
                 - !Ref OrganizationUnitID
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/common-org/common-org-trust-all.template.yaml'
-        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+        - S3Region: !Ref 'AWS::Region'
+          S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'
 
   OrgDeliveryKmsKeyStackset:
     DependsOn:
@@ -371,14 +381,14 @@ Resources:
         - 'CAPABILITY_AUTO_EXPAND'
       StackInstancesGroup:
         - Regions:
-            - !Ref AWS::Region
+            - !Ref SecurityToolingAccountRegion
           DeploymentTargets:
             Accounts:
               - !Ref SecurityToolingAccountId    
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/common-org/common-org-delivery-kms-key.yaml'
-        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+        - S3Region: !Ref 'AWS::Region'
+          S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'
       Parameters:
         - ParameterKey: 'LoggingAccountId'
           ParameterValue: !Ref LoggingAccountId
@@ -396,13 +406,12 @@ Resources:
       ServiceToken: !GetAtt rSumoLogicLambdaHelper.Arn
       accountID: !Ref SecurityToolingAccountId
       roleName: !Ref ExecutionRoleRuleName
-      region: !Ref AWS::Region
+      region: !Ref SecurityToolingAccountRegion
       stackName: !Sub 'CommonOrgDeliveryKmsKey-${AWS::StackName}'
       outputKey: oDeliveryKeyArn
 
   OrgDeliveryS3BucketStackset:
-    DependsOn:
-      - "rOrgDeliveryKMSKeyArn"  
+
     Type: AWS::CloudFormation::StackSet
     Properties:
       StackSetName: !Sub 'CommonOrgDeliveryS3Bucket-${AWS::StackName}'
@@ -415,19 +424,25 @@ Resources:
         - 'CAPABILITY_AUTO_EXPAND'
       StackInstancesGroup:
         - Regions:
-            - !Ref AWS::Region
+            - !Ref LogArchivingAccountRegion
           DeploymentTargets:
             Accounts:
               - !Ref LoggingAccountId
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/common-org/common-org-delivery-s3-bucket.yaml'
-        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+        - S3Region:  !Ref 'AWS::Region'
+          S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'
       Parameters:
         - ParameterKey: 'DeliveryKMSKeyArn'
           ParameterValue: !GetAtt rOrgDeliveryKMSKeyArn.ARN
         - ParameterKey: 'DeliveryBucketPrefix'
           ParameterValue: !Ref DeliveryBucketPrefix
+        - ParameterKey: "SumoDeployment"
+          ParameterValue: !Ref SumoDeployment
+        - ParameterKey: "SumoOrganizationId"
+          ParameterValue: !Ref SumoOrganizationId
+        - ParameterKey: "ManagementAccountID"
+          ParameterValue: !Ref "AWS::AccountId"
 
   #Get ARN of GuardDuty S3 bucket
   rDeliveryS3BucketArn:
@@ -438,14 +453,50 @@ Resources:
       ServiceToken: !GetAtt rSumoLogicLambdaHelper.Arn
       accountID: !Ref LoggingAccountId
       roleName: !Ref ExecutionRoleRuleName
-      region: !Ref AWS::Region
+      region: !Ref LogArchivingAccountRegion
       stackName:  !Sub 'CommonOrgDeliveryS3Bucket-${AWS::StackName}'
       outputKey: oDeliveryS3Bucket
 
+  #Get ARN of SNS Topic which created with s3 bucket
+  rSNSTopicArn:
+    Type: Custom::AWSARN
+    DependsOn:
+      - "OrgDeliveryS3BucketStackset"
+    Properties:
+      ServiceToken: !GetAtt rSumoLogicLambdaHelper.Arn
+      accountID: !Ref LoggingAccountId
+      roleName: !Ref ExecutionRoleRuleName
+      region: !Ref LogArchivingAccountRegion
+      stackName:  !Sub 'CommonOrgDeliveryS3Bucket-${AWS::StackName}'
+      outputKey: oSNSTopicArn
+
+  #Get ARN of Sumo Role which created with s3 bucket
+  rSumoRoleArn:
+    Type: Custom::AWSARN
+    DependsOn:
+      - "OrgDeliveryS3BucketStackset"
+    Properties:
+      ServiceToken: !GetAtt rSumoLogicLambdaHelper.Arn
+      accountID: !Ref LoggingAccountId
+      roleName: !Ref ExecutionRoleRuleName
+      region: !Ref LogArchivingAccountRegion
+      stackName:  !Sub 'CommonOrgDeliveryS3Bucket-${AWS::StackName}'
+      outputKey: oSumoRoleArn
+
 Outputs:
+  StackName:
+    Description: Name of Common Stack
+    Value: !Ref 'AWS::StackName'
+
   AdministrationRoleArn:
     Description: ARN of the create Administration Role.
     Value: !GetAtt rAdministrationRole.Arn
+    Export: 
+      Name: !Sub "${AWS::StackName}-AdminRoleOrg"
+  
+  ExecutionRoleRuleName:
+    Description: Name of role execution
+    Value: !Ref ExecutionRoleRuleName
 
   ExecutionRoleArn:
     Description: ARN of the create Execution Role.
@@ -466,8 +517,17 @@ Outputs:
   OrgDeliveryKMSKeyArn:
     Description: ARN of the delivery KMS key.
     Value: !GetAtt rOrgDeliveryKMSKeyArn.ARN
+
+  SNSTopicArn:
+    Description: ARN of SNS Topic
+    Value: !GetAtt rSNSTopicArn.ARN
   
   OrgDeliveryS3BucketArn:
     Description: ARN of the delivery S3 bucket.
     Value: !GetAtt rDeliveryS3BucketArn.ARN  
+  
+  SumoRoleArn:
+    Description: "Arn of Sumo Role for sumologic account to read data from s3 bucket of customer"
+    Value: !GetAtt rSumoRoleArn.ARN
+
 

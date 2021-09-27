@@ -15,7 +15,9 @@ Metadata:
           - Section1SumoLogicOrganizationId
           - Section1SumoLogicResourceRemoveOnDeleteStack
           - Section1SecurityToolingAccountId
+          - SecurityToolingAccountRegion
           - Section1LogArchivingAccountId
+          - LogArchivingAccountRegion
           - Section1OrganizationID
           - Section1OrganizationUnitID
       - Label:
@@ -42,6 +44,19 @@ Metadata:
           - Section2GuardDutyCreateHttpLogsSource
           - Section2GuardDutyHttpLogsSourceCategoryName
 
+      # CloudTrail parameters
+      - Label:
+          default: "3. CloudTrail Configuration"
+        Parameters:
+          - CloudTrailRegions
+          - InstallCloudTrailApp
+          - InstallPCICloudTrailApp
+          - InstallCISFoundationApp
+          - InstallCloudTrailMonitoringAnalyticsApp
+          - InstallCloudTrailSecOpsApp
+          - CloudTrailBucketPathExpression
+          - CloudTrailLogsSourceCategoryName
+
       - Label:
           default: "AWS Quick Start configuration"
         Parameters:
@@ -62,8 +77,12 @@ Metadata:
         default: "Delete Sumo Logic resources when stack is deleted"
       Section1SecurityToolingAccountId:
         default: "Security tooling account ID"
+      SecurityToolingAccountRegion:
+        default: "Security tooling account Region"
       Section1LogArchivingAccountId:
         default: "Log archiving account ID"
+      LogArchivingAccountRegion:
+        default: "Log archiving account Region"
       Section1OrganizationID:
         default: "AWS Organizations ID"
       Section1OrganizationUnitID:
@@ -87,6 +106,25 @@ Metadata:
       Section2GuardDutyRegions:
         default: "GuardDuty Regions"
 
+      # CloudTrail parameters
+      CloudTrailRegions:
+        default: "CloudTrail Regions of Management Account"
+      InstallCloudTrailApp:
+        default: "Install Sumo Logic AWS CloudTrail app"
+      InstallPCICloudTrailApp:
+        default: "Install Sumo Logic PCI compliance for AWS CloudTrail app"
+      InstallCISFoundationApp:
+        default: "Install Sumo Logic CIS AWS Foundations Benchmark app"
+      InstallCloudTrailMonitoringAnalyticsApp:
+        default: "Install Amazon CloudTrail - Sumo Cloud Security Monitoring and Analytics App"
+      InstallCloudTrailSecOpsApp:
+        default: "Install Sumo Global Intelligence for AWS CloudTrail SecOps App"
+      CloudTrailBucketPathExpression:
+        default: "Path expression for logs"
+      CloudTrailLogsSourceCategoryName:
+        default: "Sumo Logic CloudTrail logs source category name"
+
+    # QuickStart Bucket Configuration
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
       QSS3BucketRegion:
@@ -140,12 +178,20 @@ Parameters:
     Type: String
     AllowedPattern: '^\d{12}$'
     ConstraintDescription: "Security tooling account ID cannot be empty. Must be 12 digits"
+  
+  SecurityToolingAccountRegion:
+    Description: "Enter your security tooling account region"
+    Type: String
 
   Section1LogArchivingAccountId:
     Description: "Enter your log archiving account ID"
     Type: String
     AllowedPattern: '^\d{12}$'
     ConstraintDescription: "Log archiving account ID cannot be empty. Must be 12 digits"
+ 
+  LogArchivingAccountRegion:
+    Description: "Enter your log archiving account region"
+    Type: String
 
   Section1OrganizationID:
     AllowedPattern: '^o-[a-z0-9]{10,32}$'
@@ -223,7 +269,62 @@ Parameters:
     Default: 'us-east-1, us-east-2'
     Type: String
 
+  # CloudTrail parameters
+  CloudTrailRegions:
+    Type: String
+    Default: us-east-1,us-east-2
+    Description: "Enter multi management account regions for CloudTrail"
+  InstallCloudTrailApp:
+    Type: String
+    Description: "Yes: Install Sumo Logic AWS CloudTrail app.
+                  No: Skip installation of app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  InstallPCICloudTrailApp:
+    Type: String
+    Description: "Yes: Install PCI compliance For AWS CloudTrail app.
+                  No: Skip installation of app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  InstallCISFoundationApp:
+    Type: String
+    Description: "Yes: Install CIS AWS Foundations Benchmark app.
+                  No: Skip installation of app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  InstallCloudTrailMonitoringAnalyticsApp:
+    Type: String
+    Description: "Yes: Install Amazon CloudTrail - Sumo Cloud Security Monitoring and Analytics App.
+                  No: Skip installation of app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  InstallCloudTrailSecOpsApp:
+    Type: String
+    Description: "Yes: Install Sumo Global Intelligence for AWS CloudTrail SecOps App.
+                  No: Skip installation of app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  CloudTrailBucketPathExpression:
+    Type: String
+    Description: "Path expression to match the folder structure for CloudTrail logs (e.g., AWSLogs/*/CloudTrail/*)."
+    Default: "CloudTrail/AWSLogs/*/CloudTrail/*"
+  CloudTrailLogsSourceCategoryName:
+    Type: String
+    Description: "Required when flag is set to No. Provide an existing source category name from Sumo Logic collecting CloudTrail logs. This is used for Threat Intel for AWS app installation also."
+    Default: "AWS/Cloudtrail/Logs"
 
+
+  # QuickStart parameters
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
@@ -242,7 +343,7 @@ Parameters:
     Type: "String"
 
 Conditions:
-  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+
 
   # Conditions for GuardDuty apps
   install_sumo_guardduty_app: !Or
@@ -260,6 +361,13 @@ Conditions:
     - !Condition install_sumo_global_guardduty_app
     - !Condition create_guardduty_source
     - !Condition install_aws_guardduty_app
+  call_cloudtrail_stack: !Or
+    - !Equals [ !Ref InstallCloudTrailApp, 'Yes' ] 
+    - !Equals [ !Ref InstallPCICloudTrailApp, 'Yes' ]
+    - !Equals [ !Ref InstallCISFoundationApp, 'Yes' ]
+    - !Equals [ !Ref InstallCloudTrailMonitoringAnalyticsApp, 'Yes' ]
+    - !Equals [ !Ref InstallCloudTrailSecOpsApp, 'Yes' ]
+
 
 Resources:
   WaitHandle:
@@ -270,8 +378,8 @@ Resources:
     Properties:
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/common-org/common-org-management.template.yaml'
-        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+        - S3Region:  !Ref 'AWS::Region'
+          S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'
       Parameters:
         AdministrationRoleName: !Sub 'AdministrationRole-${AWS::StackName}'
         ExecutionRoleRuleName: !Sub 'ExecutionRole-${AWS::StackName}'
@@ -287,6 +395,8 @@ Resources:
         SecurityToolingAccountId: !Ref Section1SecurityToolingAccountId
         LoggingAccountId: !Ref Section1LogArchivingAccountId
         DeliveryBucketPrefix: !Ref Section1DeliveryBucketPrefix
+        SecurityToolingAccountRegion: !Ref SecurityToolingAccountRegion
+        LogArchivingAccountRegion: !Ref LogArchivingAccountRegion
 
 #Stackset for GuardDuty Delete Detector Role
   GuardDutyDeleteDetectorRoleStackset:
@@ -309,8 +419,8 @@ Resources:
                 - !Ref Section1OrganizationUnitID
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/guardduty-org/guardduty-org-delete-detector-role.yaml'
-        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+        - S3Region: !Ref 'AWS::Region'
+          S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'
       AutoDeployment: 
         Enabled: true
         RetainStacksOnAccountRemoval: true
@@ -329,8 +439,8 @@ Resources:
     Properties:
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/guardduty-org/guardduty-org-configuration.yaml'
-        - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-          S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]            
+        - S3Region: !Ref 'AWS::Region'
+          S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'           
       Parameters:
         SumoDeployment: !Ref Section1SumoLogicDeployment
         SumoAccessID: !Ref Section1SumoLogicAccessID
@@ -338,9 +448,9 @@ Resources:
         RemoveSumoResourcesOnDeleteStack: !Ref Section1SumoLogicResourceRemoveOnDeleteStack
         InstallSumoGuardDutyApp: !If [install_sumo_guardduty_app, "Yes", "No"]
         InstallSumoGlobalGuardDutyApp: !If [install_sumo_global_guardduty_app, "Yes", "No"]
-        CollectorName: !Sub "aws-quickstart-collector-${AWS::AccountId}" 
+        CollectorName: !Sub "aws-quickstart-collector" 
         CreateHttpLogsSource: !If [create_guardduty_source, "Yes", "No"]
-        HttpLogsSourceName: !Sub "aws-quickstart-guardduty-${AWS::Region}"
+        HttpLogsSourceName: !Sub "aws-quickstart-guardduty"
         HttpLogsSourceCategoryName: !If [create_guardduty_source, "aws/quickstart/guardduty/logs", !Ref Section2GuardDutyHttpLogsSourceCategoryName]
         InstallAWSGuardDutyApp: !If [install_aws_guardduty_app, "Yes", "No"]
         AutoEnableS3Logs: !Ref Section2AutoEnableS3Logs
@@ -358,3 +468,38 @@ Resources:
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         ParentStackName: !Sub 'ParentStack-${AWS::StackName}'
         ParentHelperFunctionArn: !GetAtt CommonOrgManagement.Outputs.SumoLogicLambdaHelperARN
+        LogArchivingAccountRegion: !Ref LogArchivingAccountRegion
+
+# Stack for Cloudtrail
+  CloudtrailStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: call_cloudtrail_stack
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/cloudtrail-org/cloudtrail-master.yaml'
+        - S3Region:  !Ref 'AWS::Region'
+          S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'
+      Parameters:
+        SumoLogicDeployment: !Ref Section1SumoLogicDeployment
+        SumoLogicAccessID: !Ref Section1SumoLogicAccessID
+        SumoLogicAccessKey: !Ref Section1SumoLogicAccessKey
+        SumoLogicResourceRemoveOnDeleteStack: !Ref Section1SumoLogicResourceRemoveOnDeleteStack
+        ExecutionRoleRuleName: !GetAtt CommonOrgManagement.Outputs.ExecutionRoleRuleName
+        CloudTrailRegions: !Ref CloudTrailRegions
+        InstallCloudTrailApp: !Ref InstallCloudTrailApp
+        InstallPCICloudTrailApp: !Ref InstallPCICloudTrailApp
+        InstallCISFoundationApp: !Ref InstallCISFoundationApp
+        InstallCloudTrailMonitoringAnalyticsApp: !Ref InstallCloudTrailMonitoringAnalyticsApp
+        InstallCloudTrailSecOpsApp: !Ref InstallCloudTrailSecOpsApp
+        CloudTrailBucketPathExpression: !Ref CloudTrailBucketPathExpression
+        CloudTrailLogsSourceCategoryName: !Ref CloudTrailLogsSourceCategoryName
+        SNSTopicArn: !GetAtt CommonOrgManagement.Outputs.SNSTopicArn
+        CloudTrailLogsBucketName: !GetAtt CommonOrgManagement.Outputs.OrgDeliveryS3BucketArn
+        KMSArn: !GetAtt CommonOrgManagement.Outputs.OrgDeliveryKMSKeyArn 
+        SumoRoleArn: !GetAtt CommonOrgManagement.Outputs.SumoRoleArn
+        SecurityToolingAccountRegion: !Ref SecurityToolingAccountRegion
+        LogArchivingAccountRegion: !Ref LogArchivingAccountRegion
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        ParentStackName: !GetAtt CommonOrgManagement.Outputs.StackName
+        ResourcePrefix: !Ref "AWS::StackName"

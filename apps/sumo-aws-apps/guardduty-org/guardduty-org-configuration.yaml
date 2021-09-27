@@ -262,6 +262,9 @@ Parameters:
       It cannot start or end with a hyphen (-).
     Description: GuardDuty S3 bucket name
     Type: String
+  LogArchivingAccountRegion:
+    Type: String
+    Description: "Region of Logging Account"
 
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
@@ -522,7 +525,7 @@ Resources:
       Code:
         S3Bucket: !Sub
                 - "${S3Bucket}"
-                - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+                - S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'
         S3Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
       Description: Configure GuardDuty for the Organization
       Environment:
@@ -542,7 +545,7 @@ Resources:
       CodeUri:
         Bucket: !Sub
           - "${S3Bucket}"
-          - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+          - S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'
         Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/guardduty-org/cloudwatchevents.zip"
       Handler: cloudwatchevents.handler
       Runtime: nodejs14.x
@@ -580,9 +583,9 @@ Resources:
     Condition: install_http_logs_source
     Properties:
       ServiceToken: !If [ do_not_use_parent_stack, !GetAtt rSumoLogicHelperFunction.Arn, !Ref ParentHelperFunctionArn ]
-      Region: !Ref "AWS::Region"
+      Region: !Ref LogArchivingAccountRegion
       CollectorType: Hosted
-      RemoveOnDeleteStack: !If [do_not_use_parent_stack,!Ref RemoveSumoResourcesOnDeleteStack,false]
+      RemoveOnDeleteStack: false
       CollectorName: !Ref CollectorName
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
@@ -593,7 +596,7 @@ Resources:
     Type: Custom::HTTPSource
     Properties:
       ServiceToken: !If [ do_not_use_parent_stack, !GetAtt rSumoLogicHelperFunction.Arn, !Ref ParentHelperFunctionArn ]
-      Region: !Ref "AWS::Region"
+      Region: !Ref LogArchivingAccountRegion
       SourceName: !Ref HttpLogsSourceName
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       SourceCategory: !Ref HttpLogsSourceCategoryName
@@ -609,7 +612,7 @@ Resources:
     Condition: install_sumo_guardduty_app
     Properties:
       ServiceToken: !If [ do_not_use_parent_stack, !GetAtt rSumoLogicHelperFunction.Arn, !Ref ParentHelperFunctionArn ]
-      Region: !Ref "AWS::Region"
+      Region: !Ref LogArchivingAccountRegion
       AppName: "Amazon QuickStart - Amazon GuardDuty"
       AppId: "5a58719f-0f8a-4aa7-993f-9cc337a286aa"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
@@ -624,7 +627,7 @@ Resources:
     Condition: install_sumo_global_guardduty_app
     Properties:
       ServiceToken: !If [ do_not_use_parent_stack, !GetAtt rSumoLogicHelperFunction.Arn, !Ref ParentHelperFunctionArn ]
-      Region: !Ref "AWS::Region"
+      Region: !Ref LogArchivingAccountRegion
       AppName: "Amazon QuickStart - Global Intelligence for Amazon GuardDuty"
       AppId: "8e7efcb3-040a-4a92-9f8d-922fafb24afb"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack

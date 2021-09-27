@@ -1,0 +1,304 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "This CloudFormation template sets up AWS Cloudtrail Org and Sumo Logic resources for all of the Sumo Logic cloudtrail apps."
+
+Metadata:
+  QuickStartDocumentation:
+    EntrypointName: "Parameters for deploying Sumo Logic"
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "1.1 Sumo Logic access configuration (required)"
+        Parameters:
+          - SumoLogicDeployment
+          - SumoLogicAccessID
+          - SumoLogicAccessKey
+          - SumoLogicResourceRemoveOnDeleteStack
+        
+      - Label:
+          default: "1.2 Organization configuration"
+        Parameters:
+          - ExecutionRoleRuleName
+          - CloudTrailRegions
+
+      - Label:
+          default: "2.1 CloudTrail app configuration"
+        Parameters:
+          - InstallCloudTrailApp
+          - InstallPCICloudTrailApp
+          - InstallCISFoundationApp
+          - InstallCloudTrailMonitoringAnalyticsApp
+          - InstallCloudTrailSecOpsApp
+      - Label:
+          default: "2.2 S3 configuration"
+        Parameters:
+          - CloudTrailLogsBucketName
+      - Label:
+          default: "2.3 CloudTrail source configuration"
+        Parameters:
+          - CloudTrailBucketPathExpression
+          - CloudTrailLogsSourceCategoryName
+          - SNSTopicArn
+          - KMSArn
+          - SumoRoleArn
+          - ResourcePrefix
+
+      - Label:
+          default: "AWS Quick Start configuration"
+        Parameters:
+          - QSS3BucketName
+          - QSS3KeyPrefix
+      
+      - Label:
+          default: "Local Parameters. Do Not Edit the values."
+        Parameters:
+          - ParentStackName
+
+    ParameterLabels:
+      SumoLogicDeployment:
+        default: "Sumo Logic deployment name"
+      SumoLogicAccessID:
+        default: "Sumo Logic access ID"
+      SumoLogicAccessKey:
+        default: "Sumo Logic access key"
+      SumoLogicResourceRemoveOnDeleteStack:
+        default: "Delete Sumo Logic resources when stack is deleted"
+      
+      # Organization parameters
+      ExecutionRoleRuleName:
+        default: "Name of Execution Role for Organization"
+      CloudTrailRegions:
+        default: "CloudTrail Regions of Management Account"
+      
+      
+      
+      # CloudTrail apps parameters
+      InstallCloudTrailApp:
+        default: "Install Sumo Logic AWS CloudTrail app"
+      InstallPCICloudTrailApp:
+        default: "Install Sumo Logic PCI compliance for AWS CloudTrail app"
+      InstallCISFoundationApp:
+        default: "Install Sumo Logic CIS AWS Foundations Benchmark app"
+      InstallCloudTrailMonitoringAnalyticsApp:
+        default: "Install Amazon CloudTrail - Sumo Cloud Security Monitoring and Analytics App"
+      InstallCloudTrailSecOpsApp:
+        default: "Install Sumo Global Intelligence for AWS CloudTrail SecOps App"
+      CloudTrailLogsBucketName:
+        default: "S3 bucket name"
+      CloudTrailBucketPathExpression:
+        default: "Path expression for logs"
+      CloudTrailLogsSourceCategoryName:
+        default: "Sumo Logic CloudTrail logs source category name"
+      SNSTopicArn:
+        default: "ARN of SNS Topic"
+      KMSArn:
+        default: "ARN of KMS"
+      SumoRoleArn:
+        Default: "ARN of Sumo Role"
+      ResourcePrefix:
+        Default: "Resource prefix for auto deployment"
+      QSS3BucketName:
+        default: "Quick Start S3 bucket name"
+      QSS3KeyPrefix:
+        default: "Quick Start S3 key prefix"
+      ParentStackName:
+        default: "If Any, Name of parent Stack"
+
+Parameters:
+  SumoLogicDeployment:
+    Type: String
+    AllowedValues:
+      - au
+      - ca
+      - de
+      - eu
+      - jp
+      - us2
+      - us1
+      - in
+      - fed
+    Description: "Enter the geographic location of the deployment: au, ca, de, eu, jp, us2, in, fed, or us1."
+  SumoLogicAccessID:
+    Type: String
+    Description: "Enter the Sumo Logic console access ID, which you received when you created the access key."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic access ID cannot be empty."
+  SumoLogicAccessKey:
+    Type: String
+    Description: "Enter your Sumo Logic access key. Retrieve this from your Sumo Logic account."
+    AllowedPattern: ".+"
+    ConstraintDescription: "Sumo Logic access key cannot be empty."
+    NoEcho: true
+
+  SumoLogicResourceRemoveOnDeleteStack:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "If this parameter is set to true, the collector, sources, and Sumo Logic apps are deleted.
+                  If this parameter is set to false, then the collector, sources, and Sumo Logic apps are not deleted."
+    Type: String
+  # Organization parameters
+  ExecutionRoleRuleName:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    Description: AWS Execution Role name of the administrator account (the account in which StackSets will be created).
+    Type: String
+    Default: AWSCloudFormationStackSetExecutionRole
+  CloudTrailRegions:
+    Type: CommaDelimitedList
+    Default: us-east-1,us-east-2
+    Description: "Enter multi management account regions for CloudTrail"
+  SecurityToolingAccountRegion:
+    Type: String
+    Description: "Region of tooling account"
+  LogArchivingAccountRegion:
+    Type: String
+    Description: "Region of logging account"
+
+  # CloudTrail apps parameters
+  InstallCloudTrailApp:
+    Type: String
+    Description: "Yes: Install Sumo Logic AWS CloudTrail app.
+                  No: Skip installation of app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  InstallPCICloudTrailApp:
+    Type: String
+    Description: "Yes: Install PCI compliance For AWS CloudTrail app.
+                  No: Skip installation of app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  InstallCISFoundationApp:
+    Type: String
+    Description: "Yes: Install CIS AWS Foundations Benchmark app.
+                  No: Skip installation of app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  InstallCloudTrailMonitoringAnalyticsApp:
+    Type: String
+    Description: "Yes: Install Amazon CloudTrail - Sumo Cloud Security Monitoring and Analytics App.
+                  No: Skip installation of app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  InstallCloudTrailSecOpsApp:
+    Type: String
+    Description: "Yes: Install Sumo Global Intelligence for AWS CloudTrail SecOps App.
+                  No: Skip installation of app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  CloudTrailLogsBucketName:
+    Type: String
+    Description: "Required when flag is set to No. Provide an existing bucket name that has CloudTrail logs."
+    Default: ""
+  CloudTrailBucketPathExpression:
+    Type: String
+    Description: "Path expression to match the folder structure for CloudTrail logs (e.g., AWSLogs/*/CloudTrail/*)."
+    Default: "AWSLogs/*/CloudTrail/*"
+  CloudTrailLogsSourceCategoryName:
+    Type: String
+    Description: "Required when flag is set to No. Provide an existing source category name from Sumo Logic collecting CloudTrail logs. This is used for Threat Intel for AWS app installation also."
+    Default: "AWS/Cloudtrail/Logs"
+  SNSTopicArn:
+    Type: String
+    Description: "ARN of SNS Topic to listen event S3 Put Object and trigger to Sumo Logic"
+  KMSArn:
+    Type: String
+    Description: "ARN of KMS"
+  SumoRoleArn:
+    Description: "ARN of Sumo Role that allow sumologic read data from s3 bucket"
+    Type: String
+  ResourcePrefix:
+    Description: "Resource prefix for auto deployment"
+    Type: String
+    Default: "aws-quickstart"  
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: "aws-quickstart"
+    Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Type: "String"
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: "quickstart-sumo-logic-log-centralization/"
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: "String"
+  ParentStackName:
+    Type: String
+    Description: Parent Stack Name. Do Not Edit the value.
+Resources:
+  #Stackset for cloudtrail org
+  CloudtrailResoucesStackset:
+    Type: 'AWS::CloudFormation::StackSet'
+    Properties:
+      AdministrationRoleARN: !ImportValue
+        "Fn::Sub": "${ParentStackName}-AdminRoleOrg" 
+      ExecutionRoleName: !Ref "ExecutionRoleRuleName"
+      StackSetName: !Sub 'CreateCloudtrailOrg-${AWS::StackName}'
+      PermissionModel: SELF_MANAGED
+      Capabilities:
+        - 'CAPABILITY_NAMED_IAM'
+        - 'CAPABILITY_IAM'
+        - 'CAPABILITY_AUTO_EXPAND'
+      StackInstancesGroup:
+        - Regions: !Ref CloudTrailRegions 
+          DeploymentTargets:
+            Accounts:
+              - !Ref "AWS::AccountId"   
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/cloudtrail-org/cloudtrail-org.yaml'
+        - S3Region: !Ref "AWS::Region"
+          S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'
+      Parameters:
+        - ParameterKey: 'pCloudTrailS3BucketName'
+          ParameterValue: !Ref CloudTrailLogsBucketName
+        - ParameterKey: pOrganizationCloudTrailKMSKey
+          ParameterValue: !Ref KMSArn
+        - ParameterKey: 'pResourceNamePrefix'
+          ParameterValue: !Ref "AWS::StackName"
+        - ParameterKey: "QSS3BucketName"
+          ParameterValue: !Ref QSS3BucketName
+        - ParameterKey: "QSS3KeyPrefix"
+          ParameterValue: !Ref QSS3KeyPrefix
+        - ParameterKey: "ResourcePrefix"
+          ParameterValue: !Ref ResourcePrefix
+  CreateSumoApps:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/cloudtrail-org/cloudtrail-app-sumo.yaml'
+        - S3Region: !Ref 'AWS::Region'
+          S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'
+      Parameters:
+        SumoDeployment: !Ref SumoLogicDeployment
+        SumoAccessID: !Ref SumoLogicAccessID
+        SumoAccessKey: !Ref SumoLogicAccessKey
+        RemoveSumoResourcesOnDeleteStack: !Ref SumoLogicResourceRemoveOnDeleteStack
+        InstallCloudTrailApp: !Ref InstallCloudTrailApp
+        InstallPCICloudTrailApp: !Ref InstallPCICloudTrailApp
+        InstallCISFoundationApp: !Ref InstallCISFoundationApp
+        InstallCloudTrailMonitoringAnalyticsApp: !Ref InstallCloudTrailMonitoringAnalyticsApp
+        InstallCloudTrailSecOpsApp: !Ref InstallCloudTrailSecOpsApp
+        CollectorName: aws-quickstart-collector
+        CloudTrailLogsBucketName: !Ref CloudTrailLogsBucketName
+        CloudTrailBucketPathExpression: !Ref CloudTrailBucketPathExpression
+        CloudTrailLogsSourceCategoryName: !Ref CloudTrailLogsSourceCategoryName
+        SNSTopicArn: !Ref SNSTopicArn
+        SumoRoleArn: !Ref SumoRoleArn
+        SecurityToolingAccountRegion: !Ref SecurityToolingAccountRegion
+        LogArchivingAccountRegion: !Ref LogArchivingAccountRegion
+        ResourcePrefix: !Ref ResourcePrefix
+        ParentStackName: !Ref ParentStackName
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        

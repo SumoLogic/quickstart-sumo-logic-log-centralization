@@ -34,6 +34,13 @@ Parameters:
     Type: String
     Description: Organization log archive account ID
 
+  SumoAWSAccountID:
+    Description: "The AWS Account ID of Sumo Logic to collect logs from customer"
+    Type: String
+    AllowedPattern: '^\d{12}$'
+    ConstraintDescription: "Log archiving account ID cannot be empty. Must be 12 digits"
+    Default: "926226587429"
+
 
 Resources:
   rDeliveryKey:
@@ -59,11 +66,38 @@ Resources:
             Resource: "*"
             Sid: Allow GuardDuty to encrypt logs
 
+#policy for cloudtrail
+          - Sid: Allow CloudTrail to encrypt logs
+            Effect: Allow
+            Principal:
+              Service: "cloudtrail.amazonaws.com"
+            Action: kms:GenerateDataKey*
+            Resource: "*"
+            Condition:
+              StringLike:
+                "kms:EncryptionContext:aws:cloudtrail:arn": !Sub "arn:${AWS::Partition}:cloudtrail:*:${OrgPrimaryAccountId}:trail/*"
+
+          - Sid: Allow CloudTrail to decrypt log files
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Sub arn:${AWS::Partition}:iam::${OrgPrimaryAccountId}:root
+            Action: kms:Decrypt
+            Resource: "*"
+            Condition:
+              "Null":
+                "kms:EncryptionContext:aws:cloudtrail:arn": "false"
+          - Sid: Allow CloudTrail to describe key
+            Effect: Allow
+            Principal:
+              Service: "cloudtrail.amazonaws.com"
+            Action: kms:DescribeKey
+            Resource: "*"
           - Action: kms:CreateAlias
             Condition:
               StringEquals:
                 "kms:CallerAccount": !Sub ${AWS::AccountId}
-                "kms:ViaService": cloudformation.us-east-1.amazonaws.com
+                "kms:ViaService": !Sub "cloudformation.${AWS::Region}.amazonaws.com"
             Effect: Allow
             Principal:
               AWS: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:root
@@ -76,6 +110,7 @@ Resources:
               AWS:
                 - !Sub arn:${AWS::Partition}:iam::${LoggingAccountId}:root
                 - !Sub arn:${AWS::Partition}:iam::${OrgPrimaryAccountId}:root
+                - !Sub arn:${AWS::Partition}:iam::${SumoAWSAccountID}:root
             Resource: "*"
             Sid: Allow Log Archive and Primary account access
 
