@@ -208,6 +208,10 @@ Parameters:
     MaxLength: 100
     MinLength: 16
     Type: String
+  # Section1OrganizationUnitID:
+  #   Description: >
+  #     Organizational unit (OU) ID of Log Archiving Account and Organizational unit (OU) ID of Security Tooling Account. List separated by comma. If Log Archiving Account and Security Tooling Account are the same OU then just enter an ID. The elements in the list cannot be duplicated.
+  #   Type: String
 
   Section1DeliveryBucketPrefix:
     AllowedPattern: "^$|^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
@@ -392,6 +396,7 @@ Resources:
         SumoAccessKey: !Ref Section1SumoLogicAccessKey
         SumoOrganizationId: !Ref Section1SumoLogicOrganizationId
         RemoveSumoResourcesOnDeleteStack: !Ref Section1SumoLogicResourceRemoveOnDeleteStack
+        CollectorName: !Sub "aws-quickstart-collector-${AWS::StackName}"
         SecurityToolingAccountId: !Ref Section1SecurityToolingAccountId
         LoggingAccountId: !Ref Section1LogArchivingAccountId
         DeliveryBucketPrefix: !Ref Section1DeliveryBucketPrefix
@@ -448,7 +453,7 @@ Resources:
         RemoveSumoResourcesOnDeleteStack: !Ref Section1SumoLogicResourceRemoveOnDeleteStack
         InstallSumoGuardDutyApp: !If [install_sumo_guardduty_app, "Yes", "No"]
         InstallSumoGlobalGuardDutyApp: !If [install_sumo_global_guardduty_app, "Yes", "No"]
-        CollectorName: !Sub "aws-quickstart-collector" 
+        CollectorID: !GetAtt CommonOrgManagement.Outputs.SumoCollectorID 
         CreateHttpLogsSource: !If [create_guardduty_source, "Yes", "No"]
         HttpLogsSourceName: !Sub "aws-quickstart-guardduty"
         HttpLogsSourceCategoryName: !If [create_guardduty_source, "aws/quickstart/guardduty/logs", !Ref Section2GuardDutyHttpLogsSourceCategoryName]
@@ -484,6 +489,7 @@ Resources:
         SumoLogicAccessID: !Ref Section1SumoLogicAccessID
         SumoLogicAccessKey: !Ref Section1SumoLogicAccessKey
         SumoLogicResourceRemoveOnDeleteStack: !Ref Section1SumoLogicResourceRemoveOnDeleteStack
+        CollectorID: !GetAtt CommonOrgManagement.Outputs.SumoCollectorID
         ExecutionRoleRuleName: !GetAtt CommonOrgManagement.Outputs.ExecutionRoleRuleName
         CloudTrailRegions: !Ref CloudTrailRegions
         InstallCloudTrailApp: !Ref InstallCloudTrailApp

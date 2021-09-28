@@ -22,7 +22,7 @@ Metadata:
           - InstallCISFoundationApp
           - InstallCloudTrailMonitoringAnalyticsApp
           - InstallCloudTrailSecOpsApp
-          - CollectorName
+
 
       - Label:
           default: "App Details - CloudTrail Log Source Configuration"
@@ -68,8 +68,7 @@ Metadata:
         default: "Install Amazon CloudTrail - Sumo Cloud Security Monitoring and Analytics App"
       InstallCloudTrailSecOpsApp:
         default: "Install Sumo Global Intelligence for AWS CloudTrail SecOps App"
-      CollectorName:
-        default: "Collector Name"
+
 
       CloudTrailLogsBucketName:
         default: "AWS S3 Bucket Name"
@@ -129,6 +128,9 @@ Parameters:
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
 
+  CollectorID:
+    Type: String
+    Description: "ID of Sumo Hosted Collector"
 
   SumoRoleArn:
     Description: "ARN of Sumo Role that allow sumologic read data from s3 bucket"
@@ -179,10 +181,7 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  CollectorName:
-    Type: String
-    Description: Change the collector name to be created else default name will be used.
-    Default: AWS-Cloudtrail-Collector
+
 
   CloudTrailLogsBucketName:
     Type: String
@@ -228,13 +227,10 @@ Parameters:
     Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Type: "String"
 
-  ParentStackName:
-    Type: String
-    Default: "ParentStackName"
-    Description: Parent Stack Name. Do Not Edit the value.
+
 
 Conditions:
-  do_not_use_parent_stack: !Equals [ !Ref ParentStackName, "ParentStackName"]
+
 
   install_cloudtrail_app: !Equals [!Ref InstallCloudTrailApp, 'Yes']
   install_pci_cloudtrail_app: !Equals [!Ref InstallPCICloudTrailApp, 'Yes']
@@ -291,17 +287,7 @@ Resources:
 
 
 
-  SumoHostedCollector:
-    Type: Custom::Collector
-    Properties:
-      ServiceToken: !GetAtt SumoLogicHelperFunction.Arn
-      Region: !Ref LogArchivingAccountRegion
-      CollectorType: Hosted
-      RemoveOnDeleteStack: false
-      CollectorName: !Ref CollectorName
-      SumoAccessID: !Ref SumoAccessID
-      SumoAccessKey: !Ref SumoAccessKey
-      SumoDeployment: !Ref SumoDeployment
+
 
   sumoCloudTrailApp:
     Type: Custom::App
@@ -409,7 +395,7 @@ Resources:
       TargetBucketName: !Ref CloudTrailLogsBucketName
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       SourceCategory: !Ref CloudTrailLogsSourceCategoryName
-      CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
+      CollectorId: !Ref CollectorID
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment

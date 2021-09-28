@@ -138,6 +138,9 @@ Parameters:
     Description: "If this parameter is set to true, the collector, sources, and Sumo Logic apps are deleted.
                   If this parameter is set to false, then the collector, sources, and Sumo Logic apps are not deleted."
     Type: String
+  CollectorID:
+      Type: String
+      Description: "ID of Hosted Collector"
   # Organization parameters
   ExecutionRoleRuleName:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
@@ -284,12 +287,13 @@ Resources:
         SumoAccessID: !Ref SumoLogicAccessID
         SumoAccessKey: !Ref SumoLogicAccessKey
         RemoveSumoResourcesOnDeleteStack: !Ref SumoLogicResourceRemoveOnDeleteStack
+        CollectorID: !Ref CollectorID
         InstallCloudTrailApp: !Ref InstallCloudTrailApp
         InstallPCICloudTrailApp: !Ref InstallPCICloudTrailApp
         InstallCISFoundationApp: !Ref InstallCISFoundationApp
         InstallCloudTrailMonitoringAnalyticsApp: !Ref InstallCloudTrailMonitoringAnalyticsApp
         InstallCloudTrailSecOpsApp: !Ref InstallCloudTrailSecOpsApp
-        CollectorName: aws-quickstart-collector
+        
         CloudTrailLogsBucketName: !Ref CloudTrailLogsBucketName
         CloudTrailBucketPathExpression: !Ref CloudTrailBucketPathExpression
         CloudTrailLogsSourceCategoryName: !Ref CloudTrailLogsSourceCategoryName

@@ -28,7 +28,11 @@ Metadata:
       - Label:
           default: Delivery S3 Attributes
         Parameters:
-          - DeliveryBucketPrefix          
+          - DeliveryBucketPrefix 
+      - Label:
+          default: "Sumo Hosted Collector Name"
+        Parameters:
+          - CollectorName       
       - Label:
           default: "AWS Quick Start configuration"
         Parameters:
@@ -60,7 +64,9 @@ Metadata:
       AdministrationRoleName:
         default: "Administration Role Name"
       ExecutionRoleRuleName:
-        default: "Execution Role Name"       
+        default: "Execution Role Name" 
+      CollectorName:
+        default: "Name of Sumo Hosted Collector"      
       QSS3BucketName:
         default: "Quick Start S3 bucket name"
       QSS3BucketRegion:
@@ -128,6 +134,10 @@ Parameters:
       Delivery S3 bucket prefix.
       The account and region will get added to the end. e.g. log-delivery-123456789012-us-east-1
     Type: String
+  CollectorName:
+    Type: String
+    Description: "Name of Sumo Hosted Collector"
+    Default: "aws-quickstart-collector"
   QSS3BucketName:
     AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
@@ -483,6 +493,19 @@ Resources:
       stackName:  !Sub 'CommonOrgDeliveryS3Bucket-${AWS::StackName}'
       outputKey: oSumoRoleArn
 
+  # Create sumo hosted collector
+  SumoHostedCollector:
+    Type: Custom::Collector
+    Properties:
+      ServiceToken: !GetAtt rSumoLogicLambdaHelper.Arn
+      Region: !Ref LogArchivingAccountRegion
+      CollectorType: Hosted
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      CollectorName: !Ref CollectorName
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
+
 Outputs:
   StackName:
     Description: Name of Common Stack
@@ -529,5 +552,8 @@ Outputs:
   SumoRoleArn:
     Description: "Arn of Sumo Role for sumologic account to read data from s3 bucket of customer"
     Value: !GetAtt rSumoRoleArn.ARN
+  SumoCollectorID:
+    Description: "ID of Sumo Hosted Collector"
+    Value: !GetAtt SumoHostedCollector.COLLECTOR_ID
 
 

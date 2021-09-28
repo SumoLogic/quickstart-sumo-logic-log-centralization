@@ -18,7 +18,7 @@ Metadata:
         Parameters:
           - InstallSumoGuardDutyApp
           - InstallSumoGlobalGuardDutyApp
-          - CollectorName
+          - CollectorID
 
       - Label:
           default: "App Details - HTTP Logs Source Configuration"
@@ -73,8 +73,8 @@ Metadata:
         default: "Install Sumo Logic Amazon GuardDuty App"
       InstallSumoGlobalGuardDutyApp:
         default: "Install Sumo Logic Global Intelligence for Amazon GuardDuty"
-      CollectorName:
-        default: "Collector Name"
+      CollectorID:
+        default: "ID of Hosted Collector"
       CreateHttpLogsSource:
         default: "Create Sumo Logic HTTP Logs Source"
       HttpLogsSourceName:
@@ -169,10 +169,10 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  CollectorName:
+  CollectorID:
     Type: String
-    Description: Change the collector name to be created else default name will be used.
-    Default: AWS-GuardDuty-Collector
+    Description: Change the collector id of Sumo Hosted Collector
+
 
   CreateHttpLogsSource:
     Type: String
@@ -578,18 +578,7 @@ Resources:
       KMS_KEY_ARN: !Ref KMSKeyArn
       PUBLISHING_DESTINATION_BUCKET_ARN: !Sub arn:${AWS::Partition}:s3:::${PublishingDestinationBucketName}
 
-  SumoHostedCollector:
-    Type: Custom::Collector
-    Condition: install_http_logs_source
-    Properties:
-      ServiceToken: !If [ do_not_use_parent_stack, !GetAtt rSumoLogicHelperFunction.Arn, !Ref ParentHelperFunctionArn ]
-      Region: !Ref LogArchivingAccountRegion
-      CollectorType: Hosted
-      RemoveOnDeleteStack: false
-      CollectorName: !Ref CollectorName
-      SumoAccessID: !Ref SumoAccessID
-      SumoAccessKey: !Ref SumoAccessKey
-      SumoDeployment: !Ref SumoDeployment
+
 
   SumoHTTPSource:
     Condition: install_http_logs_source
@@ -600,7 +589,7 @@ Resources:
       SourceName: !Ref HttpLogsSourceName
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       SourceCategory: !Ref HttpLogsSourceCategoryName
-      CollectorId: !GetAtt SumoHostedCollector.COLLECTOR_ID
+      CollectorId: !Ref CollectorID
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
