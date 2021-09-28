@@ -67,12 +67,7 @@ Metadata:
         default: Lambda Function Name
       pLambdaExecutionRoleName:
         default: Lambda Execution Role Name
-      # pLambdaS3BucketName:
-      #   default: Lambda S3 Bucket Name
-      # pLambdaZipFileName:
-      #   default: Lambda Zip File Name
-      # pLogLevel:
-      #   default: Log Level
+        
       pOrganizationCloudTrailKMSKey:
         default: Organization CloudTrail KMS Key
       pResourceNamePrefix:
@@ -397,7 +392,7 @@ Resources:
     Properties:
       ServiceToken: !GetAtt rLambdaFunction.Arn
       AWS_PARTITION: !Sub ${AWS::Partition}
-      CLOUDTRAIL_NAME: !Sub "${pCloudTrailName}-${AWS::Region}"
+      CLOUDTRAIL_NAME: !Sub "${pCloudTrailName}-${ResourcePrefix}-${AWS::Region}"
       CLOUDWATCH_LOG_GROUP_ARN: !If [cCreateCloudWatchLogGroup, !GetAtt rCloudTrailLogGroup.Arn, '']
       CLOUDWATCH_LOG_GROUP_ROLE_ARN: !If [cCreateCloudWatchLogGroup, !GetAtt rCloudTrailLogGroupRole.Arn, '']
       ENABLE_DATA_EVENTS_ONLY: !Ref pEnableDataEventsOnly
