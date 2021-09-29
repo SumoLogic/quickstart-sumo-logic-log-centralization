@@ -185,6 +185,7 @@ Parameters:
   SecurityToolingAccountRegion:
     Description: "Enter your security tooling account region"
     Type: String
+    Default: us-east-1
 
   Section1LogArchivingAccountId:
     Description: "Enter your log archiving account ID"
@@ -195,6 +196,7 @@ Parameters:
   LogArchivingAccountRegion:
     Description: "Enter your log archiving account region"
     Type: String
+    Default: us-east-1
 
   Section1OrganizationID:
     AllowedPattern: '^o-[a-z0-9]{10,32}$'
@@ -278,7 +280,7 @@ Parameters:
     Type: String
   Section2GuardDutyRegions:
     Description: Comma delimited list of regions to enable GuardDuty. Leave blank to enable all regions.
-    Default: 'us-east-1, us-east-2'
+    Default: 'us-east-1,us-east-2'
     Type: String
 
   # CloudTrail parameters
@@ -456,6 +458,8 @@ Resources:
         - S3Region: !Ref 'AWS::Region'
           S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'           
       Parameters:
+        AdministrationRoleArn: !GetAtt CommonOrgManagement.Outputs.AdministrationRoleArn
+        ExecutionRoleRuleName: !Sub 'ExecutionRole-${AWS::StackName}'
         SumoDeployment: !Ref Section1SumoLogicDeployment
         SumoAccessID: !Ref Section1SumoLogicAccessID
         SumoAccessKey: !Ref Section1SumoLogicAccessKey

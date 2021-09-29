@@ -297,7 +297,7 @@ Resources:
                   - guardduty:ListDetectors
                   - guardduty:ListOrganizationAdminAccounts
                 Effect: Allow
-                Resource: "*"
+                Resource: !Sub "arn:${AWS::Partition}:guardduty:*:*:*"
                 Sid: GuardDutyNoResource
 
               - Action:
@@ -336,7 +336,9 @@ Resources:
 
             - Action: sts:AssumeRole
               Effect: Allow
-              Resource: "*"
+              Resource: 
+                - !Sub arn:*:guardduty:*:${AWS::AccountId}:admin/*
+                - !Sub arn:*:iam::*:role/*
               Sid: AssumeRole             
               
   rSumoLogicLambdaHelper:
