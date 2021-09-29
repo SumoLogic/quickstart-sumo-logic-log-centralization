@@ -20,6 +20,7 @@ Metadata:
           - LogArchivingAccountRegion
           - Section1OrganizationID
           - Section1OrganizationUnitID
+          - LoggingOrganizationUnitID
       - Label:
           default: "1.2 S3 Delivery Bucket configuration (required)"
         Parameters:
@@ -86,7 +87,9 @@ Metadata:
       Section1OrganizationID:
         default: "AWS Organizations ID"
       Section1OrganizationUnitID:
-        default: "Organization unit (OU) ID"
+        default: "Organization unit (OU) ID of security tooling account"
+      LoggingOrganizationUnitID:
+        default: "Organization unit (OU) ID of log archiving account"
       Section1DeliveryBucketPrefix:
         default: "Delivery Bucket Prefix"
 
@@ -203,15 +206,20 @@ Parameters:
 
   Section1OrganizationUnitID:
     Description: >
-      Organizational unit (OU) ID - A string that begins with "ou-" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second "-" dash and from 8 to 32 additional lowercase letters or digits  
+      Organizational unit (OU) ID of Security Tooling Account where KMS will install - A string that begins with "ou-" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second "-" dash and from 8 to 32 additional lowercase letters or digits  
     AllowedPattern: '^ou-[0-9a-z]{4,32}-[a-z0-9]{8,32}$'
     MaxLength: 100
     MinLength: 16
     Type: String
-  # Section1OrganizationUnitID:
-  #   Description: >
-  #     Organizational unit (OU) ID of Log Archiving Account and Organizational unit (OU) ID of Security Tooling Account. List separated by comma. If Log Archiving Account and Security Tooling Account are the same OU then just enter an ID. The elements in the list cannot be duplicated.
-  #   Type: String
+
+  LoggingOrganizationUnitID:
+    Description: >
+      Organizational unit (OU) ID of log archiving account where S3 bucket will install - A string that begins with "ou-" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second "-" dash and from 8 to 32 additional lowercase letters or digits  
+    AllowedPattern: '^ou-[0-9a-z]{4,32}-[a-z0-9]{8,32}$'
+    MaxLength: 100
+    MinLength: 16
+    Type: String
+
 
   Section1DeliveryBucketPrefix:
     AllowedPattern: "^$|^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
@@ -388,6 +396,7 @@ Resources:
         AdministrationRoleName: !Sub 'AdministrationRole-${AWS::StackName}'
         ExecutionRoleRuleName: !Sub 'ExecutionRole-${AWS::StackName}'
         OrganizationUnitID: !Ref Section1OrganizationUnitID
+        LoggingOrganizationUnitID: !Ref LoggingOrganizationUnitID
         QSS3BucketName: !Ref QSS3BucketName  
         QSS3BucketRegion: !Ref QSS3BucketRegion 
         QSS3KeyPrefix: !Ref QSS3KeyPrefix

@@ -302,7 +302,7 @@ Resources:
         SecurityToolingAccountRegion: !Ref SecurityToolingAccountRegion
         LogArchivingAccountRegion: !Ref LogArchivingAccountRegion
         ResourcePrefix: !Ref ResourcePrefix
-        ParentStackName: !Ref ParentStackName
+
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         
