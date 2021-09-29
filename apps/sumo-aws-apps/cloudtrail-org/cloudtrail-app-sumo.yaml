@@ -282,6 +282,16 @@ Resources:
           - Arn
 
 
+  sumoAppWaitHandle:
+    Type: "AWS::CloudFormation::WaitConditionHandle"
+
+  sumoCloudTrailAppWaitCondition:
+    Condition: install_cloudtrail_app
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !Ref sumoAppWaitHandle
+      Timeout: "5"
+      Count: 0
 
 
 
@@ -300,6 +310,15 @@ Resources:
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
 
+
+  sumoPCICloudTrailAppWaitCondition:
+    Condition: install_pci_cloudtrail_app
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !Ref sumoAppWaitHandle
+      Timeout: "15"
+      Count: 0
+
   sumoPCICloudTrailApp:
     Type: Custom::App
     Condition: install_pci_cloudtrail_app
@@ -315,6 +334,16 @@ Resources:
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
 
+
+  sumoCISFoundationsAppWaitCondition:
+    Condition: install_cis_foundation_app
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !Ref sumoAppWaitHandle
+      Timeout: "25"
+      Count: 0
+
+
   sumoCISFoundationsApp:
     Type: Custom::App
     Condition: install_cis_foundation_app
@@ -329,6 +358,15 @@ Resources:
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
+
+  sumMonitoringAnalyticsAppWaitCondition:
+    Condition: install_cloudtrail_monitoring_analytics_app
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !Ref sumoAppWaitHandle
+      Timeout: "35"
+      Count: 0
+
   sumMonitoringAnalyticsApp:
     Type: Custom::App
     Condition: install_cloudtrail_monitoring_analytics_app
@@ -343,6 +381,14 @@ Resources:
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
+      
+  sumSecOpsAppWaitCondition:
+    Condition: install_cloudtrail_secops_app
+    Type: "AWS::CloudFormation::WaitCondition"
+    Properties:
+      Handle: !Ref sumoAppWaitHandle
+      Timeout: "45"
+      Count: 0
 
   sumSecOpsApp:
     Type: Custom::App

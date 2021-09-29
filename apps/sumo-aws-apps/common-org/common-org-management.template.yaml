@@ -186,7 +186,8 @@ Parameters:
     Type: String
     Default: AWSCloudFormationStackSetExecutionRole
 
-
+Conditions:
+  same_ou: !Equals [ !Ref OrganizationUnitID, !Ref LoggingOrganizationUnitID ]
 
 Resources:
 #Role for management account
@@ -380,16 +381,25 @@ Resources:
         - 'CAPABILITY_IAM'
         - 'CAPABILITY_AUTO_EXPAND'
       StackInstancesGroup:
-        - Regions:
-            - !Ref AWS::Region
-          DeploymentTargets:
-              OrganizationalUnitIds: 
-                - !Ref OrganizationUnitID       
-        - Regions:
-            - !Ref AWS::Region
-          DeploymentTargets:
-              OrganizationalUnitIds: 
-                - !Ref LoggingOrganizationUnitID
+        !If 
+          - same_ou
+          -
+            - Regions:
+                - !Ref AWS::Region
+              DeploymentTargets:
+                  OrganizationalUnitIds: 
+                    - !Ref OrganizationUnitID
+          -
+            - Regions:
+                - !Ref AWS::Region
+              DeploymentTargets:
+                  OrganizationalUnitIds: 
+                    - !Ref OrganizationUnitID       
+            - Regions:
+                - !Ref AWS::Region
+              DeploymentTargets:
+                  OrganizationalUnitIds: 
+                    - !Ref LoggingOrganizationUnitID
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/common-org/common-org-trust-all.template.yaml'
         - S3Region: !Ref 'AWS::Region'
