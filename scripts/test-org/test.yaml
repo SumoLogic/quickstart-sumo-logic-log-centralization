@@ -1,0 +1,73 @@
+---
+Global:
+  TemplatePath: "../../templates/master-org.template.yaml"
+  TestProjectName: MasterTemplate
+  ParallelTestsRun: 4
+Tests:
+    # with all new
+  - TestName: AllResources
+    Regions:
+      - '${REGION_STACK}'
+    Skip: false
+    SkipDelete: false
+    Parameters:
+      Values:
+        Section1aSumoLogicDeployment: '${ENTERPRISE_DEPLOYMENT}'
+        Section1bSumoLogicAccessID: '${ENTERPRISE_ACCESS_ID}'
+        Section1cSumoLogicAccessKey: '${ENTERPRISE_ACCESS_KEY}'
+        Section1dSumoLogicOrganizationId: '${ENTERPRISE_ORG_ID}'
+        QSS3BucketName: '${QSS3BucketName}'
+        Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
+        # Organization
+        Section1SecurityToolingAccountId: '${TOOLING_ACCOUNT_ID}'
+        SecurityToolingAccountRegion: '${TOOLING_LOGGING_REGION}'
+        Section1LogArchivingAccountId: '${LOGGING_ACCOUNT_ID}'
+        LogArchivingAccountRegion: '${TOOLING_LOGGING_REGION}'
+        Section1OrganizationID: '${ORG_ID}'
+        Section1OrganizationUnitID: '${TOOLING_OU}'
+        LoggingOrganizationUnitID: '${LOGGING_OU}'
+        # Cloudtrail
+        CloudTrailRegions: '${CLOUDTRAIL_GUARDDUTY_REGIONS}'
+        InstallCloudTrailApp: 'Yes'
+        InstallPCICloudTrailApp: 'Yes'
+        InstallCISFoundationApp: 'Yes'
+        InstallCloudTrailMonitoringAnalyticsApp: 'Yes'
+        InstallCloudTrailSecOpsApp: 'Yes'
+        #guardduty
+        Section1DeliveryBucketPrefix: "${RESOURCE_PREFIX}"
+        Section2InstallSumoGuardDutyApps: 'Both'
+        Section2InstallAWSGuardDutyApp: 'Yes'
+        Section2AutoEnableS3Logs: 'true'
+        Section2GuardDutyRegions: '${CLOUDTRAIL_GUARDDUTY_REGIONS}'
+        Section2GuardDutyCreateHttpLogsSource: 'Yes'
+
+
+    Assertions:
+      - AssertType: ResourceExistence
+        Assert:
+          Resources:
+            - WaitHandle,
+            - CommonOrgManagement.rAdministrationRole,
+            - CommonOrgManagement.rExecutionRole,
+            - CommonOrgManagement.rSumoLogicHelperRole,
+            - CommonOrgManagement.rSumoLogicLambdaHelper,
+            - CommonOrgManagement.OrgTrustAllStackset,
+            - CommonOrgManagement.OrgDeliveryKmsKeyStackset,
+            - CommonOrgManagement.rOrgDeliveryKMSKeyArn,
+            - CommonOrgManagement.OrgDeliveryS3BucketStackset,
+            - CommonOrgManagement.rDeliveryS3BucketArn,
+            - CommonOrgManagement.rSNSTopicArn,
+            - CommonOrgManagement.rSumoRoleArn,
+            - CommonOrgManagement.SumoHostedCollector,
+      - AssertType: OutputsCheck
+        Assert:
+          Outputs:
+            - CreateCommonResources.BucketName,
+
+      - AssertType: ParameterCheck
+        Assert:
+          CreateCommonResources:
+            CreateBucket: "Yes"
+            CreateCollector: "Yes"
+            CreateTrail: "Yes"
+
