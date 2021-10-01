@@ -8,13 +8,13 @@
     # pip install sumologic-cfn-tester
 
 # sh uploadToS3.sh and provide the bucket details below
-region_stack="us-east-1"    #region where create stack
-bucket_name="aspin2cloudtrail"
-declare -a regions=("us-east-1" "us-east-2") #multi regions for cloudtrail and guardduty
-repo_dir_path="/media/truecrypt1/quickstart-sumo-logic-log-centralization/"
-tooling_logging_region="us-east-2"
 
-resource_prefix="org-test-1748"
+bucket_name="aspin2cloudtrail"
+declare -a regions=("us-west-1" "us-west-2") #multi regions for cloudtrail and guardduty
+repo_dir_path="/home/phunhb/MTT/quickstart-sumo-logic-log-centralization/"
+tooling_logging_region="us-west-2"
+
+resource_prefix="org-test-0800" #you should change every when run test.
 
 aws s3 cp "$repo_dir_path" s3://${bucket_name}-${region_stack}/quickstart-sumo-logic-log-centralization/ --recursive --exclude '.git/*' --exclude '.idea/*' --exclude 'docs/*' --exclude 'scripts/*' --acl public-read
 

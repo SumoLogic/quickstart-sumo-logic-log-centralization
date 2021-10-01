@@ -1,23 +1,24 @@
 ---
 Global:
-  TemplatePath: "../../templates/master-org.template.yaml"
+  TemplatePath: "../../templates/master-org.teamplate.yaml"
   TestProjectName: MasterTemplate
-  ParallelTestsRun: 4
+  ParallelTestsRun: 1
 Tests:
     # with all new
-  - TestName: AllResources
+    # should change name of TestName when you run again.
+  - TestName: AllResources01  
     Regions:
-      - '${REGION_STACK}'
+      - 'us-west-1'
     Skip: false
     SkipDelete: false
     Parameters:
       Values:
-        Section1aSumoLogicDeployment: '${ENTERPRISE_DEPLOYMENT}'
-        Section1bSumoLogicAccessID: '${ENTERPRISE_ACCESS_ID}'
-        Section1cSumoLogicAccessKey: '${ENTERPRISE_ACCESS_KEY}'
-        Section1dSumoLogicOrganizationId: '${ENTERPRISE_ORG_ID}'
+        Section1SumoLogicDeployment: '${ENTERPRISE_DEPLOYMENT}'
+        Section1SumoLogicAccessID: '${ENTERPRISE_ACCESS_ID}'
+        Section1SumoLogicAccessKey: '${ENTERPRISE_ACCESS_KEY}'
+        Section1SumoLogicOrganizationId: '${ENTERPRISE_ORG_ID}'
         QSS3BucketName: '${QSS3BucketName}'
-        Section1eSumoLogicResourceRemoveOnDeleteStack: 'true'
+        Section1SumoLogicResourceRemoveOnDeleteStack: 'true'
         # Organization
         Section1SecurityToolingAccountId: '${TOOLING_ACCOUNT_ID}'
         SecurityToolingAccountRegion: '${TOOLING_LOGGING_REGION}'
@@ -46,28 +47,48 @@ Tests:
       - AssertType: ResourceExistence
         Assert:
           Resources:
-            - WaitHandle,
-            - CommonOrgManagement.rAdministrationRole,
-            - CommonOrgManagement.rExecutionRole,
-            - CommonOrgManagement.rSumoLogicHelperRole,
-            - CommonOrgManagement.rSumoLogicLambdaHelper,
-            - CommonOrgManagement.OrgTrustAllStackset,
-            - CommonOrgManagement.OrgDeliveryKmsKeyStackset,
-            - CommonOrgManagement.rOrgDeliveryKMSKeyArn,
-            - CommonOrgManagement.OrgDeliveryS3BucketStackset,
-            - CommonOrgManagement.rDeliveryS3BucketArn,
-            - CommonOrgManagement.rSNSTopicArn,
-            - CommonOrgManagement.rSumoRoleArn,
-            - CommonOrgManagement.SumoHostedCollector,
+            - WaitHandle
+            - CommonOrgManagement.rAdministrationRole
+            - CommonOrgManagement.rExecutionRole
+            - CommonOrgManagement.rSumoLogicHelperRole
+            - CommonOrgManagement.rSumoLogicLambdaHelper
+            - CommonOrgManagement.OrgTrustAllStackset
+            - CommonOrgManagement.OrgDeliveryKmsKeyStackset
+            - CommonOrgManagement.rOrgDeliveryKMSKeyArn
+            - CommonOrgManagement.OrgDeliveryS3BucketStackset
+            - CommonOrgManagement.rDeliveryS3BucketArn
+            - CommonOrgManagement.rSNSTopicArn
+            - CommonOrgManagement.rSumoRoleArn
+            - CommonOrgManagement.SumoHostedCollector
+            - GuardDutyDeleteDetectorRoleStackset
+            - GuardDutyConfigurationStack.rConfigurationRole
+            - GuardDutyConfigurationStack.OrgSumoCloudWatchEventFunctionStackset
+            - GuardDutyConfigurationStack.rAWSGuardDutyCustomResource
+            - GuardDutyConfigurationStack.SumoHTTPSource
+            - GuardDutyConfigurationStack.sumoGuardDutyApp
+            - GuardDutyConfigurationStack.sumoGlobalGuardDutyApp
+            - CloudtrailStack.CloudtrailResoucesStackset
+            - CloudtrailStack.CreateSumoApps.SumoLogicHelperRole
+            - CloudtrailStack.CreateSumoApps.SumoLogicHelperFunction
+            - CloudtrailStack.CreateSumoApps.sumoCloudTrailApp
+            - CloudtrailStack.CreateSumoApps.sumoPCICloudTrailApp
+            - CloudtrailStack.CreateSumoApps.sumoCISFoundationsApp
+            - CloudtrailStack.CreateSumoApps.sumMonitoringAnalyticsApp
+            - CloudtrailStack.CreateSumoApps.sumSecOpsApp
+            - CloudtrailStack.CreateSumoApps.SumoSNSSubscription
+            - CloudtrailStack.CreateSumoApps.SumoCloudTrailSource
       - AssertType: OutputsCheck
         Assert:
           Outputs:
-            - CreateCommonResources.BucketName,
-
-      - AssertType: ParameterCheck
-        Assert:
-          CreateCommonResources:
-            CreateBucket: "Yes"
-            CreateCollector: "Yes"
-            CreateTrail: "Yes"
+            - CommonOrgManagement.StackName
+            - CommonOrgManagement.AdministrationRoleArn
+            - CommonOrgManagement.ExecutionRoleRuleName
+            - CommonOrgManagement.ExecutionRoleArn
+            - CommonOrgManagement.SumoLogicLambdaHelperARN
+            - CommonOrgManagement.SumoLogicHelperRoleARN
+            - CommonOrgManagement.OrgDeliveryKMSKeyArn
+            - CommonOrgManagement.SNSTopicArn
+            - CommonOrgManagement.OrgDeliveryS3BucketArn
+            - CommonOrgManagement.SumoRoleArn
+            - CommonOrgManagement.SumoCollectorID
 
