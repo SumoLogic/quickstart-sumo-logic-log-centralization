@@ -202,6 +202,19 @@ class SumoLogic(object):
         }
         return self.post('/content/folders', params=content, version='v2')
 
+    def get_children_folder(self, folder_id):
+        r = self.get('/content/folders/%s' % folder_id, version='v2')
+        return json.loads(r.text)['children']
+
+    def folder_not_exist(self, folder_id):
+        endpoint = self.get_versioned_endpoint('v2')
+        r = self.session.get(endpoint + '/content/folders/' + folder_id, params=None)
+        return "Content with the given ID does not exist." in r.text
+
+    def get_parent_folder_id(self, folder_id):
+        r = self.get('/content/folders/%s' % folder_id, version='v2')
+        return json.loads(r.text)['parentId'] 
+
     def get_personal_folder(self):
         return self.get('/content/folders/personal', version='v2')
 

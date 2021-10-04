@@ -27,7 +27,9 @@ Metadata:
       - Label:
           default: "2.1 GuardDuty App configuration"
         Parameters:
-          - Section2InstallSumoGuardDutyApps 
+          - Section2InstallSumoGuardDutyApp
+          - Section2InstallSumoGlobalGuardDutyApp
+          - Section2InstallSumoCloudSecurityMonitoringandAnalyticsGuardDutyApp
           - Section2InstallAWSGuardDutyApp
       - Label:
           default: "2.2 GuardDuty Attributes"
@@ -91,10 +93,14 @@ Metadata:
         default: "Delivery Bucket Prefix"
 
       # GuardDuty apps parameters
+      Section2InstallSumoGuardDutyApp:
+        default: "Install Sumo Logic Amazon GuardDuty App"
+      Section2InstallSumoGlobalGuardDutyApp:
+        default: "Install Sumo Logic Global Intelligence for Amazon GuardDuty"
+      Section2InstallSumoCloudSecurityMonitoringandAnalyticsGuardDutyApp:
+        default: "Install Sumo Logic Cloud Security Monitoring and Analytics for Amazon GuardDuty"
       Section2InstallAWSGuardDutyApp:
-        default: "Install AWS GuardDuty app"
-      Section2InstallSumoGuardDutyApps:
-        default: "Install Sumo Logic GuardDuty app"       
+        default: "Install AWS GuardDuty app"    
       Section2GuardDutyCreateHttpLogsSource:
         default: "Create Sumo Logic HTTP logs source"
       Section2GuardDutyHttpLogsSourceCategoryName:
@@ -231,18 +237,30 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'  
-  Section2InstallSumoGuardDutyApps:
+  Section2InstallSumoGuardDutyApp:
     Type: String
-    Description: "GuardDuty: Install Sumo Amazon GuardDuty app.
-                  GlobalGuardDutyApp: Install Sumo Global Intelligence for Amazon GuardDuty app.
-                  Both: Install both apps.
-                  Skip: Skip installation of apps."
-    Default: 'Both'
+    Description: "Yes -> To Install Amazon GuardDuty App in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
     AllowedValues:
-      - 'GuardDuty'
-      - 'GlobalGuardDuty'
-      - 'Both'
-      - 'Skip'
+      - 'Yes'
+      - 'No'
+  Section2InstallSumoGlobalGuardDutyApp:
+    Type: String
+    Description: "Yes -> To Install Global Intelligence for Amazon GuardDuty in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section2InstallSumoCloudSecurityMonitoringandAnalyticsGuardDutyApp:
+    Type: String
+    Description: "Yes -> To Install Cloud Security Monitoring and Analytics for Amazon GuardDuty in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No' 
   Section2GuardDutyCreateHttpLogsSource:
     Type: String
     Description: "Yes: Create Sumo Logic HTTP log source to collect GuardDuty logs.
@@ -346,19 +364,11 @@ Parameters:
 
 Conditions:
 
-
-  # Conditions for GuardDuty apps
-  install_sumo_guardduty_app: !Or
-    - !Equals [ !Ref Section2InstallSumoGuardDutyApps, 'GuardDuty' ]
-    - !Equals [ !Ref Section2InstallSumoGuardDutyApps, 'Both' ]
-  install_sumo_global_guardduty_app: !Or
-    - !Equals [ !Ref Section2InstallSumoGuardDutyApps, 'GlobalGuardDuty' ]
-    - !Equals [ !Ref Section2InstallSumoGuardDutyApps, 'Both' ]
-
   # Conditions for calling child stack of each app if any resource create condition is true.
   call_guardduty_stack: !Or
-    - !Condition install_sumo_guardduty_app
-    - !Condition install_sumo_global_guardduty_app
+    - !Equals [ !Ref Section2InstallSumoGuardDutyApp, 'Yes' ]
+    - !Equals [ !Ref Section2InstallSumoGlobalGuardDutyApp, 'Yes' ]
+    - !Equals [ !Ref Section2InstallSumoCloudSecurityMonitoringandAnalyticsGuardDutyApp, 'Yes' ]
     - !Equals [ !Ref Section2GuardDutyCreateHttpLogsSource, 'Yes' ]
     - !Equals [ !Ref Section2InstallAWSGuardDutyApp, 'Yes' ]
     
@@ -419,12 +429,13 @@ Resources:
         SumoAccessID: !Ref Section1SumoLogicAccessID
         SumoAccessKey: !Ref Section1SumoLogicAccessKey
         RemoveSumoResourcesOnDeleteStack: !Ref Section1SumoLogicResourceRemoveOnDeleteStack
-        InstallSumoGuardDutyApp: !If [install_sumo_guardduty_app, "Yes", "No"]
-        InstallSumoGlobalGuardDutyApp: !If [install_sumo_global_guardduty_app, "Yes", "No"]
+        InstallSumoGuardDutyApp: !Ref Section2InstallSumoGuardDutyApp
+        InstallSumoGlobalGuardDutyApp: !Ref Section2InstallSumoGlobalGuardDutyApp
+        InstallSumoCloudSecurityMonitoringandAnalyticsGuardDutyApp: !Ref Section2InstallSumoCloudSecurityMonitoringandAnalyticsGuardDutyApp
         CollectorID: !GetAtt CommonOrgManagement.Outputs.SumoCollectorID 
-        CreateHttpLogsSource: !If [create_guardduty_source, "Yes", "No"]
+        CreateHttpLogsSource: !Ref Section2GuardDutyCreateHttpLogsSource
         HttpLogsSourceName: !Sub "aws-quickstart-guardduty"
-        HttpLogsSourceCategoryName: !If [create_guardduty_source, "aws/quickstart/guardduty/logs", !Ref Section2GuardDutyHttpLogsSourceCategoryName]
+        HttpLogsSourceCategoryName: !Ref Section2GuardDutyHttpLogsSourceCategoryName
         InstallAWSGuardDutyApp: !Ref Section2InstallAWSGuardDutyApp
         AutoEnableS3Logs: !Ref Section2AutoEnableS3Logs
         ConfigurationRoleName: !Sub 'ConfigurationRole-${AWS::StackName}'

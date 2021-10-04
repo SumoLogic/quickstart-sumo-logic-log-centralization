@@ -18,6 +18,7 @@ Metadata:
         Parameters:
           - InstallSumoGuardDutyApp
           - InstallSumoGlobalGuardDutyApp
+          - InstallSumoCloudSecurityMonitoringandAnalyticsGuardDutyApp
           - CollectorID
 
       - Label:
@@ -76,6 +77,8 @@ Metadata:
         default: "Install Sumo Logic Amazon GuardDuty App"
       InstallSumoGlobalGuardDutyApp:
         default: "Install Sumo Logic Global Intelligence for Amazon GuardDuty"
+      InstallSumoCloudSecurityMonitoringandAnalyticsGuardDutyApp:
+        default: "Install Sumo Logic Cloud Security Monitoring and Analytics for Amazon GuardDuty"
       CollectorID:
         default: "ID of Hosted Collector"
       CreateHttpLogsSource:
@@ -173,6 +176,14 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
+  InstallSumoCloudSecurityMonitoringandAnalyticsGuardDutyApp:
+    Type: String
+    Description: "Yes -> To Install Cloud Security Monitoring and Analytics for Amazon GuardDuty in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'  
   CollectorID:
     Type: String
     Description: Change the collector id of Sumo Hosted Collector
@@ -302,6 +313,7 @@ Conditions:
   install_aws_guardduty_app: !Equals [!Ref InstallAWSGuardDutyApp, 'Yes']
   install_sumo_global_guardduty_app: !Equals [!Ref InstallSumoGlobalGuardDutyApp, 'Yes']
   install_http_logs_source: !Equals [!Ref CreateHttpLogsSource, 'Yes']
+  install_sumo_cloud_security_monitoring_and_analytics_app: !Equals [!Ref InstallSumoCloudSecurityMonitoringandAnalyticsGuardDutyApp, 'Yes']
 
 Resources:
   rConfigurationRole:
@@ -513,6 +525,21 @@ Resources:
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       AppSources:
         gdbenchmark: !Sub "_sourceCategory=${HttpLogsSourceCategoryName}"
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
+
+  sumoGuardDutyCloudSecurityMonitoringandAnalyticsApp:
+    Type: Custom::App
+    Condition: install_sumo_cloud_security_monitoring_and_analytics_app
+    Properties:
+      ServiceToken: !Ref ParentHelperFunctionArn
+      Region: !Ref LogArchivingAccountRegion
+      AppName: "Amazon QuickStart - Cloud Security Monitoring and Analytics for Amazon GuardDuty"
+      AppId: "9a2b2aa3-b747-45c6-896e-4b3bec3d2e9e"
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      AppSources:
+        gdlogsrc: !Sub "_sourceCategory=${HttpLogsSourceCategoryName}"
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment

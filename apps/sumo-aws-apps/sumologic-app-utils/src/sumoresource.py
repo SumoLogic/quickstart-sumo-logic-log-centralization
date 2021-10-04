@@ -623,8 +623,34 @@ class App(SumoResource):
 
     def delete(self, app_folder_id, remove_on_delete_stack, *args, **kwargs):
         if remove_on_delete_stack:
+            parent_folder_id = self.sumologic_cli.get_parent_folder_id(app_folder_id)
             response = self.sumologic_cli.delete_folder(app_folder_id)
             print("deleting app folder %s : %s" % (app_folder_id, response.text))
+            waiting = False
+            while (waiting==False):
+                waiting = self.sumologic_cli.folder_not_exist(app_folder_id)
+                if (waiting==False):
+                    print("waiting delete app folder %s" % app_folder_id)
+                else:
+                    print("deleted app folder %s" % app_folder_id)
+                time.sleep(5)
+            if len(parent_folder_id) > 0:
+                print("app folder %s in parent folder %s" % (app_folder_id, parent_folder_id))
+                children_folder = self.sumologic_cli.get_children_folder(parent_folder_id)
+                if len(children_folder) > 0:
+                    print("parent folder %s has %s children" % (parent_folder_id, str(len(children_folder))))
+                else:                   
+                    print("parent folder %s no children" % parent_folder_id)
+                    response = self.sumologic_cli.delete_folder(parent_folder_id)
+                    print("deleting parent folder %s" % parent_folder_id)
+                    waiting = False
+                    while (waiting==False):
+                        waiting = self.sumologic_cli.folder_not_exist(parent_folder_id)
+                        if (waiting==False):
+                            print("waiting delete parent folder %s" % parent_folder_id)
+                        else:
+                            print("deleted parent folder %s" % parent_folder_id)
+                        time.sleep(5)
         else:
             print("skipping app folder deletion")
 
