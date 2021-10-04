@@ -235,7 +235,7 @@ class GuardDuty(AWSResource):
 
         self.CLOUDFORMATION_PARAMETERS = ["AUTO_ENABLE_S3_LOGS", "AWS_PARTITION", "CONFIGURATION_ROLE_NAME",
                                     "DELEGATED_ADMIN_ACCOUNT_ID", "DELETE_DETECTOR_ROLE_NAME", "ENABLED_REGIONS",
-                                    "FINDING_PUBLISHING_FREQUENCY", "KMS_KEY_ARN", "PUBLISHING_DESTINATION_BUCKET_ARN"]
+                                    "FINDING_PUBLISHING_FREQUENCY"]
         self.SERVICE_ROLE_NAME = "AWSServiceRoleForAmazonGuardDuty"
         self.SERVICE_NAME = "guardduty.amazonaws.com"
         self.PAGE_SIZE = 20  # Max page size for list_accounts
@@ -430,7 +430,7 @@ class GuardDuty(AWSResource):
             raise ValueError(f"Error updating GuardDuty configuration")
 
     def configure_guardduty(self, session, delegated_account_id: str, auto_enable_s3_logs: bool, available_regions: list,
-                            finding_publishing_frequency: str, kms_key_arn: str, publishing_destination_arn: str):
+                            finding_publishing_frequency: str):
 
         accounts, account_ids = self.get_all_organization_accounts(delegated_account_id)
 
@@ -443,32 +443,6 @@ class GuardDuty(AWSResource):
                 if detectors["DetectorIds"]:
                     detector_id = detectors["DetectorIds"][0]
                     logger.info(f"DetectorID: {detector_id} Region: {region}")
-
-                    # Update Publish Destination
-                    destinations = regional_guardduty.list_publishing_destinations(DetectorId=detector_id)
-
-                    if "Destinations" in destinations and len(destinations["Destinations"]) == 1:
-                        destination_id = destinations["Destinations"][0]["DestinationId"]
-
-                        regional_guardduty.update_publishing_destination(
-                            DetectorId=detector_id,
-                            DestinationId=destination_id,
-                            DestinationProperties={
-                                "DestinationArn": publishing_destination_arn,
-                                "KmsKeyArn": kms_key_arn,
-                            },
-                        )
-                    else:
-                        # Create Publish Destination
-                        regional_guardduty.create_publishing_destination(
-                            DetectorId=detector_id,
-                            DestinationType="S3",
-                            DestinationProperties={
-                                "DestinationArn": publishing_destination_arn,
-                                "KmsKeyArn": kms_key_arn,
-                            },
-                        )
-
                     # Create members for existing Organization accounts
                     logger.info(f"Members created for existing accounts: {accounts} in {region}")
                     self.gd_create_members(regional_guardduty, detector_id, accounts)
@@ -679,9 +653,7 @@ class GuardDuty(AWSResource):
                     params.get("DELEGATED_ADMIN_ACCOUNT_ID", ""),
                     auto_enable_s3_logs,
                     available_regions,
-                    params.get("FINDING_PUBLISHING_FREQUENCY", "FIFTEEN_MINUTES"),
-                    params.get("KMS_KEY_ARN", ""),
-                    params.get("PUBLISHING_DESTINATION_BUCKET_ARN", "")
+                    params.get("FINDING_PUBLISHING_FREQUENCY", "FIFTEEN_MINUTES")
                 )
             else:
                 raise ValueError(
@@ -756,6 +728,7 @@ class GuardDuty(AWSResource):
         return {
             "params": props
         }                                                                                 
+
 
 class AWSARN(AWSResource):
 

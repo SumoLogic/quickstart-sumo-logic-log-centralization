@@ -18,9 +18,8 @@ Metadata:
           - SecurityToolingAccountId
           - LoggingAccountId
           - OrganizationUnitID
-          - LoggingOrganizationUnitID
+          - OrganizationRootID
           - SecurityToolingAccountRegion
-          - LogArchivingAccountRegion
       - Label:
           default: "Role Details configuration"
         Parameters:
@@ -50,10 +49,8 @@ Metadata:
         default: "Security tooling account Region"
       LogArchivingAccountRegion:
         default: "Log archiving account Region"  
-      OrganizationUnitID:
-        default: "Organization unit (OU) ID of security tooling account"
-      LoggingOrganizationUnitID:
-        default: "Organization unit (OU) ID of log archiving account"
+      OrganizationRootID:
+        default: "AWS Organization root ID"
       SumoDeployment:
         default: "Sumo Logic Deployment Name"
       SumoAccessID:
@@ -157,23 +154,14 @@ Parameters:
     Default: "quickstart-sumo-logic-log-centralization/"
     Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
     Type: "String"
-
-  OrganizationUnitID:
+    
+  OrganizationRootID:
+    AllowedPattern: '^r-[0-9a-z]{4,32}$'
     Description: >
-      Organizational unit (OU) ID of security tooling account where KMS will install - A string that begins with "ou-" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second "-" dash and from 8 to 32 additional lowercase letters or digits  
-    AllowedPattern: '^ou-[0-9a-z]{4,32}-[a-z0-9]{8,32}$'
-    MaxLength: 100
-    MinLength: 16
+      The Root ID string requires r- followed by from 4 to 32 lowercase letters or digits.
+    MaxLength: 34
     Type: String
-
-  LoggingOrganizationUnitID:
-    Description: >
-      Organizational unit (OU) ID of log archiving account where S3 bucket will install - A string that begins with "ou-" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second "-" dash and from 8 to 32 additional lowercase letters or digits  
-    AllowedPattern: '^ou-[0-9a-z]{4,32}-[a-z0-9]{8,32}$'
-    MaxLength: 100
-    MinLength: 16
-    Type: String
-
+    
   AdministrationRoleName:
     AllowedPattern: "^[0-9a-zA-Z-/]*$"
     Description: AWS Administration Role name to enable use of AWS CloudFormation StackSets.
@@ -185,9 +173,6 @@ Parameters:
     Description: AWS Execution Role name of the administrator account (the account in which StackSets will be created).
     Type: String
     Default: AWSCloudFormationStackSetExecutionRole
-
-Conditions:
-  same_ou: !Equals [ !Ref OrganizationUnitID, !Ref LoggingOrganizationUnitID ]
 
 Resources:
 #Role for management account
@@ -381,25 +366,11 @@ Resources:
         - 'CAPABILITY_IAM'
         - 'CAPABILITY_AUTO_EXPAND'
       StackInstancesGroup:
-        !If 
-          - same_ou
-          -
-            - Regions:
-                - !Ref AWS::Region
-              DeploymentTargets:
-                  OrganizationalUnitIds: 
-                    - !Ref OrganizationUnitID
-          -
-            - Regions:
-                - !Ref AWS::Region
-              DeploymentTargets:
-                  OrganizationalUnitIds: 
-                    - !Ref OrganizationUnitID       
-            - Regions:
-                - !Ref AWS::Region
-              DeploymentTargets:
-                  OrganizationalUnitIds: 
-                    - !Ref LoggingOrganizationUnitID
+        - Regions:
+            - !Ref AWS::Region
+          DeploymentTargets:
+              OrganizationalUnitIds: 
+                - !Ref OrganizationRootID
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/common-org/common-org-trust-all.template.yaml'
         - S3Region: !Ref 'AWS::Region'

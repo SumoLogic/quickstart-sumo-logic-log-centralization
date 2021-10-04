@@ -15,12 +15,11 @@ Metadata:
           - Section1SumoLogicOrganizationId
           - Section1SumoLogicResourceRemoveOnDeleteStack
           - Section1SecurityToolingAccountId
-          - SecurityToolingAccountRegion
+          - Section1SecurityToolingAccountRegion
           - Section1LogArchivingAccountId
-          - LogArchivingAccountRegion
+          - Section1LogArchivingAccountRegion
+          - Section1OrganizationRootID
           - Section1OrganizationID
-          - Section1OrganizationUnitID
-          - LoggingOrganizationUnitID
       - Label:
           default: "1.2 S3 Delivery Bucket configuration (required)"
         Parameters:
@@ -49,14 +48,14 @@ Metadata:
       - Label:
           default: "3. CloudTrail Configuration"
         Parameters:
-          - CloudTrailRegions
-          - InstallCloudTrailApp
-          - InstallPCICloudTrailApp
-          - InstallCISFoundationApp
-          - InstallCloudTrailMonitoringAnalyticsApp
-          - InstallCloudTrailSecOpsApp
-          - CloudTrailBucketPathExpression
-          - CloudTrailLogsSourceCategoryName
+          - Section3CloudTrailRegions
+          - Section3InstallCloudTrailApp
+          - Section3InstallPCICloudTrailApp
+          - Section3InstallCISFoundationApp
+          - Section3InstallCloudTrailMonitoringAnalyticsApp
+          - Section3InstallCloudTrailSecOpsApp
+          - Section3CloudTrailBucketPathExpression
+          - Section3CloudTrailLogsSourceCategoryName
 
       - Label:
           default: "AWS Quick Start configuration"
@@ -78,18 +77,16 @@ Metadata:
         default: "Delete Sumo Logic resources when stack is deleted"
       Section1SecurityToolingAccountId:
         default: "Security tooling account ID"
-      SecurityToolingAccountRegion:
+      Section1SecurityToolingAccountRegion:
         default: "Security tooling account Region"
       Section1LogArchivingAccountId:
         default: "Log archiving account ID"
-      LogArchivingAccountRegion:
+      Section1LogArchivingAccountRegion:
         default: "Log archiving account Region"
       Section1OrganizationID:
         default: "AWS Organizations ID"
-      Section1OrganizationUnitID:
-        default: "Organization unit (OU) ID of security tooling account"
-      LoggingOrganizationUnitID:
-        default: "Organization unit (OU) ID of log archiving account"
+      Section1OrganizationRootID:
+        default: "AWS Organization root ID"      
       Section1DeliveryBucketPrefix:
         default: "Delivery Bucket Prefix"
 
@@ -110,21 +107,21 @@ Metadata:
         default: "GuardDuty Regions"
 
       # CloudTrail parameters
-      CloudTrailRegions:
+      Section3CloudTrailRegions:
         default: "CloudTrail Regions of Management Account"
-      InstallCloudTrailApp:
+      Section3InstallCloudTrailApp:
         default: "Install Sumo Logic AWS CloudTrail app"
-      InstallPCICloudTrailApp:
+      Section3InstallPCICloudTrailApp:
         default: "Install Sumo Logic PCI compliance for AWS CloudTrail app"
-      InstallCISFoundationApp:
+      Section3InstallCISFoundationApp:
         default: "Install Sumo Logic CIS AWS Foundations Benchmark app"
-      InstallCloudTrailMonitoringAnalyticsApp:
+      Section3InstallCloudTrailMonitoringAnalyticsApp:
         default: "Install Amazon CloudTrail - Sumo Cloud Security Monitoring and Analytics App"
-      InstallCloudTrailSecOpsApp:
+      Section3InstallCloudTrailSecOpsApp:
         default: "Install Sumo Global Intelligence for AWS CloudTrail SecOps App"
-      CloudTrailBucketPathExpression:
+      Section3CloudTrailBucketPathExpression:
         default: "Path expression for logs"
-      CloudTrailLogsSourceCategoryName:
+      Section3CloudTrailLogsSourceCategoryName:
         default: "Sumo Logic CloudTrail logs source category name"
 
     # QuickStart Bucket Configuration
@@ -182,7 +179,7 @@ Parameters:
     AllowedPattern: '^\d{12}$'
     ConstraintDescription: "Security tooling account ID cannot be empty. Must be 12 digits"
   
-  SecurityToolingAccountRegion:
+  Section1SecurityToolingAccountRegion:
     Description: "Enter your security tooling account region"
     Type: String
     Default: us-east-1
@@ -193,7 +190,7 @@ Parameters:
     AllowedPattern: '^\d{12}$'
     ConstraintDescription: "Log archiving account ID cannot be empty. Must be 12 digits"
  
-  LogArchivingAccountRegion:
+  Section1LogArchivingAccountRegion:
     Description: "Enter your log archiving account region"
     Type: String
     Default: us-east-1
@@ -206,20 +203,11 @@ Parameters:
     MinLength: 12
     Type: String
 
-  Section1OrganizationUnitID:
+  Section1OrganizationRootID:
+    AllowedPattern: '^r-[0-9a-z]{4,32}$'
     Description: >
-      Organizational unit (OU) ID of Security Tooling Account where KMS will install - A string that begins with "ou-" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second "-" dash and from 8 to 32 additional lowercase letters or digits  
-    AllowedPattern: '^ou-[0-9a-z]{4,32}-[a-z0-9]{8,32}$'
-    MaxLength: 100
-    MinLength: 16
-    Type: String
-
-  LoggingOrganizationUnitID:
-    Description: >
-      Organizational unit (OU) ID of log archiving account where S3 bucket will install - A string that begins with "ou-" followed by from 4 to 32 lowercase letters or digits (the ID of the root that the OU is in). This string is followed by a second "-" dash and from 8 to 32 additional lowercase letters or digits  
-    AllowedPattern: '^ou-[0-9a-z]{4,32}-[a-z0-9]{8,32}$'
-    MaxLength: 100
-    MinLength: 16
+      The Root ID string requires r- followed by from 4 to 32 lowercase letters or digits.
+    MaxLength: 34
     Type: String
 
 
@@ -284,11 +272,11 @@ Parameters:
     Type: String
 
   # CloudTrail parameters
-  CloudTrailRegions:
+  Section3CloudTrailRegions:
     Type: String
     Default: us-east-1,us-east-2
     Description: "Enter multi management account regions for CloudTrail"
-  InstallCloudTrailApp:
+  Section3InstallCloudTrailApp:
     Type: String
     Description: "Yes: Install Sumo Logic AWS CloudTrail app.
                   No: Skip installation of app."
@@ -296,7 +284,7 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  InstallPCICloudTrailApp:
+  Section3InstallPCICloudTrailApp:
     Type: String
     Description: "Yes: Install PCI compliance For AWS CloudTrail app.
                   No: Skip installation of app."
@@ -304,7 +292,7 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  InstallCISFoundationApp:
+  Section3InstallCISFoundationApp:
     Type: String
     Description: "Yes: Install CIS AWS Foundations Benchmark app.
                   No: Skip installation of app."
@@ -312,7 +300,7 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  InstallCloudTrailMonitoringAnalyticsApp:
+  Section3InstallCloudTrailMonitoringAnalyticsApp:
     Type: String
     Description: "Yes: Install Amazon CloudTrail - Sumo Cloud Security Monitoring and Analytics App.
                   No: Skip installation of app."
@@ -320,7 +308,7 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  InstallCloudTrailSecOpsApp:
+  Section3InstallCloudTrailSecOpsApp:
     Type: String
     Description: "Yes: Install Sumo Global Intelligence for AWS CloudTrail SecOps App.
                   No: Skip installation of app."
@@ -328,11 +316,11 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-  CloudTrailBucketPathExpression:
+  Section3CloudTrailBucketPathExpression:
     Type: String
     Description: "Path expression to match the folder structure for CloudTrail logs (e.g., AWSLogs/*/CloudTrail/*)."
     Default: "CloudTrail/AWSLogs/*/CloudTrail/*"
-  CloudTrailLogsSourceCategoryName:
+  Section3CloudTrailLogsSourceCategoryName:
     Type: String
     Description: "Required when flag is set to No. Provide an existing source category name from Sumo Logic collecting CloudTrail logs. This is used for Threat Intel for AWS app installation also."
     Default: "AWS/Cloudtrail/Logs"
@@ -366,21 +354,20 @@ Conditions:
   install_sumo_global_guardduty_app: !Or
     - !Equals [ !Ref Section2InstallSumoGuardDutyApps, 'GlobalGuardDuty' ]
     - !Equals [ !Ref Section2InstallSumoGuardDutyApps, 'Both' ]
-  create_guardduty_source: !Equals [ !Ref Section2GuardDutyCreateHttpLogsSource, 'Yes' ]
-  install_aws_guardduty_app: !Equals [ !Ref Section2InstallAWSGuardDutyApp, 'Yes' ]
 
   # Conditions for calling child stack of each app if any resource create condition is true.
   call_guardduty_stack: !Or
     - !Condition install_sumo_guardduty_app
     - !Condition install_sumo_global_guardduty_app
-    - !Condition create_guardduty_source
-    - !Condition install_aws_guardduty_app
+    - !Equals [ !Ref Section2GuardDutyCreateHttpLogsSource, 'Yes' ]
+    - !Equals [ !Ref Section2InstallAWSGuardDutyApp, 'Yes' ]
+    
   call_cloudtrail_stack: !Or
-    - !Equals [ !Ref InstallCloudTrailApp, 'Yes' ] 
-    - !Equals [ !Ref InstallPCICloudTrailApp, 'Yes' ]
-    - !Equals [ !Ref InstallCISFoundationApp, 'Yes' ]
-    - !Equals [ !Ref InstallCloudTrailMonitoringAnalyticsApp, 'Yes' ]
-    - !Equals [ !Ref InstallCloudTrailSecOpsApp, 'Yes' ]
+    - !Equals [ !Ref Section3InstallCloudTrailApp, 'Yes' ] 
+    - !Equals [ !Ref Section3InstallPCICloudTrailApp, 'Yes' ]
+    - !Equals [ !Ref Section3InstallCISFoundationApp, 'Yes' ]
+    - !Equals [ !Ref Section3InstallCloudTrailMonitoringAnalyticsApp, 'Yes' ]
+    - !Equals [ !Ref Section3InstallCloudTrailSecOpsApp, 'Yes' ]
 
 
 Resources:
@@ -397,8 +384,6 @@ Resources:
       Parameters:
         AdministrationRoleName: !Sub 'AdministrationRole-${AWS::StackName}'
         ExecutionRoleRuleName: !Sub 'ExecutionRole-${AWS::StackName}'
-        OrganizationUnitID: !Ref Section1OrganizationUnitID
-        LoggingOrganizationUnitID: !Ref LoggingOrganizationUnitID
         QSS3BucketName: !Ref QSS3BucketName  
         QSS3BucketRegion: !Ref QSS3BucketRegion 
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
@@ -411,46 +396,15 @@ Resources:
         SecurityToolingAccountId: !Ref Section1SecurityToolingAccountId
         LoggingAccountId: !Ref Section1LogArchivingAccountId
         DeliveryBucketPrefix: !Ref Section1DeliveryBucketPrefix
-        SecurityToolingAccountRegion: !Ref SecurityToolingAccountRegion
-        LogArchivingAccountRegion: !Ref LogArchivingAccountRegion
-
-#Stackset for GuardDuty Delete Detector Role
-  GuardDutyDeleteDetectorRoleStackset:
-    Condition: call_guardduty_stack
-    DependsOn:
-      - "CommonOrgManagement"
-    Type: 'AWS::CloudFormation::StackSet'
-    Properties:
-      StackSetName: !Sub "GuardDuty-Delete-Detector-Role-${AWS::StackName}"
-      PermissionModel: SERVICE_MANAGED
-      Capabilities:
-        - 'CAPABILITY_NAMED_IAM'
-        - 'CAPABILITY_IAM'
-        - 'CAPABILITY_AUTO_EXPAND' 
-      StackInstancesGroup:
-        - Regions:
-            - !Ref AWS::Region
-          DeploymentTargets:
-              OrganizationalUnitIds: 
-                - !Ref Section1OrganizationUnitID
-      TemplateURL: !Sub
-        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/guardduty-org/guardduty-org-delete-detector-role.yaml'
-        - S3Region: !Ref 'AWS::Region'
-          S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'
-      AutoDeployment: 
-        Enabled: true
-        RetainStacksOnAccountRemoval: true
-      Parameters: 
-        - ParameterKey: 'DeleteDetectorRoleName'
-          ParameterValue: !Sub "DeleteDetectorRole-${AWS::StackName}"
-        - ParameterKey: 'OrgPrimaryAccountId'
-          ParameterValue: !Ref "AWS::AccountId"
+        SecurityToolingAccountRegion: !Ref Section1SecurityToolingAccountRegion
+        LogArchivingAccountRegion: !Ref Section1LogArchivingAccountRegion
+        OrganizationRootID: !Ref Section1OrganizationRootID
 
 #Stack for GuardDuty Configuration
   GuardDutyConfigurationStack:
     Condition: call_guardduty_stack
     DependsOn:
-      - "GuardDutyDeleteDetectorRoleStackset"
+      - "CommonOrgManagement"
     Type: 'AWS::CloudFormation::Stack'
     Properties:
       TemplateURL: !Sub
@@ -460,6 +414,7 @@ Resources:
       Parameters:
         AdministrationRoleArn: !GetAtt CommonOrgManagement.Outputs.AdministrationRoleArn
         ExecutionRoleRuleName: !Sub 'ExecutionRole-${AWS::StackName}'
+        OrganizationRootID: !Ref Section1OrganizationRootID
         SumoDeployment: !Ref Section1SumoLogicDeployment
         SumoAccessID: !Ref Section1SumoLogicAccessID
         SumoAccessKey: !Ref Section1SumoLogicAccessKey
@@ -470,15 +425,12 @@ Resources:
         CreateHttpLogsSource: !If [create_guardduty_source, "Yes", "No"]
         HttpLogsSourceName: !Sub "aws-quickstart-guardduty"
         HttpLogsSourceCategoryName: !If [create_guardduty_source, "aws/quickstart/guardduty/logs", !Ref Section2GuardDutyHttpLogsSourceCategoryName]
-        InstallAWSGuardDutyApp: !If [install_aws_guardduty_app, "Yes", "No"]
+        InstallAWSGuardDutyApp: !Ref Section2InstallAWSGuardDutyApp
         AutoEnableS3Logs: !Ref Section2AutoEnableS3Logs
         ConfigurationRoleName: !Sub 'ConfigurationRole-${AWS::StackName}'
         DelegatedAdminAccountId: !Ref AWS::AccountId
-        DeleteDetectorRoleName: !Sub 'DeleteDetectorRole-${AWS::StackName}'
         EnabledRegions: !Ref Section2GuardDutyRegions
         FindingPublishingFrequency: !Ref Section2FindingPublishingFrequency 
-        KMSKeyArn: !GetAtt CommonOrgManagement.Outputs.OrgDeliveryKMSKeyArn 
-        PublishingDestinationBucketName: !GetAtt CommonOrgManagement.Outputs.OrgDeliveryS3BucketArn
         LambdaExecutionRoleName: !Select [ 1, !Split ['/', !GetAtt CommonOrgManagement.Outputs.SumoLogicHelperRoleARN]]
         OrganizationId: !Ref Section1OrganizationID 
         QSS3BucketName: !Ref QSS3BucketName  
@@ -486,7 +438,7 @@ Resources:
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         ParentStackName: !Sub 'ParentStack-${AWS::StackName}'
         ParentHelperFunctionArn: !GetAtt CommonOrgManagement.Outputs.SumoLogicLambdaHelperARN
-        LogArchivingAccountRegion: !Ref LogArchivingAccountRegion
+        LogArchivingAccountRegion: !Ref Section1LogArchivingAccountRegion
 
 # Stack for Cloudtrail
   CloudtrailStack:
@@ -504,20 +456,20 @@ Resources:
         SumoLogicResourceRemoveOnDeleteStack: !Ref Section1SumoLogicResourceRemoveOnDeleteStack
         CollectorID: !GetAtt CommonOrgManagement.Outputs.SumoCollectorID
         ExecutionRoleRuleName: !GetAtt CommonOrgManagement.Outputs.ExecutionRoleRuleName
-        CloudTrailRegions: !Ref CloudTrailRegions
-        InstallCloudTrailApp: !Ref InstallCloudTrailApp
-        InstallPCICloudTrailApp: !Ref InstallPCICloudTrailApp
-        InstallCISFoundationApp: !Ref InstallCISFoundationApp
-        InstallCloudTrailMonitoringAnalyticsApp: !Ref InstallCloudTrailMonitoringAnalyticsApp
-        InstallCloudTrailSecOpsApp: !Ref InstallCloudTrailSecOpsApp
-        CloudTrailBucketPathExpression: !Ref CloudTrailBucketPathExpression
-        CloudTrailLogsSourceCategoryName: !Ref CloudTrailLogsSourceCategoryName
+        CloudTrailRegions: !Ref Section3CloudTrailRegions
+        InstallCloudTrailApp: !Ref Section3InstallCloudTrailApp
+        InstallPCICloudTrailApp: !Ref Section3InstallPCICloudTrailApp
+        InstallCISFoundationApp: !Ref Section3InstallCISFoundationApp
+        InstallCloudTrailMonitoringAnalyticsApp: !Ref Section3InstallCloudTrailMonitoringAnalyticsApp
+        InstallCloudTrailSecOpsApp: !Ref Section3InstallCloudTrailSecOpsApp
+        CloudTrailBucketPathExpression: !Ref Section3CloudTrailBucketPathExpression
+        CloudTrailLogsSourceCategoryName: !Ref Section3CloudTrailLogsSourceCategoryName
         SNSTopicArn: !GetAtt CommonOrgManagement.Outputs.SNSTopicArn
         CloudTrailLogsBucketName: !GetAtt CommonOrgManagement.Outputs.OrgDeliveryS3BucketArn
         KMSArn: !GetAtt CommonOrgManagement.Outputs.OrgDeliveryKMSKeyArn 
         SumoRoleArn: !GetAtt CommonOrgManagement.Outputs.SumoRoleArn
-        SecurityToolingAccountRegion: !Ref SecurityToolingAccountRegion
-        LogArchivingAccountRegion: !Ref LogArchivingAccountRegion
+        SecurityToolingAccountRegion: !Ref Section1SecurityToolingAccountRegion
+        LogArchivingAccountRegion: !Ref Section1LogArchivingAccountRegion
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         ParentStackName: !GetAtt CommonOrgManagement.Outputs.StackName
