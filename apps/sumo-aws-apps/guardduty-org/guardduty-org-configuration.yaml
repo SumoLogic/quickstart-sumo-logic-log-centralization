@@ -259,9 +259,6 @@ Parameters:
     Default: guardduty-org-lambda
     Type: String
 
-  LogArchivingAccountRegion:
-    Type: String
-    Description: "Region of Logging Account"
 
   AdministrationRoleArn:
     Description: Arn of AWS Administration Role name to enable use of AWS CloudFormation StackSets.
@@ -488,7 +485,6 @@ Resources:
     Type: Custom::HTTPSource
     Properties:
       ServiceToken: !Ref ParentHelperFunctionArn
-      Region: !Ref LogArchivingAccountRegion
       SourceName: !Ref HttpLogsSourceName
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
       SourceCategory: !Ref HttpLogsSourceCategoryName
@@ -504,7 +500,6 @@ Resources:
     Condition: install_sumo_guardduty_app
     Properties:
       ServiceToken: !Ref ParentHelperFunctionArn
-      Region: !Ref LogArchivingAccountRegion
       AppName: "Amazon QuickStart - Amazon GuardDuty"
       AppId: "5a58719f-0f8a-4aa7-993f-9cc337a286aa"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
@@ -519,7 +514,6 @@ Resources:
     Condition: install_sumo_global_guardduty_app
     Properties:
       ServiceToken: !Ref ParentHelperFunctionArn
-      Region: !Ref LogArchivingAccountRegion
       AppName: "Amazon QuickStart - Global Intelligence for Amazon GuardDuty"
       AppId: "8e7efcb3-040a-4a92-9f8d-922fafb24afb"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
@@ -534,7 +528,6 @@ Resources:
     Condition: install_sumo_cloud_security_monitoring_and_analytics_app
     Properties:
       ServiceToken: !Ref ParentHelperFunctionArn
-      Region: !Ref LogArchivingAccountRegion
       AppName: "Amazon QuickStart - Cloud Security Monitoring and Analytics for Amazon GuardDuty"
       AppId: "9a2b2aa3-b747-45c6-896e-4b3bec3d2e9e"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack

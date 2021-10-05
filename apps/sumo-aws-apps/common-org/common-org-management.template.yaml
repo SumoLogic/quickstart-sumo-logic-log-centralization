@@ -346,7 +346,7 @@ Resources:
         Bucket: !Sub
                 - "${S3Bucket}"
                 - S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'
-        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
+        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/sumologic-app-utils/sumo_app_utils_org.zip"
       MemorySize: 512
       Timeout: 900
       ReservedConcurrentExecutions: 1
@@ -556,14 +556,18 @@ Outputs:
   SNSTopicArn:
     Description: ARN of SNS Topic
     Value: !GetAtt rSNSTopicArn.ARN
+    Condition: create_s3_bucket
   
   OrgDeliveryS3BucketArn:
     Description: ARN of the delivery S3 bucket.
-    Value: !GetAtt rDeliveryS3BucketArn.ARN  
+    Value: !GetAtt rDeliveryS3BucketArn.ARN
+    Condition: create_s3_bucket
   
   SumoRoleArn:
     Description: "Arn of Sumo Role for sumologic account to read data from s3 bucket of customer"
     Value: !GetAtt rSumoRoleArn.ARN
+    Condition: create_s3_bucket
+
   SumoCollectorID:
     Description: "ID of Sumo Hosted Collector"
     Value: !GetAtt SumoHostedCollector.COLLECTOR_ID

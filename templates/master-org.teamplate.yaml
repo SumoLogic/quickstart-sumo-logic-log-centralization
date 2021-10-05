@@ -15,9 +15,8 @@ Metadata:
           - Section1SumoLogicOrganizationId
           - Section1SumoLogicResourceRemoveOnDeleteStack
           - Section1SecurityToolingAccountId
-          - Section1SecurityToolingAccountRegion
+          - Section1ToolingAndLoggingRegion
           - Section1LogArchivingAccountId
-          - Section1LogArchivingAccountRegion
           - Section1OrganizationRootID
           - Section1OrganizationID
       - Label:
@@ -95,12 +94,10 @@ Metadata:
         default: "Delete Sumo Logic resources when stack is deleted"
       Section1SecurityToolingAccountId:
         default: "Security tooling account ID"
-      Section1SecurityToolingAccountRegion:
-        default: "Security tooling account Region"
+      Section1ToolingAndLoggingRegion:
+        default: "Security tooling and Log Archiving account Region"
       Section1LogArchivingAccountId:
         default: "Log archiving account ID"
-      Section1LogArchivingAccountRegion:
-        default: "Log archiving account Region"
       Section1OrganizationID:
         default: "AWS Organizations ID"
       Section1OrganizationRootID:
@@ -209,10 +206,32 @@ Parameters:
     AllowedPattern: '^\d{12}$'
     ConstraintDescription: "Security tooling account ID cannot be empty. Must be 12 digits"
   
-  Section1SecurityToolingAccountRegion:
-    Description: "Enter your security tooling account region"
+  Section1ToolingAndLoggingRegion:
+    Description: "Enter your security tooling and log archiving account region"
     Type: String
     Default: us-east-1
+    AllowedValues:
+      - 'us-east-1'
+      - 'us-east-2'
+      - 'us-west-1'
+      - 'us-west-2'
+      - 'af-south-1'
+      - 'ap-east-1'
+      - 'ap-south-1'
+      - 'ap-northeast-3'
+      - 'ap-northeast-2'
+      - 'ap-southeast-1'
+      - 'ap-southeast-2'
+      - 'ap-northeast-1'
+      - 'ca-central-1'
+      - 'eu-central-1'
+      - 'eu-west-1'
+      - 'eu-west-2'
+      - 'eu-south-1'
+      - 'eu-west-3'
+      - 'eu-north-1'
+      - 'me-south-1'
+      - 'sa-east-1'
 
   Section1LogArchivingAccountId:
     Description: "Enter your log archiving account ID"
@@ -220,10 +239,6 @@ Parameters:
     AllowedPattern: '^\d{12}$'
     ConstraintDescription: "Log archiving account ID cannot be empty. Must be 12 digits"
  
-  Section1LogArchivingAccountRegion:
-    Description: "Enter your log archiving account region"
-    Type: String
-    Default: us-east-1
 
   Section1OrganizationID:
     AllowedPattern: '^o-[a-z0-9]{10,32}$'
@@ -324,8 +339,30 @@ Parameters:
       - 'No'
   Section3CloudTrailRegions:
     Type: String
-    Default: us-east-1,us-east-2
-    Description: "Enter multi management account regions for CloudTrail"
+    Description: "Enter multi management account region for CloudTrail"
+    Default: us-east-1
+    AllowedValues:
+      - 'us-east-1'
+      - 'us-east-2'
+      - 'us-west-1'
+      - 'us-west-2'
+      - 'af-south-1'
+      - 'ap-east-1'
+      - 'ap-south-1'
+      - 'ap-northeast-3'
+      - 'ap-northeast-2'
+      - 'ap-southeast-1'
+      - 'ap-southeast-2'
+      - 'ap-northeast-1'
+      - 'ca-central-1'
+      - 'eu-central-1'
+      - 'eu-west-1'
+      - 'eu-west-2'
+      - 'eu-south-1'
+      - 'eu-west-3'
+      - 'eu-north-1'
+      - 'me-south-1'
+      - 'sa-east-1'
   Section3InstallCloudTrailApp:
     Type: String
     Description: "Yes: Install Sumo Logic AWS CloudTrail app.
@@ -461,15 +498,13 @@ Resources:
         SecurityToolingAccountId: !Ref Section1SecurityToolingAccountId
         LoggingAccountId: !Ref Section1LogArchivingAccountId
         DeliveryBucketPrefix: !Ref Section1DeliveryBucketPrefix
-        SecurityToolingAccountRegion: !Ref Section1SecurityToolingAccountRegion
-        LogArchivingAccountRegion: !Ref Section1LogArchivingAccountRegion
+        SecurityToolingAccountRegion: !Ref Section1ToolingAndLoggingRegion
+        LogArchivingAccountRegion: !Ref Section1ToolingAndLoggingRegion
         OrganizationRootID: !Ref Section1OrganizationRootID
 
 #Stack for GuardDuty Configuration
   GuardDutyConfigurationStack:
     Condition: call_guardduty_stack
-    DependsOn:
-      - "CommonOrgManagement"
     Type: 'AWS::CloudFormation::Stack'
     Properties:
       TemplateURL: !Sub
@@ -504,7 +539,6 @@ Resources:
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         ParentStackName: !Sub 'ParentStack-${AWS::StackName}'
         ParentHelperFunctionArn: !GetAtt CommonOrgManagement.Outputs.SumoLogicLambdaHelperARN
-        LogArchivingAccountRegion: !Ref Section1LogArchivingAccountRegion
 
 # Stack for Cloudtrail
   CloudtrailStack:
@@ -536,9 +570,9 @@ Resources:
         CloudTrailLogsBucketName: !If [ create_cloudtrail_bucket, !GetAtt CommonOrgManagement.Outputs.OrgDeliveryS3BucketArn, !Ref Section3CloudTrailExistsS3BucketName ]
         KMSArn: !GetAtt CommonOrgManagement.Outputs.OrgDeliveryKMSKeyArn 
         SumoRoleArn: !GetAtt CommonOrgManagement.Outputs.SumoRoleArn
-        SecurityToolingAccountRegion: !Ref Section1SecurityToolingAccountRegion
-        LogArchivingAccountRegion: !Ref Section1LogArchivingAccountRegion
+        SecurityToolingAccountRegion: !Ref Section1ToolingAndLoggingRegion
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         ParentStackName: !GetAtt CommonOrgManagement.Outputs.StackName
         ResourcePrefix: !Ref "AWS::StackName"
+        ParentHelperFunctionArn: !GetAtt CommonOrgManagement.Outputs.SumoLogicLambdaHelperARN

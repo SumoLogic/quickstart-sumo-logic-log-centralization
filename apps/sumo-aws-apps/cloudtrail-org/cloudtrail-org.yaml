@@ -33,7 +33,7 @@ Metadata:
         Parameters:
           - pCreateCloudWatchLogGroup
           - pDefaultLogGroupRetention
-          - pResourceNamePrefix
+
       -
         Label:
           default: Resource Tags
@@ -70,8 +70,6 @@ Metadata:
         
       pOrganizationCloudTrailKMSKey:
         default: Organization CloudTrail KMS Key
-      pResourceNamePrefix:
-        default: Resource Name Prefix
       pTagKey1:
         default: Tag Key
       pTagValue1:
@@ -157,10 +155,6 @@ Parameters:
     Description: KMS Key ARN to use for encrypting logs
     Type: String
 
-  pResourceNamePrefix:
-    Description: Resource name prefix used to identify resources created by the automation framework
-    Type: String
-    Default: aspin
 
   pTagKey1:
     AllowedPattern: '^([\p{L}\p{Z}\p{N}_.:/=+\-@]*)$'
@@ -378,7 +372,7 @@ Resources:
         Bucket: !Sub
                 - "${S3Bucket}"
                 - S3Bucket: !Sub "${QSS3BucketName}-${AWS::Region}"
-        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
+        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/sumologic-app-utils/sumo_app_utils_org.zip"
       MemorySize: 128
       Timeout: 900
       Role:

@@ -47,9 +47,7 @@ Parameters:
   SecurityToolingAccountRegion:
     Description: "Region of Tooling Account"
     Type: String
-  LogArchivingAccountRegion:
-    Description: "Region of Logging Account"
-    Type: String
+
   InstallCloudTrailApp:
     Type: String
     Description: "Yes -> To Install Sumo Logic AWS CloudTrail App in Sumo Logic for AWS Quick Start Solution.
@@ -118,21 +116,9 @@ Parameters:
   SNSTopicArn:
     Type: String
     Description: "ARN of SNS Topic to listen event S3 Put Object and trigger to Sumo Logic"
-  ResourcePrefix:
+  ParentHelperFunctionArn:
     Type: String
-    Description: "Resource prefix for auto deployment"
-  QSS3BucketName:
-    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
-    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
-    Default: "aws-quickstart"
-    Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
-    Type: "String"
-  QSS3KeyPrefix:
-    AllowedPattern: "^[0-9a-zA-Z-/]*$"
-    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
-    Default: "quickstart-sumo-logic-log-centralization/"
-    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
-    Type: "String"
+    Description: ARN of Parent Helper Funtion 
 
 
 
@@ -145,51 +131,6 @@ Conditions:
   install_cloudtrail_logs_source: !Equals [!Ref CloudTrailCreateS3LogsSource, 'Yes']
 
 Resources:
-  SumoLogicHelperRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      Path: /
-      Policies:
-        - PolicyName: SumoPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogGroup
-                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ResourcePrefix}-CloudTrail-SumoLogicHelperFunction:*"
-
-
-  SumoLogicHelperFunction:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      FunctionName: !Sub "${ResourcePrefix}-CloudTrail-SumoLogicHelperFunction"
-      Handler: main.handler
-      Runtime: python3.7
-      CodeUri:
-        Bucket: !Sub
-                - "${S3Bucket}"
-                - S3Bucket: !Sub "${QSS3BucketName}-${AWS::Region}"
-        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
-      MemorySize: 128
-      Timeout: 900
-      Role:
-        Fn::GetAtt:
-          - SumoLogicHelperRole
-          - Arn
-
 
   sumoAppWaitHandle:
     Type: "AWS::CloudFormation::WaitConditionHandle"
@@ -208,8 +149,7 @@ Resources:
     Type: Custom::App
     Condition: install_cloudtrail_app
     Properties:
-      ServiceToken: !GetAtt SumoLogicHelperFunction.Arn
-      Region: !Ref LogArchivingAccountRegion
+      ServiceToken: !Ref ParentHelperFunctionArn
       AppName: "Amazon QuickStart - AWS CloudTrail"
       AppId: "ceb7fac5-1137-4a04-a5b8-2e49190be3d4"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
@@ -232,8 +172,7 @@ Resources:
     Type: Custom::App
     Condition: install_pci_cloudtrail_app
     Properties:
-      ServiceToken: !GetAtt SumoLogicHelperFunction.Arn
-      Region: !Ref LogArchivingAccountRegion
+      ServiceToken: !Ref ParentHelperFunctionArn
       AppName: "Amazon QuickStart - PCI Compliance For AWS CloudTrail."
       AppId: "924d7e2a-a14a-4b11-8c91-133241be2a51"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
@@ -257,8 +196,7 @@ Resources:
     Type: Custom::App
     Condition: install_cis_foundation_app
     Properties:
-      ServiceToken: !GetAtt SumoLogicHelperFunction.Arn
-      Region: !Ref LogArchivingAccountRegion
+      ServiceToken: !Ref ParentHelperFunctionArn
       AppName: "Amazon QuickStart - CIS AWS Foundations Benchmark"
       AppId: "9f630fe6-9253-4700-bb7e-36afc97b8cb6"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
@@ -280,8 +218,7 @@ Resources:
     Type: Custom::App
     Condition: install_cloudtrail_monitoring_analytics_app
     Properties:
-      ServiceToken: !GetAtt SumoLogicHelperFunction.Arn
-      Region: !Ref LogArchivingAccountRegion
+      ServiceToken: !Ref ParentHelperFunctionArn
       AppName: "Amazon QuickStart - Amazon CloudTrail - Cloud Security Monitoring and Analytics App"
       AppId: "a0ce63ad-ed4f-4ea2-967b-da2854c53aa9"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
@@ -303,8 +240,7 @@ Resources:
     Type: Custom::App
     Condition: install_cloudtrail_secops_app
     Properties:
-      ServiceToken: !GetAtt SumoLogicHelperFunction.Arn
-      Region: !Ref LogArchivingAccountRegion
+      ServiceToken: !Ref ParentHelperFunctionArn
       AppName: "Amazon QuickStart - Global Intelligence for AWS CloudTrail SecOps"
       AppId: "570bdc0d-f824-4fcb-96b2-3230d4497180"
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
@@ -340,8 +276,7 @@ Resources:
     Type: Custom::AWSSource
     Properties:
       SourceType: AwsCloudTrailBucket
-      ServiceToken: !GetAtt SumoLogicHelperFunction.Arn
-      Region: !Ref LogArchivingAccountRegion
+      ServiceToken: !Ref ParentHelperFunctionArn
       SourceName: !Ref CloudTrailLogsSourceName
       TargetBucketName: !Ref CloudTrailLogsBucketName
       RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack

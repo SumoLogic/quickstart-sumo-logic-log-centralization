@@ -148,15 +148,13 @@ Parameters:
     Type: String
     Default: AWSCloudFormationStackSetExecutionRole
   CloudTrailRegions:
-    Type: CommaDelimitedList
-    Default: us-east-1,us-east-2
-    Description: "Enter multi management account regions for CloudTrail"
+    Type: String
+    Default: us-east-1
+    Description: "Enter multi management account region for CloudTrail"
   SecurityToolingAccountRegion:
     Type: String
     Description: "Region of tooling account"
-  LogArchivingAccountRegion:
-    Type: String
-    Description: "Region of logging account"
+
 
   # CloudTrail apps parameters
   InstallAWSCloudTrail:
@@ -255,6 +253,9 @@ Parameters:
   ParentStackName:
     Type: String
     Description: Parent Stack Name. Do Not Edit the value.
+  ParentHelperFunctionArn:
+    Type: String
+    Description: ARN of Parent Helper Funtion 
 Conditions:
   install_cloudtrail_on_aws: !Equals [ !Ref InstallAWSCloudTrail, 'Yes' ]
 Resources:
@@ -273,7 +274,8 @@ Resources:
         - 'CAPABILITY_IAM'
         - 'CAPABILITY_AUTO_EXPAND'
       StackInstancesGroup:
-        - Regions: !Ref CloudTrailRegions 
+        - Regions: 
+            - !Ref CloudTrailRegions 
           DeploymentTargets:
             Accounts:
               - !Ref "AWS::AccountId"   
@@ -286,8 +288,6 @@ Resources:
           ParameterValue: !Ref CloudTrailLogsBucketName
         - ParameterKey: pOrganizationCloudTrailKMSKey
           ParameterValue: !Ref KMSArn
-        - ParameterKey: 'pResourceNamePrefix'
-          ParameterValue: !Ref "AWS::StackName"
         - ParameterKey: "QSS3BucketName"
           ParameterValue: !Ref QSS3BucketName
         - ParameterKey: "QSS3KeyPrefix"
@@ -312,7 +312,6 @@ Resources:
         InstallCISFoundationApp: !Ref InstallCISFoundationApp
         InstallCloudTrailMonitoringAnalyticsApp: !Ref InstallCloudTrailMonitoringAnalyticsApp
         InstallCloudTrailSecOpsApp: !Ref InstallCloudTrailSecOpsApp
-        
         CloudTrailLogsBucketName: !Ref CloudTrailLogsBucketName
         CloudTrailBucketPathExpression: !Ref CloudTrailBucketPathExpression
         CloudTrailCreateS3LogsSource: !Ref CloudTrailCreateS3LogsSource
@@ -320,9 +319,6 @@ Resources:
         SNSTopicArn: !Ref SNSTopicArn
         SumoRoleArn: !Ref SumoRoleArn
         SecurityToolingAccountRegion: !Ref SecurityToolingAccountRegion
-        LogArchivingAccountRegion: !Ref LogArchivingAccountRegion
         ResourcePrefix: !Ref ResourcePrefix
-
-        QSS3BucketName: !Ref QSS3BucketName
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        ParentHelperFunctionArn: !Ref ParentHelperFunctionArn
         
