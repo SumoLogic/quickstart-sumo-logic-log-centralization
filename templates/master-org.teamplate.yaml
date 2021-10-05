@@ -48,17 +48,33 @@ Metadata:
 
       # CloudTrail parameters
       - Label:
-          default: "3. CloudTrail Configuration"
+          default: "3.1 CloudTrail Service Configuration"
         Parameters:
           - Section3CloudTrailRegions
+          - Section3InstallAWSCloudTrail
+
+      - Label:
+          default: "3.2 CloudTrail App Configuration"
+        Parameters:        
           - Section3InstallCloudTrailApp
           - Section3InstallPCICloudTrailApp
           - Section3InstallCISFoundationApp
           - Section3InstallCloudTrailMonitoringAnalyticsApp
           - Section3InstallCloudTrailSecOpsApp
+
+      - Label:
+          default: "3.3 CloudTrail Sumo Log Source Configuration"
+        Parameters:
+          - Section3CloudTrailCreateS3LogsSource    
           - Section3CloudTrailBucketPathExpression
           - Section3CloudTrailLogsSourceCategoryName
 
+      - Label:
+          default: "3.4 CloudTrail S3 Bucket Configuration"
+        Parameters:
+          - Section3CreateCloudTrailS3Bucket
+          - Section3CloudTrailExistsS3BucketName
+          
       - Label:
           default: "AWS Quick Start configuration"
         Parameters:
@@ -129,6 +145,14 @@ Metadata:
         default: "Path expression for logs"
       Section3CloudTrailLogsSourceCategoryName:
         default: "Sumo Logic CloudTrail logs source category name"
+      Section3CloudTrailCreateS3LogsSource:
+        default: "Create Sumo Logic S3 logs source for CloudTrail"
+      Section3CreateCloudTrailS3Bucket:
+        default: "Create S3 Bucket for CloudTrail Logs"
+      Section3CloudTrailExistsS3BucketName:
+        default: "Name of exists S3 Bucket which contains the CloudTrail Logs"
+      Section3InstallAWSCloudTrail:
+        default: "Install CloudTrail Service in AWS"
 
     # QuickStart Bucket Configuration
       QSS3BucketName:
@@ -290,6 +314,14 @@ Parameters:
     Type: String
 
   # CloudTrail parameters
+  Section3InstallAWSCloudTrail:
+    Type: String
+    Description: "Yes: Install CloudTrail Service on AWS.
+                  No: Skip installation."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
   Section3CloudTrailRegions:
     Type: String
     Default: us-east-1,us-east-2
@@ -338,6 +370,26 @@ Parameters:
     Type: String
     Description: "Path expression to match the folder structure for CloudTrail logs (e.g., AWSLogs/*/CloudTrail/*)."
     Default: "CloudTrail/AWSLogs/*/CloudTrail/*"
+  Section3CreateCloudTrailS3Bucket:
+    Type: String
+    Description: "Yes: Create AWS S3 Bucket for CloudTrail logs.
+                  No: Skip creation of the S3 Bucket."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  Section3CloudTrailExistsS3BucketName:
+    Type: String
+    Description: "Required when flag is set to Yes. Provide an existing S3 Bucket name which contains CloudTrail Logs"
+    Default: ""
+  Section3CloudTrailCreateS3LogsSource:
+    Type: String
+    Description: "Yes: Create Sumo Logic S3 log source to collect CloudTrail logs.
+                  No: Skip creation of the Sumo Logic S3 log source."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
   Section3CloudTrailLogsSourceCategoryName:
     Type: String
     Description: "Required when flag is set to No. Provide an existing source category name from Sumo Logic collecting CloudTrail logs. This is used for Threat Intel for AWS app installation also."
@@ -378,7 +430,9 @@ Conditions:
     - !Equals [ !Ref Section3InstallCISFoundationApp, 'Yes' ]
     - !Equals [ !Ref Section3InstallCloudTrailMonitoringAnalyticsApp, 'Yes' ]
     - !Equals [ !Ref Section3InstallCloudTrailSecOpsApp, 'Yes' ]
-
+    - !Equals [ !Ref Section3CloudTrailCreateS3LogsSource, 'Yes' ]
+  #condition for cloudtrail
+  create_cloudtrail_bucket: !Equals [ !Ref Section3CreateCloudTrailS3Bucket, 'Yes' ]
 
 Resources:
   WaitHandle:
@@ -403,6 +457,7 @@ Resources:
         SumoOrganizationId: !Ref Section1SumoLogicOrganizationId
         RemoveSumoResourcesOnDeleteStack: !Ref Section1SumoLogicResourceRemoveOnDeleteStack
         CollectorName: !Sub "aws-quickstart-collector-${AWS::StackName}"
+        CreateS3Bucket: !If [ create_cloudtrail_bucket, 'Yes','No' ]
         SecurityToolingAccountId: !Ref Section1SecurityToolingAccountId
         LoggingAccountId: !Ref Section1LogArchivingAccountId
         DeliveryBucketPrefix: !Ref Section1DeliveryBucketPrefix
@@ -467,6 +522,7 @@ Resources:
         SumoLogicResourceRemoveOnDeleteStack: !Ref Section1SumoLogicResourceRemoveOnDeleteStack
         CollectorID: !GetAtt CommonOrgManagement.Outputs.SumoCollectorID
         ExecutionRoleRuleName: !GetAtt CommonOrgManagement.Outputs.ExecutionRoleRuleName
+        InstallAWSCloudTrail: !Ref Section3InstallAWSCloudTrail
         CloudTrailRegions: !Ref Section3CloudTrailRegions
         InstallCloudTrailApp: !Ref Section3InstallCloudTrailApp
         InstallPCICloudTrailApp: !Ref Section3InstallPCICloudTrailApp
@@ -474,9 +530,10 @@ Resources:
         InstallCloudTrailMonitoringAnalyticsApp: !Ref Section3InstallCloudTrailMonitoringAnalyticsApp
         InstallCloudTrailSecOpsApp: !Ref Section3InstallCloudTrailSecOpsApp
         CloudTrailBucketPathExpression: !Ref Section3CloudTrailBucketPathExpression
+        CloudTrailCreateS3LogsSource: !Ref Section3CloudTrailCreateS3LogsSource
         CloudTrailLogsSourceCategoryName: !Ref Section3CloudTrailLogsSourceCategoryName
         SNSTopicArn: !GetAtt CommonOrgManagement.Outputs.SNSTopicArn
-        CloudTrailLogsBucketName: !GetAtt CommonOrgManagement.Outputs.OrgDeliveryS3BucketArn
+        CloudTrailLogsBucketName: !If [ create_cloudtrail_bucket, !GetAtt CommonOrgManagement.Outputs.OrgDeliveryS3BucketArn, !Ref Section3CloudTrailExistsS3BucketName ]
         KMSArn: !GetAtt CommonOrgManagement.Outputs.OrgDeliveryKMSKeyArn 
         SumoRoleArn: !GetAtt CommonOrgManagement.Outputs.SumoRoleArn
         SecurityToolingAccountRegion: !Ref Section1SecurityToolingAccountRegion

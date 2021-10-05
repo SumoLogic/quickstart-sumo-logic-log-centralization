@@ -2,93 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 Description: "Template to setup the AWS CloudTrail, PCI Compliance For AWS CloudTrail, CIS AWS Foundations Benchmark, Sumo Cloud Security Monitoring and Analytics For AWS CloudTrail, Sumo Global Intelligence for AWS CloudTrail SecOps app with AWS and Sumo Logic resources for AWS Quick Start Solution."
 
-Metadata:
-  'AWS::CloudFormation::Interface':
-    ParameterGroups:
-      - Label:
-          default: "Sumo Logic Access Configuration (Required)"
-        Parameters:
-          - SumoDeployment
-          - SumoAccessID
-          - SumoAccessKey
-          - RemoveSumoResourcesOnDeleteStack
-
-
-      - Label:
-          default: "App Details - Collector Configuration"
-        Parameters:
-          - InstallCloudTrailApp
-          - InstallPCICloudTrailApp
-          - InstallCISFoundationApp
-          - InstallCloudTrailMonitoringAnalyticsApp
-          - InstallCloudTrailSecOpsApp
-
-
-      - Label:
-          default: "App Details - CloudTrail Log Source Configuration"
-        Parameters:
-          - CloudTrailLogsBucketName
-          - CreateCloudTrailLogSource
-          - CloudTrailBucketPathExpression
-          - CloudTrailLogsSourceName
-          - CloudTrailLogsSourceCategoryName
-          - SNSTopicArn
-          - SumoRoleArn
-
-      - Label:
-          default: "AWS Quick Start configuration"
-        Parameters:
-          - QSS3BucketName
-          - QSS3KeyPrefix
-
-
-
-    ParameterLabels:
-      SumoDeployment:
-        default: "Sumo Logic Deployment Name"
-      SumoAccessID:
-        default: "Sumo Logic Access ID"
-      SumoAccessKey:
-        default: "Sumo Logic Access Key"
-
-      RemoveSumoResourcesOnDeleteStack:
-        default: "Delete Sumo Logic Resources when stack is deleted"
-
-
-      InstallCloudTrailApp:
-        default: "Install Sumo Logic AWS CloudTrail App"
-      InstallPCICloudTrailApp:
-        default: "Install Sumo Logic PCI Compliance For AWS CloudTrail App"
-      InstallCISFoundationApp:
-        default: "Install Sumo Logic CIS AWS Foundations Benchmark App"
-      InstallCloudTrailMonitoringAnalyticsApp:
-        default: "Install Amazon CloudTrail - Sumo Cloud Security Monitoring and Analytics App"
-      InstallCloudTrailSecOpsApp:
-        default: "Install Sumo Global Intelligence for AWS CloudTrail SecOps App"
-
-
-      CloudTrailLogsBucketName:
-        default: "AWS S3 Bucket Name"
-      CreateCloudTrailLogSource:
-        default: "Create Sumo Logic CloudTrail Logs Source"
-      CloudTrailBucketPathExpression:
-        default: "Path Expression for the logs"
-      CloudTrailLogsSourceName:
-        default: "Sumo Logic CloudTrail Logs Source Name"
-      CloudTrailLogsSourceCategoryName:
-        default: "Sumo Logic CloudTrail Logs Source Category Name"
-      SNSTopicArn:
-        default: "ARN of SNS Topic"
-      SumoRoleArn:
-        Default: "ARN of Sumo Role"
-
-      QSS3BucketName:
-        default: "Quick Start S3 bucket name"
-      QSS3KeyPrefix:
-        default: "Quick Start S3 key prefix"
-
-
-
 Parameters:
   SumoDeployment:
     Type: String
@@ -177,20 +90,10 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
-
-
   CloudTrailLogsBucketName:
     Type: String
     Description: "Existing Bucket Name - Provide value if the Flag is set to No.
                   New Bucket Name - Provide a unique Bucket Name if the flag is set to Yes."
-  CreateCloudTrailLogSource:
-    Type: String
-    Description: "Yes - to create Sumo Logic Cloud Trail Log Source with provided bucket Name.
-                  No - to skip creation of the  Sumo Logic Cloud Trail Log Source."
-    Default: 'Yes'
-    AllowedValues:
-      - 'Yes'
-      - 'No'
   CloudTrailBucketPathExpression:
     Type: String
     Description: Path expression to match one or more S3 objects. For example, ABC*.log or ABC.log
@@ -199,6 +102,14 @@ Parameters:
     Type: String
     Description: Change the CloudTrail Source name to be created else default name will be used.
     Default: AWS-Cloudtrail-Log-Source
+  CloudTrailCreateS3LogsSource:
+    Type: String
+    Description: "Yes: Create Sumo Logic S3 log source to collect CloudTrail logs.
+                  No: Skip creation of the Sumo Logic S3 log source."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
   CloudTrailLogsSourceCategoryName:
     Type: String
     Description: "Existing - Change to an existing Source Category from Sumo Logic if CloudTrail Source is not created.
@@ -226,14 +137,12 @@ Parameters:
 
 
 Conditions:
-
-
   install_cloudtrail_app: !Equals [!Ref InstallCloudTrailApp, 'Yes']
   install_pci_cloudtrail_app: !Equals [!Ref InstallPCICloudTrailApp, 'Yes']
   install_cis_foundation_app: !Equals [!Ref InstallCISFoundationApp, 'Yes']
   install_cloudtrail_monitoring_analytics_app: !Equals [!Ref InstallCloudTrailMonitoringAnalyticsApp,'Yes']
   install_cloudtrail_secops_app: !Equals [!Ref InstallCloudTrailSecOpsApp,'Yes']
-  install_cloudtrail_logs_source: !Equals [!Ref CreateCloudTrailLogSource, 'Yes']
+  install_cloudtrail_logs_source: !Equals [!Ref CloudTrailCreateS3LogsSource, 'Yes']
 
 Resources:
   SumoLogicHelperRole:

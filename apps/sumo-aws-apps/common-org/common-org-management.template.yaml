@@ -124,6 +124,14 @@ Parameters:
   LogArchivingAccountRegion:
     Description: "Enter your log archiving account region"
     Type: String
+  CreateS3Bucket:
+    Type: String
+    Description: "Yes: Create AWS S3 Bucket for QuickStart logs.
+                  No: Skip creation of the S3 Bucket."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
   DeliveryBucketPrefix:
     AllowedPattern: "^$|^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription:
@@ -173,7 +181,8 @@ Parameters:
     Description: AWS Execution Role name of the administrator account (the account in which StackSets will be created).
     Type: String
     Default: AWSCloudFormationStackSetExecutionRole
-
+Conditions:
+  create_s3_bucket: !Equals [ !Ref CreateS3Bucket, 'Yes' ]
 Resources:
 #Role for management account
   rAdministrationRole:
@@ -421,7 +430,7 @@ Resources:
       outputKey: oDeliveryKeyArn
 
   OrgDeliveryS3BucketStackset:
-
+    Condition: create_s3_bucket
     Type: AWS::CloudFormation::StackSet
     Properties:
       StackSetName: !Sub 'CommonOrgDeliveryS3Bucket-${AWS::StackName}'
@@ -456,6 +465,7 @@ Resources:
 
   #Get ARN of GuardDuty S3 bucket
   rDeliveryS3BucketArn:
+    Condition: create_s3_bucket
     Type: Custom::AWSARN
     DependsOn:
       - "OrgDeliveryS3BucketStackset"
@@ -469,6 +479,7 @@ Resources:
 
   #Get ARN of SNS Topic which created with s3 bucket
   rSNSTopicArn:
+    Condition: create_s3_bucket
     Type: Custom::AWSARN
     DependsOn:
       - "OrgDeliveryS3BucketStackset"
@@ -482,6 +493,7 @@ Resources:
 
   #Get ARN of Sumo Role which created with s3 bucket
   rSumoRoleArn:
+    Condition: create_s3_bucket
     Type: Custom::AWSARN
     DependsOn:
       - "OrgDeliveryS3BucketStackset"

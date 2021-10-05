@@ -159,6 +159,14 @@ Parameters:
     Description: "Region of logging account"
 
   # CloudTrail apps parameters
+  InstallAWSCloudTrail:
+    Type: String
+    Description: "Yes: Install CloudTrail Service on AWS.
+                  No: Skip installation."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
   InstallCloudTrailApp:
     Type: String
     Description: "Yes: Install Sumo Logic AWS CloudTrail app.
@@ -207,6 +215,14 @@ Parameters:
     Type: String
     Description: "Path expression to match the folder structure for CloudTrail logs (e.g., AWSLogs/*/CloudTrail/*)."
     Default: "AWSLogs/*/CloudTrail/*"
+  CloudTrailCreateS3LogsSource:
+    Type: String
+    Description: "Yes: Create Sumo Logic S3 log source to collect CloudTrail logs.
+                  No: Skip creation of the Sumo Logic S3 log source."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
   CloudTrailLogsSourceCategoryName:
     Type: String
     Description: "Required when flag is set to No. Provide an existing source category name from Sumo Logic collecting CloudTrail logs. This is used for Threat Intel for AWS app installation also."
@@ -239,10 +255,13 @@ Parameters:
   ParentStackName:
     Type: String
     Description: Parent Stack Name. Do Not Edit the value.
+Conditions:
+  install_cloudtrail_on_aws: !Equals [ !Ref InstallAWSCloudTrail, 'Yes' ]
 Resources:
   #Stackset for cloudtrail org
   CloudtrailResoucesStackset:
     Type: 'AWS::CloudFormation::StackSet'
+    Condition: install_cloudtrail_on_aws 
     Properties:
       AdministrationRoleARN: !ImportValue
         "Fn::Sub": "${ParentStackName}-AdminRoleOrg" 
@@ -296,6 +315,7 @@ Resources:
         
         CloudTrailLogsBucketName: !Ref CloudTrailLogsBucketName
         CloudTrailBucketPathExpression: !Ref CloudTrailBucketPathExpression
+        CloudTrailCreateS3LogsSource: !Ref CloudTrailCreateS3LogsSource
         CloudTrailLogsSourceCategoryName: !Ref CloudTrailLogsSourceCategoryName
         SNSTopicArn: !Ref SNSTopicArn
         SumoRoleArn: !Ref SumoRoleArn
