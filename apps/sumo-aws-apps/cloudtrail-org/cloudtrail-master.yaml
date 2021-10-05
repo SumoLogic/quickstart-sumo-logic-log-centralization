@@ -319,6 +319,5 @@ Resources:
         SNSTopicArn: !Ref SNSTopicArn
         SumoRoleArn: !Ref SumoRoleArn
         SecurityToolingAccountRegion: !Ref SecurityToolingAccountRegion
-        ResourcePrefix: !Ref ResourcePrefix
         ParentHelperFunctionArn: !Ref ParentHelperFunctionArn
         
