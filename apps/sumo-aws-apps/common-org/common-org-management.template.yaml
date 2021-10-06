@@ -181,6 +181,12 @@ Parameters:
     Description: AWS Execution Role name of the administrator account (the account in which StackSets will be created).
     Type: String
     Default: AWSCloudFormationStackSetExecutionRole
+
+  QSVersion:
+    Type: String
+    Description: "Version of Quick Start"
+    Default: "1.0"
+
 Conditions:
   create_s3_bucket: !Equals [ !Ref CreateS3Bucket, 'Yes' ]
 Resources:
@@ -360,6 +366,9 @@ Resources:
       - "rAdministrationRole"  
     Type: AWS::CloudFormation::StackSet
     Properties:
+      Tags:
+        - Key: "version"
+          Value: !Ref QSVersion
       StackSetName: !Sub 'CommonOrgTrustAllAccount-${AWS::StackName}'
       AutoDeployment: 
         Enabled: true
@@ -390,6 +399,9 @@ Resources:
       - "OrgTrustAllStackset"  
     Type: AWS::CloudFormation::StackSet
     Properties:
+      Tags:
+        - Key: "version"
+          Value: !Ref QSVersion
       StackSetName: !Sub 'CommonOrgDeliveryKmsKey-${AWS::StackName}'
       AdministrationRoleARN: !GetAtt rAdministrationRole.Arn
       ExecutionRoleName: !Ref ExecutionRoleRuleName
@@ -433,6 +445,9 @@ Resources:
     Condition: create_s3_bucket
     Type: AWS::CloudFormation::StackSet
     Properties:
+      Tags:
+        - Key: "version"
+          Value: !Ref QSVersion
       StackSetName: !Sub 'CommonOrgDeliveryS3Bucket-${AWS::StackName}'
       AdministrationRoleARN: !GetAtt rAdministrationRole.Arn
       ExecutionRoleName: !Ref ExecutionRoleRuleName

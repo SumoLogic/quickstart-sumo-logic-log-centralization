@@ -256,6 +256,12 @@ Parameters:
   ParentHelperFunctionArn:
     Type: String
     Description: ARN of Parent Helper Funtion 
+
+  QSVersion:
+    Type: String
+    Description: "Version of Quick Start"
+    Default: "1.0"
+
 Conditions:
   install_cloudtrail_on_aws: !Equals [ !Ref InstallAWSCloudTrail, 'Yes' ]
 Resources:
@@ -264,6 +270,9 @@ Resources:
     Type: 'AWS::CloudFormation::StackSet'
     Condition: install_cloudtrail_on_aws 
     Properties:
+      Tags:
+        - Key: "version"
+          Value: !Ref QSVersion
       AdministrationRoleARN: !ImportValue
         "Fn::Sub": "${ParentStackName}-AdminRoleOrg" 
       ExecutionRoleName: !Ref "ExecutionRoleRuleName"
@@ -297,6 +306,9 @@ Resources:
   CreateSumoApps:
     Type: AWS::CloudFormation::Stack
     Properties:
+      Tags:
+        - Key: "version"
+          Value: !Ref QSVersion
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/cloudtrail-org/cloudtrail-app-sumo.yaml'
         - S3Region: !Ref 'AWS::Region'
