@@ -56,8 +56,8 @@ Resources:
         Bucket: !Sub
           - "${S3Bucket}"
           - S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'
-        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/guardduty-org/cloudwatchevents.zip"
-      Handler: cloudwatchevents.handler
+        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/sumologic-app-utils/sumo_app_utils_org.zip"
+      Handler: cloudwatchevent/cloudwatchevents.handler
       Runtime: nodejs14.x
       Environment:
         Variables:
