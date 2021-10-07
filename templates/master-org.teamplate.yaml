@@ -589,7 +589,7 @@ Resources:
         CloudTrailLogsBucketName: !If [ create_cloudtrail_bucket, !GetAtt CommonOrgManagement.Outputs.OrgDeliveryS3BucketArn, !Ref Section3CloudTrailExistsS3BucketName ]
         KMSArn: !GetAtt CommonOrgManagement.Outputs.OrgDeliveryKMSKeyArn 
         SumoRoleArn: !GetAtt CommonOrgManagement.Outputs.SumoRoleArn
-        SecurityToolingAccountRegion: !Ref Section1ToolingAndLoggingRegion
+        CloudTrailS3Region: !Ref Section1ToolingAndLoggingRegion
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         ParentStackName: !GetAtt CommonOrgManagement.Outputs.StackName

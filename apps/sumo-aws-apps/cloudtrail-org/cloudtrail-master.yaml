@@ -151,9 +151,9 @@ Parameters:
     Type: String
     Default: us-east-1
     Description: "Enter multi management account region for CloudTrail"
-  SecurityToolingAccountRegion:
+  CloudTrailS3Region:
     Type: String
-    Description: "Region of tooling account"
+    Description: "Region of S3 Log Archiving for CloudTrail"
 
 
   # CloudTrail apps parameters
@@ -330,6 +330,6 @@ Resources:
         CloudTrailLogsSourceCategoryName: !Ref CloudTrailLogsSourceCategoryName
         SNSTopicArn: !Ref SNSTopicArn
         SumoRoleArn: !Ref SumoRoleArn
-        SecurityToolingAccountRegion: !Ref SecurityToolingAccountRegion
+        CloudTrailS3Region: !Ref CloudTrailS3Region
         ParentHelperFunctionArn: !Ref ParentHelperFunctionArn
         

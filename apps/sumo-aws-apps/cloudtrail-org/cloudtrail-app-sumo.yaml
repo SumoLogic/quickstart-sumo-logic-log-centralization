@@ -44,8 +44,8 @@ Parameters:
   SumoRoleArn:
     Description: "ARN of Sumo Role that allow sumologic read data from s3 bucket"
     Type: String
-  SecurityToolingAccountRegion:
-    Description: "Region of Tooling Account"
+  CloudTrailS3Region:
+    Description: "Region of S3 Log Archiving for CloudTrail"
     Type: String
 
   InstallCloudTrailApp:
@@ -259,7 +259,7 @@ Resources:
       TopicArn: !Ref SNSTopicArn
       Endpoint: !GetAtt SumoCloudTrailSource.SUMO_ENDPOINT
       Protocol: https
-      Region: !Ref SecurityToolingAccountRegion
+      Region: !Ref CloudTrailS3Region
       DeliveryPolicy:
         healthyRetryPolicy:
           numRetries: 40
