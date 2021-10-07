@@ -208,7 +208,7 @@ Parameters:
     Type: String
     AllowedPattern: '^\d{12}$'
     ConstraintDescription: "Security tooling account ID cannot be empty. Must be 12 digits"
-  
+
   Section1ToolingAndLoggingRegion:
     Description: "Enter your security tooling and log archiving account region"
     Type: String
@@ -241,7 +241,7 @@ Parameters:
     Type: String
     AllowedPattern: '^\d{12}$'
     ConstraintDescription: "Log archiving account ID cannot be empty. Must be 12 digits"
- 
+
 
   Section1OrganizationID:
     AllowedPattern: '^o-[a-z0-9]{10,32}$'
@@ -275,7 +275,7 @@ Parameters:
     Type: String
     Description: "Yes: Install AWS GuardDuty app.
                   No: Skip installation of app."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'  
@@ -414,7 +414,7 @@ Parameters:
     Type: String
     Description: "Yes: Create AWS S3 Bucket for CloudTrail logs.
                   No: Skip creation of the S3 Bucket."
-    Default: 'No'
+    Default: 'Yes'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -543,12 +543,10 @@ Resources:
         HttpLogsSourceCategoryName: !Ref Section2GuardDutyHttpLogsSourceCategoryName
         InstallAWSGuardDutyApp: !Ref Section2InstallAWSGuardDutyApp
         AutoEnableS3Logs: !Ref Section2AutoEnableS3Logs
-        ConfigurationRoleName: !Sub 'ConfigurationRole-${AWS::StackName}'
-        DelegatedAdminAccountId: !Ref AWS::AccountId
+        ConfigurationRoleName: !GetAtt CommonOrgManagement.Outputs.OrgConfigurationRoleName
+        DelegatedAdminAccountId: !Ref Section1SecurityToolingAccountId
         EnabledRegions: !Ref Section2GuardDutyRegions
         FindingPublishingFrequency: !Ref Section2FindingPublishingFrequency 
-        LambdaExecutionRoleName: !Select [ 1, !Split ['/', !GetAtt CommonOrgManagement.Outputs.SumoLogicHelperRoleARN]]
-        OrganizationId: !Ref Section1OrganizationID 
         QSS3BucketName: !Ref QSS3BucketName  
         QSS3BucketRegion: !Ref QSS3BucketRegion 
         QSS3KeyPrefix: !Ref QSS3KeyPrefix

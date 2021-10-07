@@ -12,7 +12,6 @@ Metadata:
           - SumoAccessID
           - SumoAccessKey
           - RemoveSumoResourcesOnDeleteStack
-
       - Label:
           default: "App Details - Collector Configuration"
         Parameters:
@@ -40,11 +39,6 @@ Metadata:
           - DelegatedAdminAccountId
           - EnabledRegions
           - FindingPublishingFrequency
-      - Label:
-          default: AWS GuardDuty Lambda Function Attributes
-        Parameters:
-          - LambdaExecutionRoleName
-          - OrganizationId
       - Label:
           default: AWS StackSet Attributes
         Parameters:
@@ -100,10 +94,6 @@ Metadata:
         default: Enabled Regions
       FindingPublishingFrequency:
         default: Finding Publishing Frequency
-      LambdaExecutionRoleName:
-        default: Lambda Execution Role Name        
-      OrganizationId:
-        default: Organization ID
 
       AdministrationRoleArn:
         default: Arn of Administration Role
@@ -243,23 +233,6 @@ Parameters:
     Description: Finding publishing frequency
     Type: String
 
-
-  OrganizationId:
-    AllowedPattern: '^o-[a-z0-9]{10,32}$'
-    ConstraintDescription: >
-      The Org Id must be a 12 character string starting with o- and followed by 10 lower case alphanumeric characters
-    Description: AWS Organizations ID
-    MaxLength: 12
-    MinLength: 12
-    Type: String
-
-  LambdaExecutionRoleName:
-    AllowedPattern: '^[\w+=,.@-]{1,64}$'
-    ConstraintDescription: Max 64 alphanumeric characters. Also special characters supported [+, =, ., @, -]
-    Default: guardduty-org-lambda
-    Type: String
-
-
   AdministrationRoleArn:
     Description: Arn of AWS Administration Role name to enable use of AWS CloudFormation StackSets.
     Type: String
@@ -318,89 +291,6 @@ Conditions:
   install_sumo_cloud_security_monitoring_and_analytics_app: !Equals [!Ref InstallSumoCloudSecurityMonitoringandAnalyticsGuardDutyApp, 'Yes']
 
 Resources:
-  rConfigurationRole:
-    Condition: install_aws_guardduty_app
-    Type: AWS::IAM::Role
-    Metadata:
-      cfn_nag:
-        rules_to_suppress:
-          - id: W11
-            reason: Actions require * in resource
-          - id: W28
-            reason: Explicit role name provided
-    Properties:
-      RoleName: !Ref ConfigurationRoleName
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Action: sts:AssumeRole
-            Effect: Allow
-            Principal:
-              AWS:
-                - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:root
-      Path: "/"
-      Policies:
-        - PolicyName: guardduty-org-policy-organizations
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Action: organizations:ListAccounts
-                Effect: Allow
-                Resource: !Sub "arn:${AWS::Partition}:organizations:*:*:*"
-                Sid: OrganizationsListAccounts
-
-        - PolicyName: guardduty-org-policy-guardduty
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Action: guardduty:ListDetectors
-                Effect: Allow
-                Resource: !Sub "arn:${AWS::Partition}:guardduty:*:*:*"
-                Sid: GuardDutyNoResource
-
-              - Action:
-                  - guardduty:CreateMembers
-                  - guardduty:CreatePublishingDestination
-                  - guardduty:DeleteDetector
-                  - guardduty:DeleteMembers
-                  - guardduty:DisassociateMembers
-                  - guardduty:ListMembers
-                  - guardduty:ListPublishingDestinations
-                  - guardduty:UpdateDetector
-                  - guardduty:UpdateMemberDetectors
-                  - guardduty:UpdateOrganizationConfiguration
-                  - guardduty:UpdatePublishingDestination
-                Effect: Allow
-                Resource:
-                  - !Sub arn:${AWS::Partition}:guardduty:*:${AWS::AccountId}:/detector/*
-                  - !Sub arn:${AWS::Partition}:guardduty:*:${AWS::AccountId}:detector/*
-                Sid: GuardDutyWithResource
-
-        - PolicyName: guardduty-org-policy-iam
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Action: iam:GetRole
-                Effect: Allow
-                Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/*
-                Sid: AllowReadIamActions
-
-              - Action:
-                  - iam:CreateServiceLinkedRole
-                  - iam:DeleteServiceLinkedRole
-                Condition:
-                  StringLike:
-                    iam:AWSServiceName: guardduty.amazonaws.com
-                Effect: Allow
-                Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty
-                Sid: AllowCreateDeleteServiceLinkedRole
-
-              - Action:
-                  - iam:DeleteRolePolicy
-                  - iam:PutRolePolicy
-                Effect: Allow
-                Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty
-                Sid: AllowPolicyActions
 
   GuardDutyDeleteDetectorRoleStackset:
     Condition: install_aws_guardduty_app
@@ -457,7 +347,7 @@ Resources:
         - Regions: !Split [",", !Ref EnabledRegions]
           DeploymentTargets:
             Accounts:
-              - !Ref AWS::AccountId
+              - !Ref DelegatedAdminAccountId
       TemplateURL: !Sub
         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/guardduty-org/guardduty-org-cloudwatch-event.yaml'
         - S3Region:  !Ref 'AWS::Region'
@@ -475,7 +365,6 @@ Resources:
   rAWSGuardDutyCustomResource:
     Type: Custom::GuardDuty
     DependsOn:
-      - "rConfigurationRole"
       - "GuardDutyDeleteDetectorRoleStackset"
     Condition: install_aws_guardduty_app
     Version: "1.0.1"
@@ -483,7 +372,7 @@ Resources:
       ServiceToken: !Ref ParentHelperFunctionArn
       AUTO_ENABLE_S3_LOGS: !Ref AutoEnableS3Logs
       AWS_PARTITION: !Sub ${AWS::Partition}
-      CONFIGURATION_ROLE_NAME: !Select [ 1, !Split ['/', !GetAtt rConfigurationRole.Arn]]
+      CONFIGURATION_ROLE_NAME: !Ref ConfigurationRoleName
       DELEGATED_ADMIN_ACCOUNT_ID: !Ref DelegatedAdminAccountId
       DELETE_DETECTOR_ROLE_NAME: !Sub 
         - "DeleteDetectorRole-${StackName}"
@@ -506,7 +395,7 @@ Resources:
       DateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
       DateLocatorRegex: '.*"updatedAt":"(.*)".*'
 
-  sumoGuardDutyApp:
+  SumoGuardDutyApp:
     Type: Custom::App
     Condition: install_sumo_guardduty_app
     Properties:
@@ -520,7 +409,7 @@ Resources:
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
 
-  sumoGlobalGuardDutyApp:
+  SumoGlobalGuardDutyApp:
     Type: Custom::App
     Condition: install_sumo_global_guardduty_app
     Properties:
@@ -534,7 +423,7 @@ Resources:
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
 
-  sumoGuardDutyCloudSecurityMonitoringandAnalyticsApp:
+  SumoGuardDutyCloudSecurityMonitoringandAnalyticsApp:
     Type: Custom::App
     Condition: install_sumo_cloud_security_monitoring_and_analytics_app
     Properties:

@@ -238,6 +238,7 @@ Resources:
       - "rExecutionRole"  
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Sub 'SumoLogicHelperRole-${AWS::StackName}'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -428,6 +429,40 @@ Resources:
         - ParameterKey: 'DeliveryKeyAlias'
           ParameterValue: !Sub "KMS-${AWS::StackName}"
 
+  OrgConfigurationRoleStackset:
+    DependsOn:
+      - "OrgDeliveryKmsKeyStackset"  
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      Tags:
+        - Key: "version"
+          Value: !Ref QSVersion
+      StackSetName: !Sub 'CommonOrgConfigurationRole-${AWS::StackName}'
+      AdministrationRoleARN: !GetAtt rAdministrationRole.Arn
+      ExecutionRoleName: !Ref ExecutionRoleRuleName
+      PermissionModel: SELF_MANAGED
+      Capabilities:
+        - 'CAPABILITY_NAMED_IAM'
+        - 'CAPABILITY_IAM'
+        - 'CAPABILITY_AUTO_EXPAND'
+      StackInstancesGroup:
+        - Regions:
+            - !Ref SecurityToolingAccountRegion
+          DeploymentTargets:
+            Accounts:
+              - !Ref SecurityToolingAccountId    
+      TemplateURL: !Sub
+        - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}apps/sumo-aws-apps/common-org/common-org-configuration-role.yaml'
+        - S3Region: !Ref 'AWS::Region'
+          S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'
+      Parameters:
+        - ParameterKey: 'ConfigurationRoleName'
+          ParameterValue: !Sub "ConfigurationRole-${AWS::StackName}"
+        - ParameterKey: 'OrgPrimaryAccountId'
+          ParameterValue: !Ref "AWS::AccountId" 
+        - ParameterKey: 'OrgPrimaryLambdaRoleName'
+          ParameterValue: !Sub 'SumoLogicHelperRole-${AWS::StackName}'
+
 #Get ARN of Delivery KMS Key
   rOrgDeliveryKMSKeyArn:
     Type: Custom::AWSARN
@@ -577,7 +612,15 @@ Outputs:
     Description: ARN of the delivery S3 bucket.
     Value: !GetAtt rDeliveryS3BucketArn.ARN
     Condition: create_s3_bucket
-  
+
+  OrgPrimaryLambdaRoleName:
+    Description: Organization Primary Lambda Role Name
+    Value: !Sub 'SumoLogicHelperRole-${AWS::StackName}'
+
+  OrgConfigurationRoleName:
+    Description: Configuration Role Name
+    Value: !Sub 'ConfigurationRole-${AWS::StackName}'
+
   SumoRoleArn:
     Description: "Arn of Sumo Role for sumologic account to read data from s3 bucket of customer"
     Value: !GetAtt rSumoRoleArn.ARN

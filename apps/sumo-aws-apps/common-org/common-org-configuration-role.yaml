@@ -1,0 +1,131 @@
+########################################################################
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+########################################################################
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create an IAM role for configuration in the delegated administrator account
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: Role Attributes
+        Parameters:
+          - ConfigurationRoleName
+          - OrgPrimaryAccountId
+          - OrgPrimaryLambdaRoleName
+
+    ParameterLabels:
+      ConfigurationRoleName:
+        default: Configuration IAM Role Name
+      OrgPrimaryAccountId:
+        default: Organization Primary Account ID
+      OrgPrimaryLambdaRoleName:
+        default: Organization Primary Lambda Role Name
+
+Parameters:
+  ConfigurationRoleName:
+    AllowedPattern: '^[\w+=,.@-]{1,64}$'
+    ConstraintDescription: Max 64 alphanumeric characters. Also special characters supported [+, =, ., @, -]
+    Description: Configuration IAM Role Name
+    Type: String
+
+  OrgPrimaryAccountId:
+    AllowedPattern: '^\d{12}$'
+    ConstraintDescription: Must be 12 digits
+    Description: Organization Primary Account ID
+    Type: String
+
+  OrgPrimaryLambdaRoleName:
+    AllowedPattern: '^[\w+=,.@-]{1,64}$'
+    ConstraintDescription: Max 64 alphanumeric characters. Also special characters supported [+, =, ., @, -]
+    Description: Organization Primary Account Lambda Role Name
+    Type: String
+
+Resources:
+  rConfigurationRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: Actions require * in resource
+          - id: W28
+            reason: Explicit role name provided
+    Properties:
+      RoleName: !Ref ConfigurationRoleName
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                aws:PrincipalArn: !Sub arn:${AWS::Partition}:iam::${OrgPrimaryAccountId}:role/${OrgPrimaryLambdaRoleName}
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Sub arn:${AWS::Partition}:iam::${OrgPrimaryAccountId}:root
+      Path: "/"
+      Policies:
+        - PolicyName: guardduty-org-policy-organizations
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action: organizations:ListAccounts
+                Effect: Allow
+                Resource: "*"
+                Sid: OrganizationsListAccounts
+
+        - PolicyName: guardduty-org-policy-guardduty
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action: guardduty:ListDetectors
+                Effect: Allow
+                Resource: "*"
+                Sid: GuardDutyNoResource
+
+              - Action:
+                  - guardduty:CreateMembers
+                  - guardduty:CreatePublishingDestination
+                  - guardduty:DeleteDetector
+                  - guardduty:DeleteMembers
+                  - guardduty:DisassociateMembers
+                  - guardduty:ListMembers
+                  - guardduty:ListPublishingDestinations
+                  - guardduty:UpdateDetector
+                  - guardduty:UpdateMemberDetectors
+                  - guardduty:UpdateOrganizationConfiguration
+                  - guardduty:UpdatePublishingDestination
+                Effect: Allow
+                Resource:
+                  - !Sub arn:${AWS::Partition}:guardduty:*:${AWS::AccountId}:/detector/*
+                  - !Sub arn:${AWS::Partition}:guardduty:*:${AWS::AccountId}:detector/*
+                Sid: GuardDutyWithResource
+
+        - PolicyName: guardduty-org-policy-iam
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action: iam:GetRole
+                Effect: Allow
+                Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/*
+                Sid: AllowReadIamActions
+
+              - Action:
+                  - iam:CreateServiceLinkedRole
+                  - iam:DeleteServiceLinkedRole
+                Condition:
+                  StringLike:
+                    iam:AWSServiceName: guardduty.amazonaws.com
+                Effect: Allow
+                Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty
+                Sid: AllowCreateDeleteServiceLinkedRole
+
+              - Action:
+                  - iam:DeleteRolePolicy
+                  - iam:PutRolePolicy
+                Effect: Allow
+                Resource: !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/guardduty.amazonaws.com/AWSServiceRoleForAmazonGuardDuty
+                Sid: AllowPolicyActions
