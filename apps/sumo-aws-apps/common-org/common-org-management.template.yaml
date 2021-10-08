@@ -132,6 +132,10 @@ Parameters:
     AllowedValues:
       - 'Yes'
       - 'No'
+  CloudTrailExistsS3BucketName:
+    Type: String
+    Description: "Required when flag is set to Yes. Provide an existing S3 Bucket name which contains CloudTrail Logs"
+    Default: ""
   DeliveryBucketPrefix:
     AllowedPattern: "^$|^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
     ConstraintDescription:
@@ -477,7 +481,6 @@ Resources:
       outputKey: oDeliveryKeyArn
 
   OrgDeliveryS3BucketStackset:
-    Condition: create_s3_bucket
     Type: AWS::CloudFormation::StackSet
     Properties:
       Tags:
@@ -512,6 +515,15 @@ Resources:
           ParameterValue: !Ref SumoOrganizationId
         - ParameterKey: "ManagementAccountID"
           ParameterValue: !Ref "AWS::AccountId"
+        - ParameterKey: CreateS3Bucket
+          ParameterValue: !Ref CreateS3Bucket
+        - ParameterKey: CloudTrailExistsS3BucketName
+          ParameterValue: !Ref CloudTrailExistsS3BucketName
+        - ParameterKey: "QSS3BucketName"
+          ParameterValue: !Ref QSS3BucketName
+        - ParameterKey: QSS3KeyPrefix
+          ParameterValue: !Ref QSS3KeyPrefix
+
 
   #Get ARN of GuardDuty S3 bucket
   rDeliveryS3BucketArn:
@@ -529,7 +541,6 @@ Resources:
 
   #Get ARN of SNS Topic which created with s3 bucket
   rSNSTopicArn:
-    Condition: create_s3_bucket
     Type: Custom::AWSARN
     DependsOn:
       - "OrgDeliveryS3BucketStackset"
@@ -543,7 +554,6 @@ Resources:
 
   #Get ARN of Sumo Role which created with s3 bucket
   rSumoRoleArn:
-    Condition: create_s3_bucket
     Type: Custom::AWSARN
     DependsOn:
       - "OrgDeliveryS3BucketStackset"
@@ -606,12 +616,15 @@ Outputs:
   SNSTopicArn:
     Description: ARN of SNS Topic
     Value: !GetAtt rSNSTopicArn.ARN
-    Condition: create_s3_bucket
+
   
   OrgDeliveryS3BucketArn:
     Description: ARN of the delivery S3 bucket.
-    Value: !GetAtt rDeliveryS3BucketArn.ARN
-    Condition: create_s3_bucket
+    Value: 
+      !If
+        - create_s3_bucket
+        - !GetAtt rDeliveryS3BucketArn.ARN
+        - !Ref CloudTrailExistsS3BucketName
 
   OrgPrimaryLambdaRoleName:
     Description: Organization Primary Lambda Role Name
@@ -624,7 +637,6 @@ Outputs:
   SumoRoleArn:
     Description: "Arn of Sumo Role for sumologic account to read data from s3 bucket of customer"
     Value: !GetAtt rSumoRoleArn.ARN
-    Condition: create_s3_bucket
 
   SumoCollectorID:
     Description: "ID of Sumo Hosted Collector"

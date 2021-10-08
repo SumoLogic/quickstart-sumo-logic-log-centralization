@@ -798,7 +798,7 @@ class AWSARN(AWSResource):
     def update(self, params, *args, **kwargs):
         pass
 
-    def delete(self, *args, **kwargs):
+    def delete(self,params, *args, **kwargs):
         pass
 
     def extract_params(self, event):
@@ -806,3 +806,66 @@ class AWSARN(AWSResource):
         return {
             "params": props
         }
+
+#Class config exists s3 resource
+class S3ExistsResource(AWSResource):
+    def __init__(self, props,  *args, **kwargs):
+        self.s3cli = boto3.client('s3')
+
+    def create(self, params, *args, **kwargs):
+        bucket_name = params['bucketName']
+        kms_arn = params['kmsArn']
+        sns_topic = params['snsTopic']
+
+        results_encrypt = self.s3cli.put_bucket_encryption(
+                    Bucket=bucket_name,
+                    ServerSideEncryptionConfiguration={
+                        'Rules': [
+                            {
+                                'ApplyServerSideEncryptionByDefault': {
+                                    'SSEAlgorithm': 'aws:kms',
+                                    'KMSMasterKeyID': kms_arn
+                                },
+                                'BucketKeyEnabled': False
+                            },
+                        ]
+                    }
+                )
+        results_notify = self.s3cli.put_bucket_notification_configuration(
+                    Bucket=bucket_name,
+                    NotificationConfiguration={
+                        'TopicConfigurations': [
+                        {
+                            'TopicArn': sns_topic,
+                            'Events': ['s3:ObjectCreated:Put'],
+                        },
+                    ]
+                        
+                    }
+                )
+
+
+        return {'ARN': bucket_name}, bucket_name
+        
+
+    def update(self, params, *args, **kwargs):
+        self.create(params, *args, **kwargs)
+
+    def delete(self, params, *args, **kwargs):
+        bucket_name = params['bucketName']
+        self.s3cli.delete_bucket_encryption(
+            Bucket=bucket_name
+        )
+        self.s3cli.put_bucket_notification_configuration(
+                    Bucket=bucket_name,
+                    NotificationConfiguration={  
+                    }
+                )
+
+
+    def extract_params(self, event):
+        props = event.get("ResourceProperties")
+        return {
+            "params": props
+        }
+

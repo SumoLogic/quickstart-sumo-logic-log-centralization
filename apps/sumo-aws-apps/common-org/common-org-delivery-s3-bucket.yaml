@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
 Description: Creates the Delivery S3 bucket
 
 Metadata:
@@ -78,7 +79,90 @@ Parameters:
     AllowedPattern: ".+"
     ConstraintDescription: "Sumo Logic Organization Id can not be empty."
 
+  CreateS3Bucket:
+    Type: String
+    Description: "Yes: Create AWS S3 Bucket for QuickStart logs.
+                  No: Skip creation of the S3 Bucket."
+    Default: 'No'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+
+  CloudTrailExistsS3BucketName:
+    Type: String
+    Description: "Required when flag is set to Yes. Provide an existing S3 Bucket name which contains CloudTrail Logs"
+    Default: ""
+
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: "aws-quickstart"
+    Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Type: "String"
+
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: "quickstart-sumo-logic-log-centralization/"
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: "String"
+Conditions:
+  create_s3_bucket: !Equals [ !Ref CreateS3Bucket, 'Yes']
+  not_create_s3_bucket: !Equals [ !Ref CreateS3Bucket, 'No']
 Resources:
+
+  s3HelperRole: 
+    Type: AWS::IAM::Role
+    Condition: not_create_s3_bucket
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: 'write-log-to-cloudwatch-log'
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action: logs:CreateLogGroup
+                Effect: Allow
+                Resource: !Sub arn:*:logs:${AWS::Region}:${AWS::AccountId}:log-group:*
+                Sid: CreateLogGroup
+              - Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Effect: Allow
+                Resource: !Sub arn:*:logs:${AWS::Region}:${AWS::AccountId}:log-group:*:log-stream:*
+                Sid: CreateLogStreamAndEvents
+              - Action:
+                  - s3:PutEncryptionConfiguration
+                  - s3:PutBucketNotification
+                Resource: !Sub "arn:aws:s3:::${CloudTrailExistsS3BucketName}"
+                Effect: Allow
+                Sid: ChangePermissionS3
+
+  s3LambdaHelper:
+    Condition: not_create_s3_bucket
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: main.handler
+      Runtime: python3.8
+      CodeUri:
+        Bucket: !Sub
+                - "${S3Bucket}"
+                - S3Bucket: !Sub '${QSS3BucketName}-${AWS::Region}'
+        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/sumologic-app-utils/sumo_app_utils_org.zip"
+      MemorySize: 512
+      Timeout: 900
+      ReservedConcurrentExecutions: 1
+      Role:
+        Fn::GetAtt:
+          - s3HelperRole
+          - Arn
 #SNS topic for listen event put object from s3 bucket. After send event to Sumo Logic
   SumoSNSTopic:
     Type: "AWS::SNS::Topic"
@@ -98,7 +182,11 @@ Resources:
               StringEquals:
                 aws:SourceAccount: !Ref "AWS::AccountId"
               ArnLike:
-                aws:SourceArn: !Sub "arn:aws:s3:::${DeliveryBucketPrefix}-orgs"
+                aws:SourceArn: 
+                  !If
+                    - create_s3_bucket
+                    - !Sub "arn:aws:s3:::${DeliveryBucketPrefix}-orgs"
+                    - !Sub "arn:aws:s3:::${CloudTrailExistsS3BucketName}"
             Effect: Allow
             Principal:
               AWS: "*"
@@ -142,8 +230,14 @@ Resources:
                   - s3:ListBucketVersions
                   - s3:ListBucket
                 Resource:
-                  - !Sub "arn:aws:s3:::${DeliveryBucketPrefix}-orgs/*"
-                  - !Sub "arn:aws:s3:::${DeliveryBucketPrefix}-orgs"
+                  !If 
+                    - create_s3_bucket
+                    -
+                      - !Sub "arn:aws:s3:::${DeliveryBucketPrefix}-orgs/*"
+                      - !Sub "arn:aws:s3:::${DeliveryBucketPrefix}-orgs"
+                    -
+                      - !Sub "arn:aws:s3:::${CloudTrailExistsS3BucketName}/*"
+                      - !Sub "arn:aws:s3:::${CloudTrailExistsS3BucketName}"
               - Sid: "SumoLogicDescyptS3Object"
                 Action:
                   - kms:Decrypt
@@ -155,6 +249,7 @@ Resources:
       - "SumoSNSpolicy"
     DeletionPolicy: Retain
     Type: AWS::S3::Bucket
+    Condition: create_s3_bucket 
     Metadata:
       cfn_nag:
         rules_to_suppress:
@@ -182,10 +277,25 @@ Resources:
       VersioningConfiguration:
         Status: Enabled
 
+#config notification and encryption of exists s3 bucket
+  rConfigExistsS3Bucket:
+    Type: Custom::S3ExistsResource
+    Condition: not_create_s3_bucket 
+    Properties:
+      ServiceToken: !GetAtt s3LambdaHelper.Arn
+      bucketName: !Ref CloudTrailExistsS3BucketName
+      kmsArn: !Ref DeliveryKMSKeyArn
+      snsTopic: !Ref SumoSNSTopic
+
+
   rS3BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref rS3Bucket
+      Bucket: 
+        !If
+          - create_s3_bucket
+          - !Ref rS3Bucket
+          - !Ref CloudTrailExistsS3BucketName
       PolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -193,13 +303,18 @@ Resources:
             Condition:
               ForAnyValue:StringNotEquals:
                 aws:CalledVia: 
-                  - guardduty.amazonaws.com
                   - cloudtrail.amazonaws.com
             Effect: Deny
             Principal: "*"
             Resource:
-              - !Sub arn:aws:s3:::${rS3Bucket}
-              - !Sub arn:aws:s3:::${rS3Bucket}/*
+              !If 
+                - create_s3_bucket
+                -
+                  - !Sub "arn:aws:s3:::${DeliveryBucketPrefix}-orgs/*"
+                  - !Sub "arn:aws:s3:::${DeliveryBucketPrefix}-orgs"
+                -
+                  - !Sub "arn:aws:s3:::${CloudTrailExistsS3BucketName}/*"
+                  - !Sub "arn:aws:s3:::${CloudTrailExistsS3BucketName}"
             Sid: DenyPutObjectUnlessGuardDutyCloudtrail
 
           - Action: "s3:*"
@@ -209,8 +324,14 @@ Resources:
             Effect: Deny
             Principal: "*"
             Resource:
-              - !Sub arn:aws:s3:::${rS3Bucket}
-              - !Sub arn:aws:s3:::${rS3Bucket}/*
+              !If 
+                - create_s3_bucket
+                -
+                  - !Sub "arn:aws:s3:::${DeliveryBucketPrefix}-orgs/*"
+                  - !Sub "arn:aws:s3:::${DeliveryBucketPrefix}-orgs"
+                -
+                  - !Sub "arn:aws:s3:::${CloudTrailExistsS3BucketName}/*"
+                  - !Sub "arn:aws:s3:::${CloudTrailExistsS3BucketName}"
             Sid: SecureTransport
 
           - Action:
@@ -220,9 +341,12 @@ Resources:
             Effect: Allow
             Principal:
               Service:
-                - guardduty.amazonaws.com
                 - cloudtrail.amazonaws.com
-            Resource: !Sub arn:aws:s3:::${rS3Bucket}
+            Resource:
+              !If 
+                - create_s3_bucket
+                - !Sub "arn:aws:s3:::${DeliveryBucketPrefix}-orgs"
+                - !Sub "arn:aws:s3:::${CloudTrailExistsS3BucketName}"
             Sid: AWSBucketPermissionsCheck
 
           - Action: s3:PutObject
@@ -232,37 +356,23 @@ Resources:
             Effect: Allow
             Principal:
               Service:
-                - guardduty.amazonaws.com
                 - cloudtrail.amazonaws.com
-            Resource: !Sub arn:aws:s3:::${rS3Bucket}/*
+            Resource:
+              !If 
+                - create_s3_bucket
+                - !Sub "arn:aws:s3:::${DeliveryBucketPrefix}-orgs/*"
+                - !Sub "arn:aws:s3:::${CloudTrailExistsS3BucketName}/*"
             Sid: AWSBucketDelivery
 
-          - Action: s3:PutObject
-            Condition:
-              StringNotEquals:
-                "s3:x-amz-server-side-encryption": "aws:kms"
-            Effect: Deny
-            Principal:
-              Service:
-                - guardduty.amazonaws.com
-            Resource: !Sub arn:aws:s3:::${rS3Bucket}/*
-            Sid: DenyUnencryptedObjectUploads
-
-          - Action: s3:PutObject
-            Condition:
-              StringNotEquals:
-                "s3:x-amz-server-side-encryption-aws-kms-key-id": !Sub ${DeliveryKMSKeyArn}
-            Effect: Deny
-            Principal:
-              Service:
-                - guardduty.amazonaws.com
-            Resource: !Sub arn:aws:s3:::${rS3Bucket}/*
-            Sid: DenyIncorrectEncryptionHeader
 
 Outputs:
   oDeliveryS3Bucket:
     Description: Delivery S3 Bucket
-    Value: !Ref rS3Bucket
+    Value: 
+      !If
+        - create_s3_bucket
+        - !Ref rS3Bucket
+        - !Ref CloudTrailExistsS3BucketName
   oSNSTopicArn:
     Description: Arn of SNS Topic
     Value: !Ref SumoSNSTopic

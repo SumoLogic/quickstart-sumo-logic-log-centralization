@@ -102,7 +102,7 @@ Metadata:
       Section1OrganizationID:
         default: "AWS Organizations ID"
       Section1OrganizationRootID:
-        default: "AWS Organization root ID"      
+        default: "AWS Organization Root OU ID"      
       Section1DeliveryBucketPrefix:
         default: "Delivery Bucket Prefix"
 
@@ -128,7 +128,7 @@ Metadata:
 
       # CloudTrail parameters
       Section3CloudTrailRegions:
-        default: "CloudTrail Regions of Management Account"
+        default: "CloudTrail Region of Management Account"
       Section3InstallCloudTrailApp:
         default: "Install Sumo Logic AWS CloudTrail app"
       Section3InstallPCICloudTrailApp:
@@ -254,7 +254,7 @@ Parameters:
   Section1OrganizationRootID:
     AllowedPattern: '^r-[0-9a-z]{4,32}$'
     Description: >
-      The Root ID string requires r- followed by from 4 to 32 lowercase letters or digits.
+      The Root OU ID string requires r- followed by from 4 to 32 lowercase letters or digits.
     MaxLength: 34
     Type: String
 
@@ -342,7 +342,7 @@ Parameters:
       - 'No'
   Section3CloudTrailRegions:
     Type: String
-    Description: "Enter multi management account region for CloudTrail"
+    Description: "Enter management account region for CloudTrail"
     Default: us-east-1
     AllowedValues:
       - 'us-east-1'
@@ -414,13 +414,13 @@ Parameters:
     Type: String
     Description: "Yes: Create AWS S3 Bucket for CloudTrail logs.
                   No: Skip creation of the S3 Bucket."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
   Section3CloudTrailExistsS3BucketName:
     Type: String
-    Description: "Required when flag is set to Yes. Provide an existing S3 Bucket name which contains CloudTrail Logs"
+    Description: "Required when flag is set to No. Provide an existing S3 Bucket name which contains CloudTrail Logs. Exists bucket must at same region and same account with log archiving account above"
     Default: ""
   Section3CloudTrailCreateS3LogsSource:
     Type: String
@@ -506,6 +506,7 @@ Resources:
         RemoveSumoResourcesOnDeleteStack: !Ref Section1SumoLogicResourceRemoveOnDeleteStack
         CollectorName: !Sub "aws-quickstart-collector-${AWS::StackName}"
         CreateS3Bucket: !If [ create_cloudtrail_bucket, 'Yes','No' ]
+        CloudTrailExistsS3BucketName: !Ref Section3CloudTrailExistsS3BucketName
         SecurityToolingAccountId: !Ref Section1SecurityToolingAccountId
         LoggingAccountId: !Ref Section1LogArchivingAccountId
         DeliveryBucketPrefix: !Ref Section1DeliveryBucketPrefix
