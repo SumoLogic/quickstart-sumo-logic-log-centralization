@@ -1,15 +1,14 @@
 // Replace the <n> in each row to specify the number of resources used in this deployment. Remove the rows for resources that aren’t used.
 |===
-|Resource |This deployment uses
+|Resources |This deployment uses
 
 // Space needed to maintain table headers
 |S3 buckets |1
-|SNS Topics| 5
+|SNS topics| 5
 |Lambda functions |7
 |AWS Identity and Access Management (IAM) roles |7
-|AWS Cloud Trail |1
-|Amazon CloudWatch Events |1
-|Amazon API Gateways |3
-|Kinesis Delivery Firehose |1
+|AWS CloudTrail |1
+|Amazon CloudWatch events |1
+|Amazon API Gateway |3
+|Kinesis Data Firehose delivery streams |1
 |===
-//TODO Suresh or Shivansh, please fill in these blanks. This table goes in our boilerplate section that refers to "the following resources."

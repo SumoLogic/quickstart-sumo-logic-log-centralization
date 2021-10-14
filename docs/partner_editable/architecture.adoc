@@ -15,24 +15,24 @@ As shown in <<architecture1>>, the Quick Start sets up the following:
 
 * Amazon GuardDuty to detect malicious activity and behavior to protect AWS accounts and workloads. 
 
-* Amazon VPC Flow Logs to capture information about IP traffic going to and from network interfaces in your VPC. 
+* Amazon Virtual Private Cloud (Amazon VPC) Flow Logs to capture information about IP traffic going to and from network interfaces. 
 
-* AWS Security Hub to assess security alerts and security posture across AWS 
+* AWS Security Hub to assess security alerts and security posture across AWS  accounts. Security Hub relays security events to Amazon CloudWatch.
 
 * AWS WAF to protect your web applications from common web exploits. 
 
 * AWS Config to record and evaluate configurations of your AWS resources. 
 
-* AWS CloudTrail to track user activity and API usage. 
+* AWS CloudTrail to track user activity and API (application programming interface) usage. 
 
-* Multiple AWS CloudFormation stacks to set up forwarding of data to Sumo Logic. Each stack consists of more than one AWS resource, including Amazon S3 buckets, AWS Lambda functions, and Amazon Kinesis Data Firehose delivery streams. 
+* Amazon CloudWatch for relaying the VPC logs to the Lambda function.
 
-* AWS Lambda functions to create a collector and multiple sources and to install apps on your Sumo Logic account. 
+* Amazon Kinesis Data Firehose delivery streams to transfer logs from AWS WAF to S3 buckets.
 
-* Amazon S3 buckets capture logs from the various AWS services. 
+* A Lambda function to create a collector and install apps.
 
-* The Sumo Logic collector and sources to receive logs from the S3 buckets. 
+* S3 buckets to capture logs from the various services. 
 
-* Amazon Kinesis Data Firehose delivery streams to transfer logs from AWS WAF to S3 buckets. 
+* Sumo Logic collector and sources to receive logs from the S3 buckets. 
 
-* S3 Event Notifications, which triggers an Amazon Simple Notification Service (Amazon SNS) topic when a new object appears.
+* Amazon Simple Notification Service (Amazon SNS), which is triggered by S3 bucket events.
