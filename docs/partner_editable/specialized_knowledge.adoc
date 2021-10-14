@@ -12,31 +12,31 @@ Also be familiar with the AWS services listed in <<features_table>>, which shows
 [#features_table]
 .Mapping of AWS services to Sumo Logic apps
 [Features table]
-[cols="1,3"]
+[cols="1,2"]
 |====
 |AWS security service or feature |Sumo Logic apps for the following AWS services or features 
 
-|https://aws.amazon.com/cloudtrail[AWS CloudTrail^] a|
+a| https://aws.amazon.com/cloudtrail[AWS CloudTrail^] a|
 * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_CloudTrail[AWS CloudTrail^]
 * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for_AWS_CloudTrail_App[PCI DSS compliance for AWS CloudTrail^]
 * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/CIS_AWS_Foundations_Benchmark_App[CIS AWS Foundations Benchmark^]
 
-|https://aws.amazon.com/guardduty[Amazon GuardDuty^] a|
+a| https://aws.amazon.com/guardduty[Amazon GuardDuty^] a|
 * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_GuardDuty[Amazon GuardDuty^]
 * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Global_Intelligence_for_Amazon_GuardDuty[Global Intelligence for Amazon GuardDuty^] 
 
-|https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html[Amazon VPC Flow Logs^] a| 
+a| https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html[Amazon VPC Flow Logs^] a| 
 * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_VPC_Flow_Logs[Amazon VPC Flow Logs^]
 * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for_Amazon_VPC_Flow_Logs[PCI DSS compliance for Amazon VPC Flow Logs^]
 * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Threat_Intel_for_AWS[Threat Intel for AWS^] 
 
-|https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerLogs.html[Amazon S3 server access logging^] a| * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_S3_Audit[Amazon S3 Audit^] 
+a| https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerLogs.html[Amazon S3 server access logging^] a| * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_S3_Audit[Amazon S3 Audit^] 
 
-|https://aws.amazon.com/security-hub/?aws-security-hub-blogs.sort-by=item.additionalFields.createdDate&aws-security-hub-blogs.sort-order=desc[AWS Security Hub^] a| * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_Security_Hub[AWS Security Hub^] 
+a| https://aws.amazon.com/security-hub/?aws-security-hub-blogs.sort-by=item.additionalFields.createdDate&aws-security-hub-blogs.sort-order=desc[AWS Security Hub^] a| * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_Security_Hub[AWS Security Hub^] 
 
-|https://aws.amazon.com/waf[AWS WAF^] a| * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_WAF[AWS WAF^]
+a| https://aws.amazon.com/waf[AWS WAF^] a| * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_WAF[AWS WAF^]
 
-|https://aws.amazon.com/config[AWS Config^] a| * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_Config[AWS Config^]
+a| https://aws.amazon.com/config[AWS Config^] a| * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_Config[AWS Config^]
 
 |====
 

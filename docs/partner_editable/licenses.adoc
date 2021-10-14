@@ -1,3 +1,2 @@
 // Include details about any licenses and how to sign up. Provide links as appropriate. If no licenses are required, clarify that. The following paragraphs provide examples of details you can provide. Remove italics, and rephrase as appropriate.
-Sumo Logic provides a free tier with unlimited queries and 30 day free trials for various licensing options.
-For more details on https://sumologic.com/pricing/[pricing information^], visit the Sumo Logic website.
+Sumo Logic provides a free tier with unlimited queries and 30-day free trials for various licensing options. For details on pricing, visit the https://sumologic.com/pricing/[Sumo Logic website^].
