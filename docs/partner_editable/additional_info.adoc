@@ -12,7 +12,7 @@ After the deployment completes, you will see the main stack, `QuickStartApps` in
 image::../images/ouput1.png[output1^]
 // If steps are required to test the deployment, add them here. If not, remove the heading
 
-=== {partner-product-short-name} Account
+==== {partner-product-short-name} Account
 Confirm that the AWS CloudFormation template installed the collectors and sources for the selected Sumo Logic apps.
 
 :xrefstyle: short
