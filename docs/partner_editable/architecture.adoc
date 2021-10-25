@@ -1,6 +1,6 @@
 :xrefstyle: short
 
-Deploying this Quick Start with default parameters builds the following environment in 
+Deploying this Quick Start with *default parameters* builds the following environment in 
 a specific account and Region in the AWS Cloud. 
 
 // Replace this example diagram with your own. Follow our wiki guidelines: https://w.amazon.com/bin/view/AWS_Quick_Starts/Process_for_PSAs/#HPrepareyourarchitecturediagram. Upload your source PowerPoint file to the GitHub {deployment name}/docs/images/ directory in this repo. 
@@ -15,24 +15,26 @@ As shown in <<architecture1>>, the Quick Start sets up the following:
 
 * Amazon GuardDuty to detect malicious activity and behavior to protect AWS accounts and workloads. 
 
-* Amazon Virtual Private Cloud (Amazon VPC) Flow Logs to capture information about IP traffic going to and from network interfaces. 
+* Amazon VPC Flow Logs to capture information about IP traffic going to and from network interfaces in your VPC. 
 
-* AWS Security Hub to assess security alerts and security posture across AWS  accounts. Security Hub relays security events to Amazon CloudWatch.
+* AWS Security Hub to assess security alerts and security posture across AWS 
 
 * AWS WAF to protect your web applications from common web exploits. 
 
 * AWS Config to record and evaluate configurations of your AWS resources. 
 
-* AWS CloudTrail to track user activity and API (application programming interface) usage. 
+* AWS CloudTrail to track user activity and API usage.
 
-* Amazon CloudWatch for relaying the VPC logs to the Lambda function.
+* AWS Network Firewall to deploy essential network protections for all of your Amazon Virtual Private Clouds (VPCs) 
 
-* Amazon Kinesis Data Firehose delivery streams to transfer logs from AWS WAF to S3 buckets.
+* Multiple CloudFormation stacks are deployed in your environment to set up forwarding of data to Sumo Logic. Each stack consists of more than one AWS resource, including Amazon S3 buckets, AWS Lambda functions, and Amazon Kinesis Data Firehose delivery streams. 
 
-* A Lambda function to create a collector and install apps.
+* AWS Lambda functions to create a collector and multiple sources, and to install apps on your Sumo Logic account. 
 
-* S3 buckets to capture logs from the various services. 
+* Amazon S3 buckets capture logs from the various AWS services. 
 
-* Sumo Logic collector and sources to receive logs from the S3 buckets. 
+* The Sumo Logic collector and sources to receive logs from the S3 buckets. 
 
-* Amazon Simple Notification Service (Amazon SNS), which is triggered by S3 bucket events.
+* Amazon Kinesis Data Firehose delivery streams to transfer logs from AWS WAF to S3 buckets. 
+
+* S3 Event Notifications, which triggers an Amazon Simple Notification Service 

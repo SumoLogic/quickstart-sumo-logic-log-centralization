@@ -1,32 +1,9 @@
 // Edit this placeholder text to accurately describe your architecture.
 
-This Quick Start provides one deployment option: you build a new AWS environment that consists of the infrastructure resources required to provision applications to your Sumo Logic account and the necessary resources to your AWS account. During the deployment, you can choose which applications to install.
+This Quick Start provides two deployment options:
 
-==== Other technical requirements
+* *Deploy {partner-product-short-name} into a new VPC*. This option builds a new AWS environment consisting of the VPC, subnets, NAT gateways, security groups, bastion hosts, and other infrastructure components. It then deploys {partner-product-short-name} into this new VPC.
+* *Deploy {partner-product-short-name} into an existing VPC*. This option provisions {partner-product-short-name} in your existing AWS infrastructure.
 
-To deploy this Quick Start, you also need the following:
+The Quick Start provides separate templates for these options. It also lets you configure Classless Inter-Domain Routing (CIDR) blocks, instance types, and {partner-product-short-name} settings, as discussed later in this guide.
 
-* A Sumo Logic enterprise account. If you don’t already have one, create one at https://sumologic.com[^] by following the on-screen instructions. 
-
-* The ability to launch AWS CloudFormation templates that create AWS Identity and Access Management (IAM) roles. 
-
-* An understanding of how Sumo Logic resources are created for each scenario (as described earlier under <<Scenarios supported by this Quick Start>>).
-
-** For data collection, scenario 1, a new Sumo Logic https://help.sumologic.com/03Send-Data/Hosted-Collectors[Hosted Collector^] called `aws-quickstart-collector` is created, and sources for each app are installed under it. 
-
-** For data collection scenarios 2 and 3, all existing sources can be reused. All new sources are installed under a new Sumo Logic–hosted collector called `aws-quickstart-collector`. 
-
-** All Sumo Logic apps are installed in a personal folder called `SumoLogic Amazon QuickStart Apps`, followed by the date. 
-
-NOTE: The Threat Intel app can report Elastic Load Balancing (ELB) data if you are already sending that data to Sumo Logic. If you've already configured AWS security services to send logs to S3 buckets or SNS topics, collect the following information before you launch the Quick Start. If you did not previously configure these services, this Quick Start automatically configures these AWS services and resources when you install the Sumo Logic apps. 
-
-|=== 
-|Sumo Logic apps|If you have done the following... | ... make a note of this: 
-
-|CloudTrail, PCI DSS compliance for AWS CloudTrail, CIS AWS foundations|Configured AWS CloudTrail to send its logs to an S3 bucket| The S3 bucket name
-|VPC Flow Logs, PCI DSS compliance for Amazon VPC Flow Logs|Configured VPC Flow Logs to send to an S3 bucket|The S3 bucket name
-|Amazon S3 Audit|Configured the access logging of S3 buckets|The S3 bucket name
-|AWS WAF|Configured AWS WAF to send a Kinesis Data Firehose delivery stream to an S3 bucket|The S3 bucket name
-|AWS Config|Configured AWS Config to deliver notifications to an SNS topic|The SNS topic
-|Threat Intel |Configured ELB logs to send data to Sumo Logic| The ELB source category in Sumo Logic
-|===

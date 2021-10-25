@@ -14,3 +14,6 @@ aggregate view of overall security and compliance posture. A Sumo Logic app is a
 of dashboards in the Sumo Logic console that provide analytics for known data streams. In 
 minutes, you can start monitoring and troubleshooting security threats and indicators of 
 compromise. 
+
+Please know that we may share who uses AWS Quick Starts with the AWS Partner Network 
+(APN) Partner that collaborated with AWS on the content of the Quick Start.

@@ -1,0 +1,22 @@
+// Replace the content in <>
+// For example: “familiarity with basic concepts in networking, database operations, and data encryption” or “familiarity with <software>.”
+// Include links if helpful. 
+// You don't need to list AWS services or point to general info about AWS; the boilerplate already covers this.
+
+This Quick Start supports the following scenarios: 
+
+* **Scenario 1: You do not use AWS security services or Sumo Logic.** You did not 
+configure AWS to use one or more security services listed under Specialized knowledge, 
+but you want to collect and analyze data using Sumo Logic apps. For this scenario, use 
+this Quick Start to set up AWS security services and configure Sumo Logic. 
+
+* **Scenario 2: You use AWS security services but not Sumo Logic.** You use the AWS security services listed under link:#_specialized_knowledge[Specialized knowledge] but have not configured Sumo 
+Logic to collect data from AWS or installed the corresponding Sumo Logic apps. For this 
+scenario, configure the auxiliary AWS services and resources to send data to Sumo 
+Logic. This scenario also installs the corresponding Sumo Logic apps. 
+
+* **Scenario 3: You use AWS security services and Sumo Logic.** You use the AWS 
+security services listed under Specialized knowledge and you collect and analyze data 
+from one or more of them in Sumo Logic. For this scenario, configure the auxiliary AWS 
+services and resources to send data to Sumo Logic. This scenario is intended only for 
+non-configured AWS security services and their corresponding Sumo Logic apps. 
