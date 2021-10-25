@@ -31,3 +31,16 @@ Sign in to your AWS account at https://aws.amazon.com with an IAM user role that
 .  On the *Specify stack details* page, change the stack name if needed. Review the parameters for the template. Provide values for the parameters that require input. For all other parameters, review the default settings and customize them as necessary. 
 
 When you finish reviewing and customizing the parameters, choose *Next*.
+
+ifndef::production_build[]
+_**This portion of the deployment guide is located at `docs/generated/parameters/index.adoc`**_
+++++
+<div class="preview_mode">
+++++
+endif::production_build[]
+include::../generated/parameters/index.adoc[]
+ifndef::production_build[]
+++++
+</div>
+++++
+endif::production_build[]
