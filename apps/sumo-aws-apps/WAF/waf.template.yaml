@@ -234,7 +234,9 @@ Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
 
   install_app: !Equals [!Ref InstallApp, 'Yes']
-  create_target_s3_bucket: !Equals [!Ref CreateS3Bucket, 'Yes']
+  create_target_s3_bucket: !And
+    - !Equals [!Ref CreateS3Bucket, 'Yes']
+    - !Condition create_sns_topic
   install_s3_source: !Equals [!Ref CreateS3Source, 'Yes']
   create_delivery_stream: !Equals [!Ref CreateDeliveryStream, 'Yes']
 
@@ -391,7 +393,7 @@ Resources:
           'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
       CollectorType: Hosted
-      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      RemoveOnDeleteStack: !If [do_not_use_parent_stack,!Ref RemoveSumoResourcesOnDeleteStack,false]
       CollectorName: !Ref CollectorName
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey

@@ -325,7 +325,6 @@ def resource_tagging(event, context):
 
 def enable_s3_logs(event, context):
     print("AWS S3 ENABLE ALB :- Starting s3 logs enable")
-
     # Get Account Id and Alias from env.
     bucket_name = os.environ.get("BucketName")
     bucket_prefix = os.environ.get("BucketPrefix")
@@ -1074,6 +1073,181 @@ class VpcResource(AWSResourcesAbstract):
                             flow_ids.append(flow_logs["FlowLogId"])
                     self.client.delete_flow_logs(FlowLogIds=flow_ids)
 
+class NetworkFireWallResource(AWSResourcesAbstract):
+    def __init__(self, aws_resource, region_value, account_id):
+        super().__init__('network-firewall', region_value, account_id)
+        self.aws_resource = aws_resource
+    def fetch_resources(self):
+        resources = []
+        resources_detail = []
+        next_token = None
+        while next_token != 'END':
+            if next_token:
+                response = self.client.list_firewalls(MaxResults=50, NextToken=next_token)
+            else:
+                response = self.client.list_firewalls(MaxResults=50)
+
+            if "Firewalls" in response:
+                resources.extend(response["Firewalls"])
+
+            next_token = response["NextToken"] if "NextToken" in response else None
+
+            if not next_token:
+                next_token = 'END'
+        for fw in resources:
+            response = self.client.describe_firewall(FirewallName=fw["FirewallName"],FirewallArn=fw["FirewallArn"])
+            if "Firewall" in response:
+                resources_detail.append(response)
+        return resources_detail
+    def get_arn_list(self, resources):
+        arns = []
+        if resources:
+            for resource in resources:
+                if "Firewall" in resource:
+                    arns.append({'FirewallName':resource['Firewall']['FirewallName'],'FirewallArn':resource['Firewall']['FirewallArn']})
+        return arns
+
+    def process_tags(self, tags):
+        return tags
+
+    def get_arn_list_cloud_trail_event(self, event_detail):
+        arns = []
+        response_elements = event_detail.get("responseElements")
+        if response_elements:
+            if "firewall" in response_elements:
+                arns.append({'FirewallName': response_elements['firewall']['firewallName'],'FirewallArn':response_elements['firewall']['firewallArn']})
+        return arns
+
+    def tag_resources_cloud_trail_event(self, *args):
+        pass
+
+    def enable_s3_logs(self, arns, s3_bucket, s3_prefix, region_account_id):
+        if arns:
+            for record in arns:
+                logging_config_flow = {
+                    'LogDestinationConfigs':[
+                        {
+                            'LogType': 'FLOW',
+                            'LogDestinationType': 'S3',
+                            'LogDestination': {
+                                'bucketName': s3_bucket,
+                                'prefix' : s3_prefix
+                            }
+                        },       
+                    ]
+                }
+                logging_config_flow_alert = {
+                    'LogDestinationConfigs':[
+                        {
+                            'LogType': 'FLOW',
+                            'LogDestinationType': 'S3',
+                            'LogDestination': {
+                                'bucketName': s3_bucket,
+                                'prefix' : s3_prefix
+                            }
+                        }, 
+                         {
+                            'LogType': 'ALERT',
+                            'LogDestinationType': 'S3',
+                            'LogDestination': {
+                                'bucketName': s3_bucket,
+                                'prefix' : s3_prefix
+                            }
+                        },           
+                    ]
+                }
+                try:
+                    #config flow  log for network firewall
+                    response = self.client.update_logging_configuration(
+                        FirewallArn = record['FirewallArn'],
+                        FirewallName = record['FirewallName'],
+                        LoggingConfiguration = logging_config_flow
+                    )
+                    #config addition alert log for network firewall
+                    response = self.client.update_logging_configuration(
+                        FirewallArn = record['FirewallArn'],
+                        FirewallName = record['FirewallName'],
+                        LoggingConfiguration = logging_config_flow_alert
+                    )
+                except Exception as e:
+                    continue
+
+    def add_bucket_policy(self, bucket_name, prefix):
+        print("Adding policy to the bucket " + bucket_name)
+        s3 = boto3.client('s3')
+        try:
+            response = s3.get_bucket_policy(Bucket=bucket_name)
+            existing_policy = json.loads(response["Policy"])
+        except ClientError as e:
+            if "Error" in e.response and "Code" in e.response["Error"] \
+                    and e.response['Error']['Code'] == "NoSuchBucketPolicy":
+                existing_policy = {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                    ]
+                }
+            else:
+                raise e
+
+        bucket_policy = [{
+            "Sid": "AWSLogDeliveryAclCheck",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "delivery.logs.amazonaws.com"
+            },
+            "Action": "s3:GetBucketAcl",
+            "Resource": "arn:aws:s3:::" + bucket_name
+        },
+            {
+                "Sid": "AWSLogDeliveryWrite",
+                "Effect": "Allow",
+                "Principal": {
+                    "Service": "delivery.logs.amazonaws.com"
+                },
+                "Action": "s3:PutObject",
+                "Resource": "arn:aws:s3:::" + bucket_name + "/" + prefix + "/AWSLogs/" + self.account_id + "/*",
+                "Condition": {
+                    "StringEquals": {
+                        "s3:x-amz-acl": "bucket-owner-full-control"
+                    }
+                }
+            }]
+        existing_policy["Statement"].extend(bucket_policy)
+
+        s3.put_bucket_policy(Bucket=bucket_name, Policy=json.dumps(existing_policy))
+
+    def disable_s3_logs(self, arns, s3_bucket,s3_prefix):
+        if arns:
+            for record in arns:
+                logging_config_flow = {
+                    'LogDestinationConfigs':[
+                        {
+                            'LogType': 'FLOW',
+                            'LogDestinationType': 'S3',
+                            'LogDestination': {
+                                'bucketName': s3_bucket,
+                                'prefix' : s3_prefix
+                            }
+                        },          
+                    ]
+                }
+                logging_config_flow_alert = {
+                    'LogDestinationConfigs':[]
+                }
+                #disable alert log for network firewall
+                response = self.client.update_logging_configuration(
+                    FirewallArn = record['FirewallArn'],
+                    FirewallName = record['FirewallName'],
+                    LoggingConfiguration = logging_config_flow
+                )
+                #disable flow log for network firewall
+                response = self.client.update_logging_configuration(
+                    FirewallArn = record['FirewallArn'],
+                    FirewallName = record['FirewallName'],
+                    LoggingConfiguration = logging_config_flow_alert
+                )
+
+
 
 class AWSResourcesProvider(object):
     provider_map = {
@@ -1095,7 +1269,9 @@ class AWSResourcesProvider(object):
         "s3": S3Resource,
         "CreateBucket": S3Resource,
         "vpc": VpcResource,
-        "CreateVpc": VpcResource
+        "CreateVpc": VpcResource,
+        "CreateFirewall": NetworkFireWallResource,
+        "firewall" : NetworkFireWallResource
     }
 
     @classmethod
@@ -1106,11 +1282,3 @@ class AWSResourcesProvider(object):
             raise Exception("%s provider not found" % provider_name)
 
 
-if __name__ == '__main__':
-    params = {"AWSResource": "s3"}
-    # value = ConfigDeliveryChannel()
-    # value.create("Six_Hours", "config-bucket-668508221233", "config", "")
-
-    value = EnableS3LogsResources(params)
-    # value.create("us-east-2", "s3", "sadasdasdasd-us-east-2", "s3logs/", "", "", "")
-    value.delete("us-east-2", "s3", "sadasdasdasd-us-east-2", "s3logs", "", True, "")

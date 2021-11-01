@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: "Template to setup the Amazon VPC Flow Logs, PCI Compliance For Amazon VPC Flow app with AWS and Sumo Logic resources for AWS Quick Start Solution."
+Description: "Template to setup the Amazon VPC Flow Logs, PCI Compliance For Amazon VPC Flow and Amazon VPC Flow - Cloud Security Monitoring and Analytics app with AWS and Sumo Logic resources for AWS Quick Start Solution."
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -19,6 +19,7 @@ Metadata:
         Parameters:
           - InstallVpcApp
           - InstallPCIVpcApp
+          - InstallCSMAVpcApp
           - CollectorName
 
       - Label:
@@ -61,6 +62,8 @@ Metadata:
         default: "Install Sumo Logic Amazon VPC Flow Logs App"
       InstallPCIVpcApp:
         default: "Install Sumo Logic PCI Compliance For Amazon VPC Flow App"
+      InstallCSMAVpcApp:
+        default: "Install Sumo Logic Amazon VPC Flow - Cloud Security Monitoring and Analytics"
       CollectorName:
         default: "Collector Name"
 
@@ -123,16 +126,23 @@ Parameters:
     ConstraintDescription: "Sumo Logic Organization Id can not be empty."
   RemoveSumoResourcesOnDeleteStack:
     AllowedValues:
-      - true
-      - false
-    Default: true
+      - 'true'
+      - 'false'
+    Default: 'true'
     Description: "To delete collectors, sources and apps when the stack is deleted, set this parameter to true. Default is true.
                   Deletes the resources created by the stack. Deletion of updated resources will be skipped."
     Type: String
-
   InstallVpcApp:
     Type: String
     Description: "Yes -> To Install Sumo Logic Amazon VPC Flow Logs in Sumo Logic for AWS Quick Start Solution.
+                  No -> Skip Installation of the app."
+    Default: 'Yes'
+    AllowedValues:
+      - 'Yes'
+      - 'No'
+  InstallCSMAVpcApp:
+    Type: String
+    Description: "Yes -> To Install Sumo Logic Amazon VPC Flow - Cloud Security Monitoring and Analytics in Sumo Logic for AWS Quick Start Solution.
                   No -> Skip Installation of the app."
     Default: 'Yes'
     AllowedValues:
@@ -155,7 +165,7 @@ Parameters:
     Type: String
     Description: "Yes - Create a new S3 bucket in AWS S3.
                   No - Use an existing S3 bucket from AWS S3 which has VPC Logs."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -167,7 +177,7 @@ Parameters:
     Type: String
     Description: "Yes - to create Sumo Logic Amazon S3 Log Source with provided bucket Name.
                   No - to skip creation of the Sumo Logic Amazon S3 Log Source."
-    Default: 'Yes'
+    Default: 'No'
     AllowedValues:
       - 'Yes'
       - 'No'
@@ -221,7 +231,10 @@ Conditions:
 
   install_vpc_app: !Equals [!Ref InstallVpcApp, 'Yes']
   install_pci_vpc_app: !Equals [!Ref InstallPCIVpcApp, 'Yes']
-  create_target_s3_bucket: !Equals [!Ref CreateS3Bucket, 'Yes']
+  install_csma_vpc_app: !Equals [!Ref InstallCSMAVpcApp, 'Yes']
+  create_target_s3_bucket: !And
+    - !Equals [!Ref CreateS3Bucket, 'Yes']
+    - !Condition create_sns_topic
   install_s3_source: !Equals [!Ref CreateS3Source, 'Yes']
 
   create_sns_topic: !And
@@ -388,7 +401,7 @@ Resources:
           'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
       Region: !Ref "AWS::Region"
       CollectorType: Hosted
-      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      RemoveOnDeleteStack: !If [do_not_use_parent_stack,!Ref RemoveSumoResourcesOnDeleteStack,false]
       CollectorName: !Ref CollectorName
       SumoAccessID: !Ref SumoAccessID
       SumoAccessKey: !Ref SumoAccessKey
@@ -472,6 +485,26 @@ Resources:
       SumoAccessKey: !Ref SumoAccessKey
       SumoDeployment: !Ref SumoDeployment
 
+  SumoVPCFlowCSMAApp:
+    Type: Custom::App
+    Condition: install_csma_vpc_app
+    Properties:
+      ServiceToken: !If
+        - do_not_use_parent_stack
+        - !GetAtt
+          - SumoLogicHelperFunction
+          - Arn
+        - !ImportValue
+          'Fn::Sub': '${ParentStackName}-SumoLogicHelperFunctionARN'
+      Region: !Ref "AWS::Region"
+      AppName: "Amazon QuickStart - Cloud Security Monitoring and Analytics For Amazon VPC Flow"
+      AppId: "1febce90-de1e-43b3-a1c2-d5dbdae40a3a"
+      RemoveOnDeleteStack: !Ref RemoveSumoResourcesOnDeleteStack
+      AppSources:
+        logsrc: !Sub "_sourceCategory=${S3SourceCategoryName}"
+      SumoAccessID: !Ref SumoAccessID
+      SumoAccessKey: !Ref SumoAccessKey
+      SumoDeployment: !Ref SumoDeployment
 Outputs:
   SumoRoleArn:
     Description: ARN of the cretaed Role.

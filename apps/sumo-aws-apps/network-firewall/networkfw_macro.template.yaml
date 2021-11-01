@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "Template to setup the Firewal Macro to process multi subnet and multi allowed ports for AWS Network Firewall stack."
+
+Parameters:
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: "aws-quickstart"
+    Description: "S3 bucket name for the Quick Start assets. This string can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Type: "String"
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: "quickstart-sumo-logic-log-centralization/"
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: "String"
+
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart'] 
+
+Resources:
+  MacroNFWHelperRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: SumoPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}-MacroNFWHelperFunction:*"
+
+  MacroNFWHelperFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-MacroNFWHelperFunction"
+      Handler: firewallmacro.handle
+      Runtime: python3.7
+      CodeUri:
+        Bucket: !Sub
+                - "${S3Bucket}"
+                - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+        Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/sumologic-app-utils/sumo_app_utils.zip"
+      MemorySize: 128
+      Timeout: 900
+      Role:
+        Fn::GetAtt:
+          - MacroNFWHelperRole
+          - Arn
+
+  NFWMacro:
+    Type: AWS::CloudFormation::Macro
+    Properties:
+      Name: 'MacroFirewall'
+      Description: Macro to process multi subnet and multi allowed ports for Network Firewall.
+      FunctionName: 
+        Fn::GetAtt:
+          - MacroNFWHelperFunction
+          - Arn
