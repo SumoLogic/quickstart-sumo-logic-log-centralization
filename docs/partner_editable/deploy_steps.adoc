@@ -28,19 +28,7 @@ Sign in to your AWS account at https://aws.amazon.com with an IAM user role that
 
 .	Check the Region displayed in the upper-right corner of the navigation bar, and change it as necessary. This is where the infrastructure for the Sumo Logic app resources is built. 
 .  On the *Create stack* page, keep the default setting for the template URL, then choose 
-.  On the *Specify stack details* page, change the stack name if needed. Review the parameters for the template. Provide values for the parameters that require input. For all other parameters, review the default settings and customize them as necessary. 
+.  On the *Specify stack details* page, change the stack name if needed. Review the parameters for the template. Provide values for the link:#_parameter_reference[parameters] that require input. For all other parameters, review the default settings and customize them as necessary.
 
-When you finish reviewing and customizing the parameters, choose *Next*.
+.  When you finish reviewing and customizing the link:#_parameter_reference[parameters], choose *Next*.
 
-ifndef::production_build[]
-_**This portion of the deployment guide is located at `docs/generated/parameters/index.adoc`**_
-++++
-<div class="preview_mode">
-++++
-endif::production_build[]
-include::../generated/parameters/index.adoc[]
-ifndef::production_build[]
-++++
-</div>
-++++
-endif::production_build[]

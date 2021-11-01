@@ -3,6 +3,10 @@
 // Include links if helpful. 
 // You don't need to list AWS services or point to general info about AWS; the boilerplate already covers this.
 
+If you are new to Sumo Logic we recommend that you become familiar with Sumo Logic as well as the following AWS services, see https://help.sumologic.com/01Start-Here/04Getting-Started[Getting Started with Sumo Logic^].
+
+The following table shows how various AWS security services map to the corresponding apps in Sumo Logic. We recommend you get familiar with them.
+
 .Features Table
 [Features Table]
 |=====
@@ -34,3 +38,11 @@ https://help.sumologic.com/07Sumo-Logic-Apps/Cloud_Security_Monitoring_and_Analy
 |https://aws.amazon.com/network-firewall[AWS Network Firewall^]| https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_Network_Firewall[AWS Network Firewall^]
 |===== 
 
+=== Scenarios supported by this Quick Start
+This Quick Start supports the following scenarios:
+
+* *Scenario 1: You do not use AWS security services and Sumo Logic*. You did not configure AWS to use one or more of the security services listed under link:#_specialized_knowledge[Specialized knowledge], but you want to do so and want to collect and analyze that data in Sumo Logic by using Sumo Logic apps. For this scenario, use the Quick Start to set up AWS security services and configure Sumo Logic.
+
+* *Scenario 2: You use AWS security services but not Sumo Logic*. You use the AWS security services listed under link:#_specialized_knowledge[Specialized knowledge] but have not configured Sumo Logic to set up the collection of data from AWS and have not installed the relevant Sumo Logic apps in the Sumo Logic console. For this scenario, configure the auxiliary AWS services and resources to send data to Sumo Logic. This scenario also installs the corresponding Sumo Logic apps.
+
+* *Scenario 3: You use AWS security services and Sumo Logic*. You use the AWS security services listed under link:#_specialized_knowledge[Specialized knowledge] and you collect and analyze data from one or more of them in Sumo Logic. For this scenario, configure the auxiliary AWS services and resources to send data to Sumo Logic. This scenario is intended only for non-configured AWS security services and their corresponding Sumo Logic apps.

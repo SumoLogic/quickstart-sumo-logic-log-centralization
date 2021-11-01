@@ -2,8 +2,6 @@ The following are technical requirements for this Quick Start.
 
 * A Sumo Logic account. If you don’t already have a Sumo Logic enterprise account, create one at https://www.sumologic.com/[^] by following the on-screen instructions. 
 
-* An AWS account. If you don’t already have an AWS account, create one at https://aws.amazon.com[^] by following the on-screen instructions. 
-
 * The ability to launch AWS CloudFormation templates that create AWS Identity and Access Management (IAM) roles. 
 
 * An understanding of how Sumo Logic resources are created. 
@@ -25,10 +23,12 @@ NOTE: If you did not previously configure these services, this Quick Start autom
 |=== 
 |Sumo Logic apps|If you have done the following | Make a note of: 
 
-|CloudTrail, PCI DSS compliance for AWS CloudTrail, CIS AWS foundations|Configured AWS CloudTrail to send its logs to an S3 bucket.| The S3 bucket name.
-|VPC Flow Logs, PCI DSS compliance for Amazon VPC Flow Logs|Configured VPC Flow Logs to send to an S3 bucket.|The S3 bucket name.
+|CloudTrail, PCI DSS compliance for AWS CloudTrail, CIS AWS foundations,Amazon CloudTrail - Cloud Security Monitoring and Analytics, Global Intelligence for AWS CloudTrail SecOps App |Configured AWS CloudTrail to send its logs to an S3 bucket.| The S3 bucket name.
+|VPC Flow Logs, PCI DSS compliance for Amazon VPC Flow Logs, Amazon VPC Flow - Cloud Security Monitoring and Analytics |Configured VPC Flow Logs to send to an S3 bucket.|The S3 bucket name.
 |Amazon S3 Audit|Configured the access logging of S3 buckets.|The S3 bucket name.
 |AWS WAF|Configured AWS WAF to send a Kinesis Data Firehose delivery stream to an S3 bucket.|The S3 bucket name.
 |AWS Config|Configured AWS Config to deliver notifications to an SNS topic.|The SNS topic.
 |Threat Intel |Configured ELB logs to send data to Sumo Logic| The ELB source category in Sumo Logic
+|AWS Network Firewall|Configured Network Firewall and Firewall policy|Network Firewall Policy ARN
+|AWS Network Firewall|Have not configured Network Firewall |VPC ID, Subnet ID
 |===

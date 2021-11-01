@@ -37,4 +37,4 @@ As shown in <<architecture1>>, the Quick Start sets up the following:
 
 * Amazon Kinesis Data Firehose delivery streams to transfer logs from AWS WAF to S3 buckets. 
 
-* S3 Event Notifications, which triggers an Amazon Simple Notification Service 
+* S3 Event Notification triggers an Amazon Simple Notification Service (Amazon SNS) topic when there is a new object in a bucket.
