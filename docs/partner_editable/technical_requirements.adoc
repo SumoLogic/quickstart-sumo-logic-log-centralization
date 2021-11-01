@@ -1,24 +1,18 @@
-The following are technical requirements for this Quick Start. 
+The following are technical requirements for this Quick Start.
 
-* A Sumo Logic account. If you don’t already have a Sumo Logic enterprise account, create one at https://www.sumologic.com/[^] by following the on-screen instructions. 
+* A Sumo Logic enterprise account. If you don’t already have one, create one at https://sumologic.com[^] by following the on-screen instructions.
 
-* The ability to launch AWS CloudFormation templates that create AWS Identity and Access Management (IAM) roles. 
+* The ability to launch AWS CloudFormation templates that create AWS Identity and Access Management (IAM) roles.
 
-* An understanding of how Sumo Logic resources are created. 
+* An understanding of how Sumo Logic resources are created for each scenario (as described earlier under <<Scenarios supported by this Quick Start>>).
 
-** For data collection, scenario 1, a new Sumo Logic https://help.sumologic.com/03Send-Data/Hosted-Collectors[Hosted Collector^] called `aws-quickstart-collector` is created, and sources for each app are installed under it. 
+** For data collection, scenario 1, a new Sumo Logic https://help.sumologic.com/03Send-Data/Hosted-Collectors[Hosted Collector^] called `aws-quickstart-collector` is created, and sources for each app are installed under it.
 
-** For data collection scenarios 2 and 3, all existing sources can be reused. All new sources are installed under a new Sumo Logic–hosted collector called `aws-quickstart-collector`. 
+** For data collection scenarios 2 and 3, all existing sources can be reused. All new sources are installed under a new Sumo Logic–hosted collector called `aws-quickstart-collector`.
 
-** All Sumo Logic apps are installed in a personal folder called `SumoLogic Amazon QuickStart Apps`, followed by the date. 
+** All Sumo Logic apps are installed in a personal folder called `SumoLogic Amazon QuickStart Apps`, followed by the date.
 
-NOTE: The Threat Intel app can report Elastic Load Balancing (ELB) data if you are 
-already sending that data to Sumo Logic. 
-
-If you already configured AWS security services to send logs to S3 buckets or SNS topics, 
-collect the following information before you launch the Quick Start. 
-
-NOTE: If you did not previously configure these services, this Quick Start automatically configures these AWS services and resources when you install the Sumo Logic apps. 
+NOTE: The Threat Intel app can report Elastic Load Balancing (ELB) data if you are already sending that data to Sumo Logic. If you've already configured AWS security services to send logs to S3 buckets or SNS topics, collect the following information before you launch the Quick Start. If you did not previously configure these services, this Quick Start automatically configures these AWS services and resources when you install the Sumo Logic apps.
 
 |=== 
 |Sumo Logic apps|If you have done the following | Make a note of: 
