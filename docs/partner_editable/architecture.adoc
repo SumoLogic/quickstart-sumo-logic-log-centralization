@@ -1,6 +1,6 @@
 :xrefstyle: short
 
-Deploying this Quick Start with default parameters builds the following environment in 
+Deploying this Quick Start with *default parameters* builds the following environment in 
 a specific account and Region in the AWS Cloud. 
 
 // Replace this example diagram with your own. Follow our wiki guidelines: https://w.amazon.com/bin/view/AWS_Quick_Starts/Process_for_PSAs/#HPrepareyourarchitecturediagram. Upload your source PowerPoint file to the GitHub {deployment name}/docs/images/ directory in this repo. 
@@ -8,8 +8,8 @@ a specific account and Region in the AWS Cloud.
 :xrefstyle: short
 [#architecture1]
 .Quick Start architecture for {partner-product-short-name} on AWS
-// [link=images/architecture.bmp]
-image::../images/architecture.bmp[architecture1]
+// [link=images/architecture.png]
+image::../images/architecture.png[architecture1]
 
 As shown in <<architecture1>>, the Quick Start sets up the following:
 
@@ -23,7 +23,9 @@ As shown in <<architecture1>>, the Quick Start sets up the following:
 
 * AWS Config to record and evaluate configurations of your AWS resources. 
 
-* AWS CloudTrail to track user activity and API usage. 
+* AWS CloudTrail to track user activity and API usage.
+
+* AWS Network Firewall to deploy essential network protections for all of your Amazon Virtual Private Clouds (VPCs) 
 
 * Multiple CloudFormation stacks are deployed in your environment to set up forwarding of data to Sumo Logic. Each stack consists of more than one AWS resource, including Amazon S3 buckets, AWS Lambda functions, and Amazon Kinesis Data Firehose delivery streams. 
 
@@ -35,4 +37,4 @@ As shown in <<architecture1>>, the Quick Start sets up the following:
 
 * Amazon Kinesis Data Firehose delivery streams to transfer logs from AWS WAF to S3 buckets. 
 
-* S3 Event Notifications, which triggers an Amazon Simple Notification Service 
+* S3 Event Notification triggers an Amazon Simple Notification Service (Amazon SNS) topic when there is a new object in a bucket.

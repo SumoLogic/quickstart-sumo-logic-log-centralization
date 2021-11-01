@@ -1,48 +1,48 @@
 // Add steps as necessary for accessing the software, post-configuration, and testing. Don’t include full usage instructions for your software, but add links to your product documentation for that information.
 //Should any sections not be applicable, remove them
 
-== Test the deployment
-=== AWS Account
+=== Step 4. Test the deployment
+==== AWS Account
 After the deployment completes, you will see the main stack, `QuickStartApps` in addition to multiple nested stacks.
 
 :xrefstyle: short
 [#output1]
 .Example output of created resources
-[link=images/output1.bmp]
-image::../images/output1.bmp[output1^]
+[link=images/ouput1.png]
+image::../images/ouput1.png[output1^]
 // If steps are required to test the deployment, add them here. If not, remove the heading
 
-=== {partner-product-short-name} Account
-Confirm that the AWS CloudFormation template installed the collectors and sources for your Sumo Logic apps.
+==== {partner-product-short-name} Account
+Confirm that the AWS CloudFormation template installed the collectors and sources for the selected Sumo Logic apps.
 
 :xrefstyle: short
 [#output2]
 .Example output of collectors and sources
-[link=images/output1.bmp]
-image::../images/output2.bmp[output2^]
+[link=images/output2.png]
+image::../images/output2.png[output2^]
 
-== Post-deployment steps
-=== Using Existing S3 Bucket
+=== Step 5. Post-deployment steps
+==== Using Existing S3 Bucket
 If you use an existing S3 bucket with logs, create an SNS topic (`SumoSNSTopic-{StackName}`) that subscribes to the Sumo Logic sources. Once the deployment completes, add that SNS topic to the S3 bucket events. For more information, see https://docs.aws.amazon.com/AmazonS3/latest/user-guide/enable-event-notifications.html[How do I enable and configure event notifications for an S3 bucket?^]
 // If post-deployment steps are required, add them here. If not, remove the heading
 
-=== AWS WAF logs for Amazon Kinesis Data Firehose Delivery Stream
+==== AWS WAF logs for Amazon Kinesis Data Firehose Delivery Stream
 If you install AWS WAF, AWS CloudFormation creates a delivery stream (`QuickStartDeliveryStream{Region}`) in your Kinesis configuration. You must configure Web ACL in AWS WAF to send logs to the delivery stream. For more information, see https://docs.aws.amazon.com/waf/latest/developerguide/logging.html[Logging Web ACL traffic information^].
 
-=== View the Sumo Logic dashboards
+=== Step 6. View the Sumo Logic dashboards
 After the deployment completes, the Sumo Logic apps are added to your Sumo Logic personal-account library in a folder named `SumoLogic Amazon QuickStart Apps <date>`.
 
 [#qsappfolder]
 .Top-level Quick Start apps folder
-[link=images/qsappfolder.bmp]
-image::../images/qsappfolder.bmp[qsappfolder^]
+[link=images/qsappfolder.png]
+image::../images/qsappfolder.png[qsappfolder^]
 
-Under the `SumoLogic Amazon QuickStart Apps <date>` folder, there are subfolders that represent each app, along with the date and timestamp.
+Under the `SumoLogic Amazon QuickStart Apps <date>` folder, there are sub-folders that represent each app, along with the date and timestamp.
 
 [#servicefolder]
 .Individual service folders
-[link=images/servicefolder.bmp]
-image::../images/servicefolder.bmp[servicefolder^]
+[link=images/servicefolder.png]
+image::../images/servicefolder.png[servicefolder^]
 
 To open the services dashboard, choose its folder in the Sumo Logic console. For instance, under the **Amazon GuardDuty** folder, open the **Amazon GuardDuty – Overview** dashboard to see detected threats.
 
@@ -83,6 +83,7 @@ For each S3 bucket, follow the https://aws.amazon.com/premiumsupport/knowledge-c
 * https://aws.amazon.com/lambda/[AWS Lambda^]
 * https://aws.amazon.com/kinesis/data-firehose/[Amazon Kinesis Data Firehose^]
 * https://aws.amazon.com/s3/[Amazon S3^]
+* https://aws.amazon.com/network-firewall/[Amazon Network Firewall^]
 
 === Sumo Logic documentation
 * https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS[Sumo Logic and AWS apps^]

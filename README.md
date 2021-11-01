@@ -1,5 +1,4 @@
-# quickstart-sumo-logic-security-integrations
-## Sumo Logic Security Integrations on the AWS Cloud
+## Sumo Logic Security Integrations on AWS—Quick Start
 
 Sumo Logic is focused on continuous intelligence, a new category of software that addresses data challenges presented by digital transformations, modern applications, and cloud computing. The Sumo Logic Continuous Intelligence Platform automates the collection, ingestion, and analysis of applications, infrastructure, security, and Internet of Things (IoT) data to derive actionable insights.
 
@@ -24,8 +23,8 @@ This Quick Start deployment builds a new AWS environment consisting of the infra
 Deploying this Quick Start with **default parameters** builds the following environment in a specific account and Region in the AWS Cloud.
 ![quickstart-sumo-logic-security-integrations](./docs/images/architecture.png)
 
-For architectural details, best practices, step-by-step instructions, and customization options, see the [deployment guide](https://fwd.aws/mpxj9).
+For architectural details, best practices, step-by-step instructions, and customization options, see the [deployment guide](https://aws-quickstart.github.io/quickstart-sumo-logic-log-centralization/).
 
 To post feedback, submit feature ideas, or report bugs, use the **Issues** section of this GitHub repo.
 
-If you'd like to submit code for this Quick Start, please review the [AWS Quick Start Contributor's Kit](https://aws-quickstart.github.io/).
+To submit code for this Quick Start, see the [AWS Quick Start Contributor's Kit](https://aws-quickstart.github.io/).

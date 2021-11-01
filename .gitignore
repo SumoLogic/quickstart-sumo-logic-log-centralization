@@ -2,4 +2,3 @@ taskcat_outputs
 .DS_Store
 .taskcat_overrides.yml
 .vscode
-.taskcat

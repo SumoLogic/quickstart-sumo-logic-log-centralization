@@ -3,34 +3,9 @@
 // Include links if helpful. 
 // You don't need to list AWS services or point to general info about AWS; the boilerplate already covers this.
 
-Before you deploy this Quick Start, we recommend that you become familiar with Sumo 
-Logic in addition to the following AWS services. If you are new to AWS, see https://aws.amazon.com/getting-started/[Getting Started with AWS^]. If you are new to Sumo Logic, see https://help.sumologic.com/01Start-Here/04Getting-Started[Getting Started with Sumo Logic^]. 
+If you are new to Sumo Logic we recommend that you become familiar with Sumo Logic as well as the following AWS services, see https://help.sumologic.com/01Start-Here/04Getting-Started[Getting Started with Sumo Logic^].
 
-
-=== Scenarios supported by this Quick Start
-
-This Quick Start supports the following scenarios: 
-
-* **Scenario 1: You do not use AWS security services or Sumo Logic.** You did not 
-configure AWS to use one or more security services listed under Specialized knowledge, 
-but you want to collect and analyze data using Sumo Logic apps. For this scenario, use 
-this Quick Start to set up AWS security services and configure Sumo Logic. 
-
-* **Scenario 2: You use AWS security services but not Sumo Logic.** You use the AWS security services listed under Specialized knowledge but have not configured Sumo 
-Logic to collect data from AWS or installed the corresponding Sumo Logic apps. For this 
-scenario, configure the auxiliary AWS services and resources to send data to Sumo 
-Logic. This scenario also installs the corresponding Sumo Logic apps. 
-
-* **Scenario 3: You use AWS security services and Sumo Logic.** You use the AWS 
-security services listed under Specialized knowledge and you collect and analyze data 
-from one or more of them in Sumo Logic. For this scenario, configure the auxiliary AWS 
-services and resources to send data to Sumo Logic. This scenario is intended only for 
-non-configured AWS security services and their corresponding Sumo Logic apps. 
-
-=== AWS services to Sumo Logic apps mapping
-
-The following table shows how various AWS security services map to the corresponding 
-apps in Sumo Logic. We recommend you get familiar with them. 
+The following table shows how various AWS security services map to the corresponding apps in Sumo Logic. We recommend you get familiar with them.
 
 .Features Table
 [Features Table]
@@ -41,15 +16,17 @@ apps in Sumo Logic. We recommend you get familiar with them.
 https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_CloudTrail[AWS CloudTrail^]
 https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for_AWS_CloudTrail_App[PCI DSS compliance for AWS CloudTrail^]
 https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/CIS_AWS_Foundations_Benchmark_App[CIS AWS Foundations Benchmark^]
+https://help.sumologic.com/07Sumo-Logic-Apps/Cloud_Security_Monitoring_and_Analytics/Amazon_CloudTrail_-_Cloud_Security_Monitoring_and_Analytics[Amazon CloudTrail - Cloud Security Monitoring and Analytics^]
+https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Global_Intelligence_for_AWS_CloudTrail[Global Intelligence for AWS CloudTrail SecOps App^]
 
 |https://aws.amazon.com/guardduty[Amazon GuardDuty^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_GuardDuty[Amazon GuardDuty^]
-
-https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Global_Intelligence_for_Amazon_GuardDuty[Global Intelligence for Amazon GuardDuty^] 
+https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Global_Intelligence_for_Amazon_GuardDuty[Global Intelligence for Amazon GuardDuty^]
 
 |https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html[Amazon VPC Flow Logs^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_VPC_Flow_Logs[Amazon VPC Flow Logs^]
 
 https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/PCI_Compliance_for_Amazon_VPC_Flow_Logs[PCI DSS compliance for Amazon VPC Flow Logs^]
-https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Threat_Intel_for_AWS[Threat Intel for AWS^] 
+https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Threat_Intel_for_AWS[Threat Intel for AWS^]
+https://help.sumologic.com/07Sumo-Logic-Apps/Cloud_Security_Monitoring_and_Analytics/Amazon_VPC_Flow_-_Cloud_Security_Monitoring_and_Analytics[Amazon VPC Flow - Cloud Security Monitoring and Analytics^]
 
 |https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerLogs.html[Amazon S3 server access logging^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Amazon_S3_Audit[Amazon S3 Audit^] 
 
@@ -58,24 +35,14 @@ https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/Threat_Intel_for_A
 |https://aws.amazon.com/waf[AWS WAF^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_WAF[AWS WAF^]
 
 |https://aws.amazon.com/config[AWS Config^] | https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_Config[AWS Config^]
+|https://aws.amazon.com/network-firewall[AWS Network Firewall^]| https://help.sumologic.com/07Sumo-Logic-Apps/01Amazon_and_AWS/AWS_Network_Firewall[AWS Network Firewall^]
 |===== 
 
-== Scenarios supported by this Quick Start
+=== Scenarios supported by this Quick Start
+This Quick Start supports the following scenarios:
 
-This Quick Start supports the following scenarios: 
+* *Scenario 1: You do not use AWS security services and Sumo Logic*. You did not configure AWS to use one or more of the security services listed under link:#_specialized_knowledge[Specialized knowledge], but you want to do so and want to collect and analyze that data in Sumo Logic by using Sumo Logic apps. For this scenario, use the Quick Start to set up AWS security services and configure Sumo Logic.
 
-* **Scenario 1: You do not use AWS security services or Sumo Logic.** You did not 
-configure AWS to use one or more security services listed under Specialized knowledge, 
-but you want to collect and analyze data using Sumo Logic apps. For this scenario, use 
-this Quick Start to set up AWS security services and configure Sumo Logic. 
+* *Scenario 2: You use AWS security services but not Sumo Logic*. You use the AWS security services listed under link:#_specialized_knowledge[Specialized knowledge] but have not configured Sumo Logic to set up the collection of data from AWS and have not installed the relevant Sumo Logic apps in the Sumo Logic console. For this scenario, configure the auxiliary AWS services and resources to send data to Sumo Logic. This scenario also installs the corresponding Sumo Logic apps.
 
-* **Scenario 2: You use AWS security services but not Sumo Logic.** You use the AWS security services listed under Specialized knowledge but have not configured Sumo 
-Logic to collect data from AWS or installed the corresponding Sumo Logic apps. For this 
-scenario, configure the auxiliary AWS services and resources to send data to Sumo 
-Logic. This scenario also installs the corresponding Sumo Logic apps. 
-
-* **Scenario 3: You use AWS security services and Sumo Logic.** You use the AWS 
-security services listed under Specialized knowledge and you collect and analyze data 
-from one or more of them in Sumo Logic. For this scenario, configure the auxiliary AWS 
-services and resources to send data to Sumo Logic. This scenario is intended only for 
-non-configured AWS security services and their corresponding Sumo Logic apps. 
+* *Scenario 3: You use AWS security services and Sumo Logic*. You use the AWS security services listed under link:#_specialized_knowledge[Specialized knowledge] and you collect and analyze data from one or more of them in Sumo Logic. For this scenario, configure the auxiliary AWS services and resources to send data to Sumo Logic. This scenario is intended only for non-configured AWS security services and their corresponding Sumo Logic apps.
