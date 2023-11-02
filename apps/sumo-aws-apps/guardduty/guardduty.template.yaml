@@ -211,7 +211,7 @@ Resources:
     Condition: do_not_use_parent_stack
     Properties:
       Handler: main.handler
-      Runtime: python3.7
+      Runtime: python3.11
       CodeUri:
         Bucket: !Sub
           - "${S3Bucket}"
@@ -234,7 +234,7 @@ Resources:
           - S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
         Key: !Sub "${QSS3KeyPrefix}apps/sumo-aws-apps/guardduty/cloudwatchevents.zip"
       Handler: cloudwatchevents.handler
-      Runtime: nodejs14.x
+      Runtime: nodejs18.x
       Environment:
         Variables:
           SUMO_ENDPOINT: !GetAtt SumoHTTPSource.SUMO_ENDPOINT

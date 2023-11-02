@@ -51,7 +51,7 @@ Resources:
     Properties:
       FunctionName: !Sub "${AWS::StackName}-MacroNFWHelperFunction"
       Handler: firewallmacro.handle
-      Runtime: python3.7
+      Runtime: python3.11
       CodeUri:
         Bucket: !Sub
                 - "${S3Bucket}"
