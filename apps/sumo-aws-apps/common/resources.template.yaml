@@ -214,7 +214,7 @@ Resources:
     DependsOn: SumoLogicHelperRole
     Properties:
       Handler: main.handler
-      Runtime: python3.7
+      Runtime: python3.11
       CodeUri:
         Bucket: !Sub
           - "${S3Bucket}"

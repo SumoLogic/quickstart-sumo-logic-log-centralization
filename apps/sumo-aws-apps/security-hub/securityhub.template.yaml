@@ -258,7 +258,7 @@ Resources:
     Condition: do_not_use_parent_stack
     Properties:
       Handler: main.handler
-      Runtime: python3.7
+      Runtime: python3.11
       CodeUri:
         Bucket: !Sub
           - "${S3Bucket}"
@@ -419,7 +419,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-securityhub-forwarder
-        SemanticVersion: 1.0.7
+        SemanticVersion: 1.0.10
 
   SecurityHubCollector:
     Type: 'AWS::Serverless::Application'
@@ -427,7 +427,7 @@ Resources:
     Properties:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:956882708938:applications/sumologic-securityhub-collector
-        SemanticVersion: 1.0.8
+        SemanticVersion: 1.0.9
       Parameters:
         S3SourceBucketName: !Ref LogsS3BucketName
 
