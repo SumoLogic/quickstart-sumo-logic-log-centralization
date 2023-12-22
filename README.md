@@ -1,3 +1,6 @@
+# Archive Notice
+This repo has been moved to [cfn-ps-sumo-logic-log-centralization](https://github.com/SumoLogic/cfn-ps-sumo-logic-log-centralization).
+
 ## Sumo Logic Security Integrations on AWS—Quick Start
 
 Sumo Logic is focused on continuous intelligence, a new category of software that addresses data challenges presented by digital transformations, modern applications, and cloud computing. The Sumo Logic Continuous Intelligence Platform automates the collection, ingestion, and analysis of applications, infrastructure, security, and Internet of Things (IoT) data to derive actionable insights.
